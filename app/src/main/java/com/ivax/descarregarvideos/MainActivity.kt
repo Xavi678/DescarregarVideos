@@ -13,8 +13,9 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.ivax.descarregarvideos.classes.PlayerResponse
 import com.ivax.descarregarvideos.databinding.ActivityMainBinding
+import com.ivax.descarregarvideos.requests.PlayerRequest
+import com.ivax.descarregarvideos.responses.PlayerResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
@@ -60,6 +61,8 @@ class MainActivity : AppCompatActivity() {
                             json(json)
                         }
                     }
+
+                    val playerRequest: PlayerRequest= PlayerRequest(videoId = "U6jiXdqmUG0")
                     val response: HttpResponse =
                         client.post("https://www.youtube.com/youtubei/v1/player") {
                             headers {
@@ -69,27 +72,7 @@ class MainActivity : AppCompatActivity() {
                                 )
                             }
                             contentType(ContentType.Application.Json)
-                            setBody(
-                                "{\n" +
-                                        "  \"videoId\": \"U6jiXdqmUG0\",\n" +
-                                        "  \"contentCheckOk\": true,\n" +
-                                        "  \"context\": {\n" +
-                                        "    \"client\": {\n" +
-                                        "      \"clientName\": \"IOS\",\n" +
-                                        "      \"clientVersion\": \"19.45.4\",\n" +
-                                        "      \"deviceMake\": \"Apple\",\n" +
-                                        "      \"deviceModel\": \"iPhone16,2\",\n" +
-                                        "      \"platform\": \"MOBILE\",\n" +
-                                        "      \"osName\": \"IOS\",\n" +
-                                        "      \"osVersion\": \"18.1.0.22B83\",\n" +
-                                        "      \"visitorData\": \"Cgs1Z3lEbWtIV2ZkNCjsubO-BjIiCgJFUxIcEhgSFhMLFBUWFwwYGRobHB0eHw4PIBAREiEgFQ%3D%3D\",\n" +
-                                        "      \"hl\": \"en\",\n" +
-                                        "      \"gl\": \"US\",\n" +
-                                        "      \"utcOffsetMinutes\": 0\n" +
-                                        "    }\n" +
-                                        "  }\n" +
-                                        "}"
-                            )
+                            setBody(playerRequest)
                         }
                     val playerResponse: PlayerResponse = response.body()
                     Log.d("DescarregarVideos", playerResponse.toString())

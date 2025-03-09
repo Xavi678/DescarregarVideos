@@ -1,4 +1,4 @@
-package com.ivax.descarregarvideos.classes
+package com.ivax.descarregarvideos.responses
 
 import kotlinx.serialization.Serializable
 
