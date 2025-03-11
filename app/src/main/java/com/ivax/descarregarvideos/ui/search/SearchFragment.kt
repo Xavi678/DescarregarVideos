@@ -62,6 +62,7 @@ class SearchFragment : Fragment() {
                     val json = Json { // this: JsonBuilder
                         encodeDefaults = true
                         ignoreUnknownKeys = true
+                        explicitNulls=false
                     }
                     var searchRequest=SearchRequest(query = searchQuery)
                        var httpClient= HttpClient(CIO){
@@ -79,11 +80,21 @@ class SearchFragment : Fragment() {
                         /*val url = "https://www.youtube.com/results?search_query=${searchQuery}"
                         val doc = Jsoup.connect(url).userAgent("Mozilla").get()
                         val inlineplayer=doc.getElementById("inline-player")*/
+                        //val rawRsp=rsp.bodyAsText()
                         val playerResponse: PlayerResponse=rsp.body()
-                        Log.d("DescarregarVides", playerResponse.toString())
+                        for (content in playerResponse.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents){
+                            val itemSectionR=content.itemSectionRenderer
+                            if(itemSectionR!=null){
+                                for(sectionRContent in itemSectionR.contents){
+                                    if(sectionRContent.videoRenderer!=null){
+
+                                    }
+
+                                }
+                            }
 
 
-
+                        }
                 }catch (e: Exception){
                     Log.d("DescarregarVides", e.message.toString())
                 }
