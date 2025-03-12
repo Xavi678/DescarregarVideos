@@ -3,7 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="100dp"
+    android:orientation="vertical"
+    >
 
     <TextView
         android:id="@+id/tbxVideoId"
@@ -11,7 +13,28 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="14dp"
-        android:text="TextView"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" android:visibility="invisible" />
+
+    <ImageView
+        android:id="@+id/imgVideoThumbnail"
+        android:layout_width="86dp"
+        android:layout_height="86dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@tools:sample/avatars" />
+
+    <TextView
+        android:id="@+id/tbxVideoDesc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="16dp"
+        android:text="TextView"
+        app:layout_constraintStart_toEndOf="@id/imgVideoThumbnail"
+        app:layout_constraintTop_toTopOf="parent" android:textColor="@color/black" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

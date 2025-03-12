@@ -1,4 +1,6 @@
 package com.ivax.descarregarvideos.classes
 
-data class VideoItem(val videoId: String) {
+import android.net.Uri
+
+data class VideoItem(val videoId: String,val title: String?, val imgUrl: String?) {
 }
