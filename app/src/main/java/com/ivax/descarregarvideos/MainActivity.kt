@@ -50,35 +50,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.appBarMain.fab.setOnClickListener { view ->
             lifecycleScope.launch {
-                try {
 
-                    val json = Json { // this: JsonBuilder
-                        encodeDefaults = true
-                        ignoreUnknownKeys = true
-                    }
-                    val client = HttpClient(CIO){
-                        install(ContentNegotiation) {
-                            json(json)
-                        }
-                    }
-
-                    val playerRequest: PlayerRequest= PlayerRequest(videoId = "U6jiXdqmUG0")
-                    val response: HttpResponse =
-                        client.post("https://www.youtube.com/youtubei/v1/player") {
-                            headers {
-                                append(
-                                    HttpHeaders.UserAgent,
-                                    "com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_0 like Mac OS X; US)"
-                                )
-                            }
-                            contentType(ContentType.Application.Json)
-                            setBody(playerRequest)
-                        }
-                    val playerResponse: PlayerResponse = response.body()
-                    Log.d("DescarregarVideos", playerResponse.toString())
-                } catch (e: Exception) {
-                    e.message?.let { Log.d("DescarregarVideos", it) }
-                }
             }
 
             /* Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)

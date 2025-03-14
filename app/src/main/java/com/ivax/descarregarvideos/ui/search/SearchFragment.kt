@@ -1,12 +1,11 @@
 package com.ivax.descarregarvideos.ui.search
 
-import android.net.Uri
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -16,24 +15,23 @@ import com.ivax.descarregarvideos.classes.VideoItem
 import com.ivax.descarregarvideos.databinding.FragmentSearchBinding
 import com.ivax.descarregarvideos.requests.SearchRequest
 import com.ivax.descarregarvideos.responses.PlayerResponse
-import com.ivax.descarregarvideos.ui.home.HomeViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import io.ktor.http.append
 import io.ktor.http.contentType
 import io.ktor.http.headers
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import androidx.core.net.toUri
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.net.URL
 
 //import org.jsoup.Jsoup
 
@@ -82,30 +80,60 @@ class SearchFragment : Fragment() {
                             append(HttpHeaders.UserAgent,"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0")
                         }
                         }
+                    searchViewModel.viewModelScope.launch {
                         /*val url = "https://www.youtube.com/results?search_query=${searchQuery}"
                         val doc = Jsoup.connect(url).userAgent("Mozilla").get()
                         val inlineplayer=doc.getElementById("inline-player")*/
                         //val rawRsp=rsp.bodyAsText()
                         var videoList = ArrayList<VideoItem>()
-                        val playerResponse: PlayerResponse=rsp.body()
-                        for (content in playerResponse.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents){
-                            val itemSectionR=content.itemSectionRenderer
-                            if(itemSectionR!=null){
-                                for(sectionRContent in itemSectionR.contents){
-                                    if(sectionRContent.videoRenderer!=null){
-                                        val title=sectionRContent.videoRenderer.title.runs.firstOrNull()?.text
-                                        val uriString=sectionRContent.videoRenderer.thumbnail.thumbnails.firstOrNull()?.url
+                        val playerResponse: PlayerResponse = rsp.body()
+                        for (content in playerResponse.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents) {
+                            val itemSectionR = content.itemSectionRenderer
+                            if (itemSectionR != null) {
+                                for (sectionRContent in itemSectionR.contents) {
+                                    if (sectionRContent.videoRenderer != null) {
+                                        val title =
+                                            sectionRContent.videoRenderer.title.runs.firstOrNull()?.text
+                                        val uriString =
+                                            sectionRContent.videoRenderer.thumbnail.thumbnails.firstOrNull()?.url
+                                        val viewCount=sectionRContent.videoRenderer.viewCountText.simpleText
+                                        val duration=sectionRContent.videoRenderer.lengthText.simpleText
                                         //val imgUrl=uriString?.toUri()
 
-                                        videoList.add(VideoItem(videoId = sectionRContent.videoRenderer.videoId, title = title, imgUrl = uriString ))
+                                        withContext(Dispatchers.IO) {
+                                            try {
+                                                val newurl = URL(uriString);
+                                                val thumbnail = BitmapFactory.decodeStream(
+                                                    newurl.openConnection().getInputStream()
+                                                );
+                                                videoList.add(
+                                                    VideoItem(
+                                                        videoId = sectionRContent.videoRenderer.videoId,
+                                                        title = title,
+                                                        imgUrl = thumbnail,
+                                                        duration = duration,
+                                                        viewCount = viewCount
+                                                    )
+                                                )
+                                            } catch (e: Exception) {
+                                                Log.d("DescarregarVideos", e.message.toString())
+                                            }
+                                        }
                                     }
+                                    /*searchViewModel.viewModelScope.launch {
+
+                                        }*/
 
                                 }
+
+
                             }
                         }
-                    var videoAadapter=VideoAdapter(videoList)
-                    binding.recylcerViewVideo.layoutManager=LinearLayoutManager(this@SearchFragment.context)
-                    binding.recylcerViewVideo.adapter=videoAadapter
+                        var videoAadapter = VideoAdapter(videoList,searchViewModel)
+                        binding.recylcerViewVideo.layoutManager =
+                            LinearLayoutManager(this@SearchFragment.context)
+                        binding.recylcerViewVideo.adapter = videoAadapter
+                    }
                 }catch (e: Exception){
                     Log.d("DescarregarVides", e.message.toString())
                 }
