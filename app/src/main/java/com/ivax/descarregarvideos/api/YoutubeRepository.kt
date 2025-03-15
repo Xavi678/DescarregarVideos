@@ -3,14 +3,18 @@ package com.ivax.descarregarvideos.api
 import android.graphics.BitmapFactory
 import android.util.Log
 import com.ivax.descarregarvideos.classes.VideoItem
+import com.ivax.descarregarvideos.requests.PlayerRequest
 import com.ivax.descarregarvideos.requests.SearchRequest
 import com.ivax.descarregarvideos.responses.PlayerResponse
+import com.ivax.descarregarvideos.responses.SearchResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
@@ -42,8 +46,8 @@ class YoutubeRepository {
             }
         }
         var videoList = ArrayList<VideoItem>()
-        val playerResponse: PlayerResponse = rsp.body()
-        for (content in playerResponse.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents) {
+        val searchResponse: SearchResponse = rsp.body()
+        for (content in searchResponse.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents) {
             val itemSectionR = content.itemSectionRenderer
             if (itemSectionR != null) {
                 for (sectionRContent in itemSectionR.contents) {
@@ -80,5 +84,34 @@ class YoutubeRepository {
             }
         }
         return videoList
+    }
+
+    suspend fun GetVideoData(videoId: String): PlayerResponse {
+        try {
+            val playerRequest = PlayerRequest(videoId = videoId)
+            val response: HttpResponse =
+                httpClient.post("https://www.youtube.com/youtubei/v1/player") {
+                    headers {
+                        append(
+                            HttpHeaders.UserAgent,
+                            "com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_0 like Mac OS X; US)"
+                        )
+                    }
+                    contentType(ContentType.Application.Json)
+                    setBody(playerRequest)
+                }
+            val txt=response.bodyAsText()
+            Log.d("DescarregarVideos", txt)
+            val playerResponse: PlayerResponse = response.body()
+            Log.d("DescarregarVideos", playerResponse.toString())
+
+            return playerResponse
+        }catch (e: Exception){
+            Log.d("DescarregarVideos", e.message.toString())
+            throw e
+        }
+    }
+    suspend fun DownloadVideoStream(url: String){
+
     }
 }

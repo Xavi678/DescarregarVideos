@@ -1,5 +1,6 @@
 package com.ivax.descarregarvideos.ui.search
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -40,34 +41,76 @@ class SearchFragment : Fragment() {
 
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
         val root: View = binding.root
-        binding.btnSearch.setOnClickListener { view->
-            var searchQuery=binding.tbxView.text.toString()
+        binding.btnSearch.setOnClickListener { view ->
+            var searchQuery = binding.tbxView.text.toString()
             binding.recylcerViewVideo.layoutManager =
                 LinearLayoutManager(this@SearchFragment.context)
             lifecycleScope.launch {
+                searchViewModel.isLoading.collectLatest {
+                    binding.searchVideoProgressBar.isVisible = it
+                }
+            }
+            lifecycleScope.launch {
                 try {
-                    searchViewModel.isLoading.collect {
-                        binding.searchVideoProgressBar.isVisible = it
-                    }
+
                     searchViewModel.SearchVideos(searchQuery)
-                    searchViewModel.searchModel.collect {
-                        var videoAadapter = VideoAdapter(it)
+                    searchViewModel.searchModel.collectLatest {
+                        var videoAadapter = VideoAdapter(
+                            it,
+                            itemClickListener = fun(videoId: String) {
+                                lifecycleScope.launch {
+                                    searchViewModel.downloadVideoResponse(videoId)
+                                    searchViewModel.adaptativeFormats.collectLatest {
+                                        if (it != null) {
+                                            val builder: AlertDialog.Builder =
+                                                AlertDialog.Builder(context)
+                                            builder
+                                                .setTitle("I am the title")
+                                                .setPositiveButton("Positive") { dialog, which ->
+                                                    // Do something.
+                                                }
+                                                .setNegativeButton("Negative") { dialog, which ->
+                                                    // Do something else.
+                                                }
+                                                .setSingleChoiceItems(
+                                                    it.map { it.mimeType }.toTypedArray(), 0
+                                                ) { dialog, which ->
+                                                    {
+                                                       var selectedCodec= it[which]
+                                                        searchViewModel.downloadVideoStream(selectedCodec.url)
+
+                                                    }
+                                                    // Do something.
+                                                }
+                                            val dialog: AlertDialog = builder.create()
+                                            dialog.show()
+                                        }
+                                    }
+
+                                }
+                                Log.d("DescarregarVideo", videoId)
+                            }
+                        )
 
                         binding.recylcerViewVideo.adapter = videoAadapter
                     }
-                }catch (e: Exception){
+                } catch (e: Exception) {
                     e.message.toString().let {
                         Log.d("DescarregarVideos", it)
                     }
                 }
             }
 
-         }
+        }
         /*val textView: TextView = binding.textHome
         searchViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }*/
         return root
+    }
+
+    fun downloadButton(videoId: String) {
+        Log.d("DescarregarVideo", videoId)
     }
 
     override fun onDestroyView() {

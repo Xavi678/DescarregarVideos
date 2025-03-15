@@ -1,5 +1,6 @@
 package com.ivax.descarregarvideos.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.classes.VideoItem
 
-class VideoAdapter(val items: List<VideoItem>?) : RecyclerView.Adapter<VideoAdapter.ViewHolder>() {
+class VideoAdapter(val items: List<VideoItem>?, private val itemClickListener: (videoId: String) -> Unit)
+    : RecyclerView.Adapter<VideoAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -28,10 +30,10 @@ class VideoAdapter(val items: List<VideoItem>?) : RecyclerView.Adapter<VideoAdap
         if(items!=null) {
             val item = items[position];
 
-            /*holder.downloadButton.setOnClickListener { view->
-
-            searchViewModel.downloadVideo(item.videoId)
-        }*/
+            holder.downloadButton.setOnClickListener { view->
+                itemClickListener(item.videoId)
+                Log.d("DescarregarVideos",item.videoId)
+            }
             holder.apply {
                 tbx.text = item.videoId
                 tbxDesc.text = item.title
