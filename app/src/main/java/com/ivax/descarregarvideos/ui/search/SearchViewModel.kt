@@ -5,8 +5,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ivax.descarregarvideos.classes.VideoItem
 import com.ivax.descarregarvideos.requests.PlayerRequest
 import com.ivax.descarregarvideos.responses.PlayerResponse
+import domain.SearchVideosUseCase
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
@@ -19,6 +21,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.http.headers
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
@@ -27,8 +30,24 @@ class SearchViewModel : ViewModel() {
     private val _text = MutableLiveData<String>().apply {
         value = "This is slideshow Fragment"
     }
+    public val searchModel= MutableStateFlow<List<VideoItem>?>(null)
+    public val isLoading = MutableStateFlow<Boolean>(false)
+    private val useCase = SearchVideosUseCase()
+    fun SearchVideos(searchQuery: String) {
+        viewModelScope.launch {
+            try {
+                isLoading.value=true
+                val result = useCase(searchQuery)
+                searchModel.value = result
+            }catch (e: Exception){
 
-    fun downloadVideo(videoId: String){
+            }finally{
+                isLoading.value=false
+            }
+        }
+    }
+
+    fun downloadVideo(videoId: String) {
         this.viewModelScope.launch {
             try {
 
@@ -62,5 +81,6 @@ class SearchViewModel : ViewModel() {
             Log.d("DescarregarVide", videoId)
         }
     }
+
     val text: LiveData<String> = _text
 }

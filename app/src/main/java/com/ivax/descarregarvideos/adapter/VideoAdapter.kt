@@ -6,13 +6,11 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.classes.VideoItem
-import com.ivax.descarregarvideos.ui.search.SearchViewModel
 
-class VideoAdapter(val items: List<VideoItem>, val searchViewModel: SearchViewModel) : RecyclerView.Adapter<VideoAdapter.ViewHolder>() {
+class VideoAdapter(val items: List<VideoItem>?) : RecyclerView.Adapter<VideoAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -27,25 +25,27 @@ class VideoAdapter(val items: List<VideoItem>, val searchViewModel: SearchViewMo
         holder: ViewHolder,
         position: Int
     ) {
-        val item = items[position];
+        if(items!=null) {
+            val item = items[position];
 
-        holder.downloadButton.setOnClickListener { view->
+            /*holder.downloadButton.setOnClickListener { view->
 
             searchViewModel.downloadVideo(item.videoId)
-        }
-        holder.apply {
-            tbx.text = item.videoId
-            tbxDesc.text = item.title
-            thumbnail.setImageBitmap(item.imgUrl)
-            duration.text = item.duration
-            viewCount.text=item.viewCount
-        }
+        }*/
+            holder.apply {
+                tbx.text = item.videoId
+                tbxDesc.text = item.title
+                thumbnail.setImageBitmap(item.imgUrl)
+                duration.text = item.duration
+                viewCount.text = item.viewCount
+            }
 
-
+        }
     }
 
     override fun getItemCount(): Int {
-        return items.size
+
+        return if(items?.size==null) 0 else items.size
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
