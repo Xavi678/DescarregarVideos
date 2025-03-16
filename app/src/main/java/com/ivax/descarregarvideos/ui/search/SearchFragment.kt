@@ -1,6 +1,6 @@
 package com.ivax.descarregarvideos.ui.search
 
-import android.app.AlertDialog
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,11 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ivax.descarregarvideos.adapter.VideoAdapter
 import com.ivax.descarregarvideos.databinding.FragmentSearchBinding
+import com.ivax.descarregarvideos.dialog_fragments.CodecsConfirmDialogFragment
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collectLatest
 
@@ -40,6 +42,26 @@ class SearchFragment : Fragment() {
             ViewModelProvider(this).get(SearchViewModel::class.java)
 
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
+        lifecycleScope.launch {
+            searchViewModel.bytes.collectLatest { latest ->
+                if(latest!=null) {
+                    activity?.applicationContext?.openFileOutput("prova.mp4", Context.MODE_PRIVATE)
+                        .use {
+
+                            it?.write(latest)
+                        }
+                }
+            }
+        }
+        searchViewModel.adaptativeFormats.observe(viewLifecycleOwner, Observer {
+            if(it!=null) {
+                CodecsConfirmDialogFragment(it, itemClickListener = fun(url: String?){
+                    searchViewModel.downloadVideoStream(url)
+                }).show(
+                    childFragmentManager, CodecsConfirmDialogFragment.TAG
+                )
+            }
+        })
         val root: View = binding.root
         binding.btnSearch.setOnClickListener { view ->
             var searchQuery = binding.tbxView.text.toString()
@@ -60,33 +82,6 @@ class SearchFragment : Fragment() {
                             itemClickListener = fun(videoId: String) {
                                 lifecycleScope.launch {
                                     searchViewModel.downloadVideoResponse(videoId)
-                                    searchViewModel.adaptativeFormats.collectLatest {
-                                        if (it != null) {
-                                            val builder: AlertDialog.Builder =
-                                                AlertDialog.Builder(context)
-                                            builder
-                                                .setTitle("I am the title")
-                                                .setPositiveButton("Positive") { dialog, which ->
-                                                    // Do something.
-                                                }
-                                                .setNegativeButton("Negative") { dialog, which ->
-                                                    // Do something else.
-                                                }
-                                                .setSingleChoiceItems(
-                                                    it.map { it.mimeType }.toTypedArray(), 0
-                                                ) { dialog, which ->
-                                                    {
-                                                       var selectedCodec= it[which]
-                                                        searchViewModel.downloadVideoStream(selectedCodec.url)
-
-                                                    }
-                                                    // Do something.
-                                                }
-                                            val dialog: AlertDialog = builder.create()
-                                            dialog.show()
-                                        }
-                                    }
-
                                 }
                                 Log.d("DescarregarVideo", videoId)
                             }

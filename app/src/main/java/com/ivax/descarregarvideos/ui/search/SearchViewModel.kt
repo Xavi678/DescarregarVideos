@@ -4,14 +4,18 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.ivax.descarregarvideos.classes.VideoItem
 import com.ivax.descarregarvideos.responses.AdaptiveFormats
 import com.ivax.descarregarvideos.responses.PlayerResponse
+import domain.DownloadStreamUseCase
 import domain.GetVideoDataUseCase
 import domain.SearchVideosUseCase
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import java.io.File
 
 class SearchViewModel : ViewModel() {
 
@@ -20,9 +24,12 @@ class SearchViewModel : ViewModel() {
     }
     public val searchModel= MutableStateFlow<List<VideoItem>?>(null)
     public val isLoading = MutableStateFlow<Boolean>(false)
-    public val adaptativeFormats = MutableStateFlow<List<AdaptiveFormats>?>(null)
+    val adaptativeFormats = MutableLiveData<List<AdaptiveFormats>?>(null)
+    public val bytes = MutableStateFlow<ByteArray?>(null)
+
     private val useCase = SearchVideosUseCase()
     private val getVideoUseCase=GetVideoDataUseCase()
+    private val downloadStreamUseCase= DownloadStreamUseCase()
     fun SearchVideos(searchQuery: String) {
         viewModelScope.launch {
             try {
@@ -39,21 +46,22 @@ class SearchViewModel : ViewModel() {
 
     fun downloadVideoResponse(videoId: String) {
         this.viewModelScope.launch {
-            try {
+
                var playerResponse: PlayerResponse= getVideoUseCase(videoId)
                var listFormats= playerResponse.streamingData.adaptiveFormats
                 adaptativeFormats.value=listFormats
-            } catch (e: Exception) {
-                e.message?.let { Log.d("DescarregarVideos", it) }
-            }
+
             Log.d("DescarregarVide", videoId)
         }
     }
 
-    fun downloadVideoStream(url: String){
+    fun downloadVideoStream(url: String?) {
         this.viewModelScope.launch {
-
+            if(url!=null) {
+                bytes.value = downloadStreamUseCase(url)
+            }
         }
+
     }
 
     val text: LiveData<String> = _text
