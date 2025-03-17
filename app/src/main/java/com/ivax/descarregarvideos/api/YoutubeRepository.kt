@@ -11,14 +11,10 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.prepareGet
-import io.ktor.client.request.prepareRequest
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsBytes
-import io.ktor.client.statement.bodyAsChannel
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -27,15 +23,13 @@ import io.ktor.http.contentType
 import io.ktor.http.headers
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.core.isNotEmpty
-import io.ktor.utils.io.core.readBytes
-import io.ktor.utils.io.readByteArray
 import io.ktor.utils.io.readRemaining
-import io.ktor.utils.io.toByteArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
+import kotlinx.io.readByteArray
 import kotlinx.serialization.json.Json
+import java.io.File
+import java.io.FileOutputStream
 import java.net.URL
 
 class YoutubeRepository {
@@ -124,9 +118,8 @@ class YoutubeRepository {
             throw e
         }
     }
-    suspend fun DownloadVideoStream(urlString: String): ByteArray {
+    suspend fun DownloadVideoStream(urlString: String, stream: File?) {
         try {
-            var result: ByteArray= byteArrayOf()
             var httpClientFile= HttpClient(CIO){
                 engine{
                     requestTimeout=0
@@ -139,17 +132,15 @@ class YoutubeRepository {
                 var progress = 0
                 val channel: ByteReadChannel = response.body()
                 while (!channel.isClosedForRead) {
-                    val packet = channel.readRemaining(max = DEFAULT_BUFFER_SIZE.toLong())
-                    while (packet.isNotEmpty) {
-                        val bytes: ByteArray = packet.readBytes()
-                        result.apply { bytes }
+                    /*min = DEFAULT_BUFFER_SIZE.toLong()*/
+                    val packet = channel.readRemaining()
+                    while (!packet.exhausted()) {
+                        val bytes: ByteArray = packet.readByteArray()
+                        stream?.appendBytes(bytes)
                         readBytes += bytes.size
-
                     }
                 }
             }
-
-            return result
         }catch (e: Exception){
             Log.d("DescarregarVideos",e.message.toString())
             throw e

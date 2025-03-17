@@ -1,6 +1,5 @@
 package com.ivax.descarregarvideos.ui.search
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,6 +16,7 @@ import com.ivax.descarregarvideos.databinding.FragmentSearchBinding
 import com.ivax.descarregarvideos.dialog_fragments.CodecsConfirmDialogFragment
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collectLatest
+import java.io.File
 
 //import org.jsoup.Jsoup
 
@@ -43,20 +43,24 @@ class SearchFragment : Fragment() {
 
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
         lifecycleScope.launch {
-            searchViewModel.bytes.collectLatest { latest ->
+            searchViewModel.downloadedFile.collectLatest { latest ->
                 if(latest!=null) {
-                    activity?.applicationContext?.openFileOutput("prova.mp4", Context.MODE_PRIVATE)
+                    Log.d("DescarregarVideos",latest.name)
+                    //activity?.applicationContext.
+                    /*activity?.applicationContext?.openFileOutput("prova.mp4", Context.MODE_PRIVATE)
                         .use {
 
                             it?.write(latest)
-                        }
+                        }*/
                 }
             }
         }
         searchViewModel.adaptativeFormats.observe(viewLifecycleOwner, Observer {
             if(it!=null) {
                 CodecsConfirmDialogFragment(it, itemClickListener = fun(url: String?){
-                    searchViewModel.downloadVideoStream(url)
+                   var fitxer= File(activity?.applicationContext?.filesDir, "prova.mp4")
+                        searchViewModel.downloadVideoStream(url,fitxer)
+
                 }).show(
                     childFragmentManager, CodecsConfirmDialogFragment.TAG
                 )
@@ -81,7 +85,9 @@ class SearchFragment : Fragment() {
                             it,
                             itemClickListener = fun(videoId: String) {
                                 lifecycleScope.launch {
-                                    searchViewModel.downloadVideoResponse(videoId)
+
+                                        searchViewModel.downloadVideoResponse(videoId)
+
                                 }
                                 Log.d("DescarregarVideo", videoId)
                             }
