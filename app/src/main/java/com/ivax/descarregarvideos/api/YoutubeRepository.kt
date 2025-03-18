@@ -29,7 +29,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.io.readByteArray
 import kotlinx.serialization.json.Json
 import java.io.File
-import java.io.FileOutputStream
 import java.net.URL
 
 class YoutubeRepository {
@@ -118,8 +117,9 @@ class YoutubeRepository {
             throw e
         }
     }
-    suspend fun DownloadVideoStream(urlString: String, stream: File?) {
+    suspend fun DownloadVideoStream(urlString: String) : ByteArray{
         try {
+            var result=byteArrayOf()
             var httpClientFile= HttpClient(CIO){
                 engine{
                     requestTimeout=0
@@ -136,11 +136,14 @@ class YoutubeRepository {
                     val packet = channel.readRemaining()
                     while (!packet.exhausted()) {
                         val bytes: ByteArray = packet.readByteArray()
-                        stream?.appendBytes(bytes)
+                        result+=bytes;
+                        //file?.appendBytes(bytes)
                         readBytes += bytes.size
                     }
                 }
+                Log.d("DescarregarVideos","Read Bytes: $readBytes length: $length")
             }
+            return result
         }catch (e: Exception){
             Log.d("DescarregarVideos",e.message.toString())
             throw e

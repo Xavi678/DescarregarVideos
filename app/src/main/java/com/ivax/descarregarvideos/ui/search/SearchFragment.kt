@@ -1,5 +1,6 @@
 package com.ivax.descarregarvideos.ui.search
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -43,27 +44,46 @@ class SearchFragment : Fragment() {
 
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
         lifecycleScope.launch {
-            searchViewModel.downloadedFile.collectLatest { latest ->
+            searchViewModel.videoDownloadedData.collectLatest { latest ->
                 if(latest!=null) {
-                    Log.d("DescarregarVideos",latest.name)
-                    //activity?.applicationContext.
-                    /*activity?.applicationContext?.openFileOutput("prova.mp4", Context.MODE_PRIVATE)
+                    //var directory=File(activity?.applicationContext?.filesDir?.path+"/videos")
+                    try {
+                        //Log.d("DescarregarVideos")
+                        activity?.applicationContext?.openFileOutput(
+                            "${latest.videoId}.mp4",
+                            Context.MODE_PRIVATE
+                        )
+                            .use {
+
+                                it?.write(latest.byteArray)
+                            }
+                        //activity?.applicationContext.
+                        /*activity?.applicationContext?.openFileOutput("prova.mp4", Context.MODE_PRIVATE)
                         .use {
 
                             it?.write(latest)
                         }*/
+                    }catch (e: Exception){
+                        Log.d("DescarregarVideos",e.message.toString())
+                    }
                 }
             }
         }
-        searchViewModel.adaptativeFormats.observe(viewLifecycleOwner, Observer {
+        searchViewModel.videoInfo.observe(viewLifecycleOwner, Observer {
+
             if(it!=null) {
-                CodecsConfirmDialogFragment(it, itemClickListener = fun(url: String?){
+               var filtered= it.adaptativeFormats.firstOrNull { x-> x.mimeType.contains("audio") }
+                if(filtered!=null) {
+                    //var fitxer = File(activity?.applicationContext?.filesDir, "prova.mp4")
+                    searchViewModel.downloadVideoStream(it.videoId,"${filtered.url}&range=0-9898989")
+                }
+                /*CodecsConfirmDialogFragment(it, itemClickListener = fun(url: String?){
                    var fitxer= File(activity?.applicationContext?.filesDir, "prova.mp4")
-                        searchViewModel.downloadVideoStream(url,fitxer)
+                        searchViewModel.downloadVideoStream("$url&range=0-9898989",fitxer)
 
                 }).show(
                     childFragmentManager, CodecsConfirmDialogFragment.TAG
-                )
+                )*/
             }
         })
         val root: View = binding.root

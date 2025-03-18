@@ -10,7 +10,7 @@ class CodecsConfirmDialogFragment(val formats: List<AdaptiveFormats>?, private v
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
         AlertDialog.Builder(requireContext())
             .setPositiveButton("ok") { dialog, which ->
-                itemClickListener(formats?.get(1)?.url)
+                itemClickListener(formats?.get(5)?.url)
             }
             .setNegativeButton("cancel"){ _,_ -> }
             .setSingleChoiceItems(

@@ -1,0 +1,36 @@
+package database
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import com.ivax.descarregarvideos.dao.VideoDao
+import com.ivax.descarregarvideos.entities.SavedVideo
+
+@Database(entities = [SavedVideo::class],exportSchema = true, version = 1)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun videoDao(): VideoDao
+    companion object {
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
+
+        fun getDatabase(
+            context: Context
+        ): AppDatabase {
+            // if the INSTANCE is not null, then return it,
+            // if it is, then create the database
+            return INSTANCE ?: synchronized(this) {
+
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "Ivax"
+                )
+                    .build()
+                INSTANCE = instance
+                // return instance
+                instance
+            }
+        }
+    }
+}
