@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ivax.descarregarvideos.adapter.VideoAdapter
 import com.ivax.descarregarvideos.databinding.FragmentSearchBinding
 import com.ivax.descarregarvideos.dialog_fragments.CodecsConfirmDialogFragment
+import com.ivax.descarregarvideos.entities.SavedVideo
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collectLatest
 import java.io.File
@@ -57,6 +58,7 @@ class SearchFragment : Fragment() {
 
                                 it?.write(latest.byteArray)
                             }
+                        searchViewModel.insertVideo(SavedVideo(latest.videoId))
                         //activity?.applicationContext.
                         /*activity?.applicationContext?.openFileOutput("prova.mp4", Context.MODE_PRIVATE)
                         .use {
