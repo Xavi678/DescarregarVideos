@@ -4,7 +4,12 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
+import com.ivax.descarregarvideos.MyApplication
 import com.ivax.descarregarvideos.classes.VideoDownloadedData
 import com.ivax.descarregarvideos.classes.VideoInfo
 import com.ivax.descarregarvideos.classes.VideoItem
@@ -82,4 +87,24 @@ class SearchViewModel(private val repository: VideoRepository) : ViewModel() {
     }
 
     val text: LiveData<String> = _text
+
+    companion object {
+
+        val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(
+                modelClass: Class<T>,
+                extras: CreationExtras
+            ): T {
+                // Get the Application object from extras
+                val application = checkNotNull(extras[APPLICATION_KEY])
+                // Create a SavedStateHandle for this ViewModel from extras
+                val savedStateHandle = extras.createSavedStateHandle()
+
+                return SearchViewModel(
+                    (application as MyApplication).videoRepository
+                ) as T
+            }
+        }
+    }
 }

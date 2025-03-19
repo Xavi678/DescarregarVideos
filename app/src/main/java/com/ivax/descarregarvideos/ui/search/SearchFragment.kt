@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -41,7 +42,7 @@ class SearchFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val searchViewModel =
-            ViewModelProvider(this).get(SearchViewModel::class.java)
+            ViewModelProvider(this, SearchViewModel.Factory).get(SearchViewModel::class.java)
 
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
         lifecycleScope.launch {
@@ -114,7 +115,6 @@ class SearchFragment : Fragment() {
                                 Log.d("DescarregarVideo", videoId)
                             }
                         )
-
                         binding.recylcerViewVideo.adapter = videoAadapter
                     }
                 } catch (e: Exception) {

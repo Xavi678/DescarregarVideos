@@ -20,5 +20,11 @@
             android:id="@+id/nav_search"
             android:icon="@drawable/ic_menu_search"
             android:title="@string/menu_search" />
+        <item
+            android:id="@+id/nav_saved_videos"
+            android:icon="@drawable/download_button"
+            android:title="@string/menu_saved_videos"
+            />
+
     </group>
 </menu>

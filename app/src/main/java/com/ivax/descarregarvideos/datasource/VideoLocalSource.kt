@@ -2,13 +2,16 @@ package com.ivax.descarregarvideos.datasource
 
 import com.ivax.descarregarvideos.dao.VideoDao
 import com.ivax.descarregarvideos.entities.SavedVideo
+import kotlinx.coroutines.flow.Flow
 
 class VideoLocalSource(private val videoDao: VideoDao) {
 
     fun insert(video: SavedVideo) {
         videoDao.insertAll(video)
     }
-
+    fun getAllVideos(): Flow<List<SavedVideo>>{
+        return videoDao.getAll()
+    }
     /*fun getAllMovies(): Flow<List<MovieDb>> {
         return movieDao.getAll()
     }

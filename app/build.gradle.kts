@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.ktor.client.json)
     implementation(libs.android.room.ktx)
     implementation(libs.android.room.runtime)
+    ksp(libs.android.room.ksp)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -28,4 +28,8 @@
         android:label="@string/menu_search"
         tools:layout="@layout/fragment_search"
          />
+    <fragment android:id="@+id/nav_saved_videos"
+        android:name="com.ivax.descarregarvideos.ui.saved.videos.SavedVideosFragment"
+        android:label="@string/menu_saved_videos"
+        tools:layout="@layout/fragment_saved_videos"/>
 </navigation>
