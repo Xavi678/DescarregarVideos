@@ -14,6 +14,9 @@ lifecycleViewmodelKtx = "2.6.1"
 navigationFragmentKtx = "2.6.0"
 navigationUiKtx = "2.6.0"
 ktorVersion = "3.1.0"
+ksp = "2.0.21-1.0.27"
+hilt = "2.50"
+composeVersion = "1.7.8"
 
 roomVersion = "2.6.1"
 
@@ -36,7 +39,14 @@ ktor-client-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json"
 android-room-runtime ={group="androidx.room", name="room-runtime", version.ref="roomVersion"}
 android-room-ktx ={group="androidx.room", name="room-ktx", version.ref="roomVersion"}
 android-room-ksp={group="androidx.room", name="room-compiler", version.ref="roomVersion"}
+dagger-hilt={group="com.google.dagger", name="hilt-android", version.ref="hilt"}
+dagger-compiler={group="com.google.dagger", name="hilt-compiler", version.ref="hilt"}
+android-composer-runtime={group="androidx.compose.runtime", name="runtime",version.ref="composeVersion"}
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+google-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+dagger-hilt = {id="com.google.dagger.hilt.android", version.ref="hilt"}
+
 

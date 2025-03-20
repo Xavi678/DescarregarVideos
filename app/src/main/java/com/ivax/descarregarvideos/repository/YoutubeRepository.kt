@@ -1,4 +1,4 @@
-package com.ivax.descarregarvideos.api
+package com.ivax.descarregarvideos.repository
 
 import android.graphics.BitmapFactory
 import android.util.Log
@@ -126,7 +126,7 @@ class YoutubeRepository {
                 }
             }
             httpClientFile.prepareGet(urlString = urlString).execute {
-                response ->
+                    response ->
                 val length = response.contentLength()?.toFloat() ?: 0F
                 var readBytes = 0
                 var progress = 0

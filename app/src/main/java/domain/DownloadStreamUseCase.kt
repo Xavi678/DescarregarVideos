@@ -1,6 +1,6 @@
 package domain
 
-import com.ivax.descarregarvideos.api.YoutubeRepository
+import com.ivax.descarregarvideos.repository.YoutubeRepository
 import java.io.File
 import java.io.FileOutputStream
 

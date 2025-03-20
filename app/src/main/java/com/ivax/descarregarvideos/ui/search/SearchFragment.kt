@@ -42,7 +42,7 @@ class SearchFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val searchViewModel =
-            ViewModelProvider(this, SearchViewModel.Factory).get(SearchViewModel::class.java)
+            ViewModelProvider(this).get(SearchViewModel::class.java)
 
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
         lifecycleScope.launch {
@@ -51,15 +51,8 @@ class SearchFragment : Fragment() {
                     //var directory=File(activity?.applicationContext?.filesDir?.path+"/videos")
                     try {
                         //Log.d("DescarregarVideos")
-                        activity?.applicationContext?.openFileOutput(
-                            "${latest.videoId}.mp4",
-                            Context.MODE_PRIVATE
-                        )
-                            .use {
 
-                                it?.write(latest.byteArray)
-                            }
-                        searchViewModel.insertVideo(SavedVideo(latest.videoId))
+                        //searchViewModel.insertVideo(SavedVideo(latest.videoId))
                         //activity?.applicationContext.
                         /*activity?.applicationContext?.openFileOutput("prova.mp4", Context.MODE_PRIVATE)
                         .use {

@@ -14,6 +14,7 @@ import com.ivax.descarregarvideos.classes.VideoDownloadedData
 import com.ivax.descarregarvideos.classes.VideoInfo
 import com.ivax.descarregarvideos.classes.VideoItem
 import com.ivax.descarregarvideos.entities.SavedVideo
+import com.ivax.descarregarvideos.repository.FileRepository
 import com.ivax.descarregarvideos.repository.VideoRepository
 import com.ivax.descarregarvideos.responses.AdaptiveFormats
 import com.ivax.descarregarvideos.responses.PlayerResponse
@@ -25,8 +26,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import javax.inject.Inject
 
-class SearchViewModel(private val repository: VideoRepository) : ViewModel() {
+class SearchViewModel @Inject constructor(private val fileRepository: FileRepository) : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
         value = "This is slideshow Fragment"
@@ -40,14 +42,18 @@ class SearchViewModel(private val repository: VideoRepository) : ViewModel() {
     private val getVideoUseCase = GetVideoDataUseCase()
     private val downloadStreamUseCase = DownloadStreamUseCase()
 
-    fun insertVideo(video: SavedVideo){
+    init{
+
+    }
+
+    /*fun insertVideo(video: SavedVideo){
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 repository.insetVideo(video)
             }
         }
 
-    }
+    }*/
     fun SearchVideos(searchQuery: String) {
         viewModelScope.launch {
             try {
@@ -68,7 +74,14 @@ class SearchViewModel(private val repository: VideoRepository) : ViewModel() {
             var playerResponse: PlayerResponse = getVideoUseCase(videoId)
             var listFormats = playerResponse.streamingData.adaptiveFormats
             val vi = VideoInfo(adaptativeFormats = listFormats, videoId = videoId)
-            videoInfo.value=vi
+            var found=listFormats.firstOrNull{ it.mimeType.contains("audio") }
+            if(found!=null) {
+                withContext(Dispatchers.IO) {
+                    var bytes=downloadStreamUseCase(found.url)
+                    fileRepository.saveFile(bytes)
+                }
+            }
+            //videoInfo.value=vi
 
                 Log.d("DescarregarVide", videoId)
         }
@@ -88,7 +101,7 @@ class SearchViewModel(private val repository: VideoRepository) : ViewModel() {
 
     val text: LiveData<String> = _text
 
-    companion object {
+    /*companion object {
 
         val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
@@ -106,5 +119,5 @@ class SearchViewModel(private val repository: VideoRepository) : ViewModel() {
                 ) as T
             }
         }
-    }
+    }*/
 }

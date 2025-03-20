@@ -4,7 +4,10 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     kotlin("plugin.serialization").version("2.0.0")
-    id("com.google.devtools.ksp")
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.devtools.ksp)
+    alias(libs.plugins.dagger.hilt)
+
 }
 
 android {
@@ -67,9 +70,14 @@ dependencies {
     implementation(libs.ktor.client.json)
     implementation(libs.android.room.ktx)
     implementation(libs.android.room.runtime)
+    implementation(libs.dagger.hilt)
+    implementation(libs.android.composer.runtime)
+    ksp(libs.dagger.compiler)
     ksp(libs.android.room.ksp)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
 }
+
+
