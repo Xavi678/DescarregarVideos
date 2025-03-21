@@ -23,7 +23,7 @@ class SavedVideosFragment : Fragment() {
                                        container: ViewGroup?,
                                        savedInstanceState: Bundle?): View {
         val savedVideosViewModel =
-            ViewModelProvider(this, SavedVideosViewModel.Factory).get(SavedVideosViewModel::class.java)
+            ViewModelProvider(this).get(SavedVideosViewModel::class.java)
 
         _binding = FragmentSavedVideosBinding.inflate(inflater, container, false)
         val root: View = binding.root

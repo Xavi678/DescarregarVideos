@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.Flow
 class SavedVideosViewModel(private val repository: VideoRepository) : ViewModel() {
     val allSavedVideos: LiveData<List<SavedVideo>> = repository.getAllVideos().asLiveData()
 
-    companion object {
+    /*companion object {
 
         val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
@@ -35,5 +35,5 @@ class SavedVideosViewModel(private val repository: VideoRepository) : ViewModel(
                 ) as T
             }
         }
-    }
+    }*/
 }

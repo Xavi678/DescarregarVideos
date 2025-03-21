@@ -1,6 +1,5 @@
 package com.ivax.descarregarvideos.ui.search
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,18 +7,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ivax.descarregarvideos.adapter.VideoAdapter
 import com.ivax.descarregarvideos.databinding.FragmentSearchBinding
-import com.ivax.descarregarvideos.dialog_fragments.CodecsConfirmDialogFragment
 import com.ivax.descarregarvideos.entities.SavedVideo
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collectLatest
-import java.io.File
 
 //import org.jsoup.Jsoup
 
@@ -28,91 +26,54 @@ import java.io.File
 //import org.openqa.selenium.WebDriver
 //import org.openqa.selenium.chrome.ChromeDriver
 
+@AndroidEntryPoint
 class SearchFragment : Fragment() {
 
     private var _binding: FragmentSearchBinding? = null
 
+    private lateinit var adapter: VideoAdapter
+
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+
+    val searchViewModel : SearchViewModel by lazy{
+        ViewModelProvider(this)[SearchViewModel::class.java]}
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val searchViewModel =
-            ViewModelProvider(this).get(SearchViewModel::class.java)
+
 
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
-        lifecycleScope.launch {
-            searchViewModel.videoDownloadedData.collectLatest { latest ->
-                if(latest!=null) {
-                    //var directory=File(activity?.applicationContext?.filesDir?.path+"/videos")
-                    try {
-                        //Log.d("DescarregarVideos")
+        adapter= VideoAdapter(itemClickListener = fun(saveVideo: SavedVideo, finished: ()->Unit) {
+                searchViewModel.downloadVideoResponse(saveVideo,finished)
 
-                        //searchViewModel.insertVideo(SavedVideo(latest.videoId))
-                        //activity?.applicationContext.
-                        /*activity?.applicationContext?.openFileOutput("prova.mp4", Context.MODE_PRIVATE)
-                        .use {
-
-                            it?.write(latest)
-                        }*/
-                    }catch (e: Exception){
-                        Log.d("DescarregarVideos",e.message.toString())
-                    }
-                }
-            }
-        }
-        searchViewModel.videoInfo.observe(viewLifecycleOwner, Observer {
-
-            if(it!=null) {
-               var filtered= it.adaptativeFormats.firstOrNull { x-> x.mimeType.contains("audio") }
-                if(filtered!=null) {
-                    //var fitxer = File(activity?.applicationContext?.filesDir, "prova.mp4")
-                    searchViewModel.downloadVideoStream(it.videoId,"${filtered.url}&range=0-9898989")
-                }
-                /*CodecsConfirmDialogFragment(it, itemClickListener = fun(url: String?){
-                   var fitxer= File(activity?.applicationContext?.filesDir, "prova.mp4")
-                        searchViewModel.downloadVideoStream("$url&range=0-9898989",fitxer)
-
-                }).show(
-                    childFragmentManager, CodecsConfirmDialogFragment.TAG
-                )*/
-            }
-        })
+            })
         val root: View = binding.root
         binding.btnSearch.setOnClickListener { view ->
             var searchQuery = binding.tbxView.text.toString()
-            binding.recylcerViewVideo.layoutManager =
-                LinearLayoutManager(this@SearchFragment.context)
+
             lifecycleScope.launch {
                 searchViewModel.isLoading.collectLatest {
+
                     binding.searchVideoProgressBar.isVisible = it
                 }
             }
             lifecycleScope.launch {
-                try {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    try {
 
-                    searchViewModel.SearchVideos(searchQuery)
-                    searchViewModel.searchModel.collectLatest {
-                        var videoAadapter = VideoAdapter(
-                            it,
-                            itemClickListener = fun(videoId: String) {
-                                lifecycleScope.launch {
-
-                                        searchViewModel.downloadVideoResponse(videoId)
-
-                                }
-                                Log.d("DescarregarVideo", videoId)
-                            }
-                        )
-                        binding.recylcerViewVideo.adapter = videoAadapter
-                    }
-                } catch (e: Exception) {
-                    e.message.toString().let {
-                        Log.d("DescarregarVideos", it)
+                        searchViewModel.SearchVideos(searchQuery)
+                        searchViewModel.searchModel.collect {
+                            adapter.addItems(it)
+                        }
+                    } catch (e: Exception) {
+                        e.message.toString().let {
+                            Log.d("DescarregarVideos", it)
+                        }
                     }
                 }
             }
@@ -122,11 +83,13 @@ class SearchFragment : Fragment() {
         searchViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }*/
+        setupUi()
         return root
     }
-
-    fun downloadButton(videoId: String) {
-        Log.d("DescarregarVideo", videoId)
+    private fun setupUi(){
+        binding.recylcerViewVideo.layoutManager =
+            LinearLayoutManager(this@SearchFragment.context)
+        binding.recylcerViewVideo.adapter = adapter
     }
 
     override fun onDestroyView() {

@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import com.ivax.descarregarvideos.databinding.ActivityMainBinding
 import com.ivax.descarregarvideos.requests.PlayerRequest
 import com.ivax.descarregarvideos.responses.PlayerResponse
+import dagger.hilt.android.AndroidEntryPoint
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
@@ -35,6 +36,7 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration

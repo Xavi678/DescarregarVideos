@@ -75,7 +75,7 @@ class YoutubeRepository {
                                 videoList.add(
                                     VideoItem(
                                         videoId = sectionRContent.videoRenderer.videoId,
-                                        title = title,
+                                        title = title.toString(),
                                         imgUrl = thumbnail,
                                         duration = duration,
                                         viewCount = viewCount
