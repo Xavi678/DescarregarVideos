@@ -16,6 +16,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.ivax.descarregarvideos.R
+import com.ivax.descarregarvideos.classes.MainDiffCallBack
 import com.ivax.descarregarvideos.classes.VideoItem
 import com.ivax.descarregarvideos.entities.SavedVideo
 
@@ -93,22 +94,3 @@ class VideoAdapter(private val itemClickListener: (saveVideo: SavedVideo,finishe
     }
 }
 
-class MainDiffCallBack(private val oldList: List<VideoItem>, private val newList: List<VideoItem>) :
-    DiffUtil.Callback() {
-    override fun getOldListSize(): Int {
-        return oldList.size
-    }
-
-    override fun getNewListSize(): Int {
-        return newList.size
-    }
-
-    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return (oldList[oldItemPosition].title == newList[newItemPosition].title)
-
-    }
-
-    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return oldList[oldItemPosition] == newList[newItemPosition]
-    }
-}

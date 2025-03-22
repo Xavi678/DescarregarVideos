@@ -6,7 +6,7 @@ import javax.inject.Singleton
 
 @Singleton
 class FileRepository @Inject constructor(private val fileWriter: FileWriter) {
-    suspend fun saveFile(bytes: ByteArray){
-        fileWriter.write(bytes)
+    suspend fun saveFile(fileNme: String,bytes: ByteArray){
+        fileWriter.write(fileNme,bytes)
     }
 }

@@ -19,6 +19,7 @@ hilt = "2.50"
 composeVersion = "1.7.8"
 
 roomVersion = "2.6.1"
+exoplayerVersion="1.5.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -42,6 +43,9 @@ android-room-ksp={group="androidx.room", name="room-compiler", version.ref="room
 dagger-hilt={group="com.google.dagger", name="hilt-android", version.ref="hilt"}
 dagger-compiler={group="com.google.dagger", name="hilt-compiler", version.ref="hilt"}
 android-composer-runtime={group="androidx.compose.runtime", name="runtime",version.ref="composeVersion"}
+android-exoplayer = {group="androidx.media3", name="media3-exoplayer",version.ref="exoplayerVersion"}
+android-exoplayer-dash = {group="androidx.media3", name="media3-exoplayer-dash",version.ref="exoplayerVersion"}
+android-exoplayer-ui={group="androidx.media3", name="media3-ui",version.ref="exoplayerVersion"}
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

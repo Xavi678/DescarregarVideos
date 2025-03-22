@@ -22,6 +22,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        ksp {
+            arg("room.schemaLocation", "$projectDir/schemas")
+        }
     }
 
     buildTypes {
@@ -72,6 +75,9 @@ dependencies {
     implementation(libs.android.room.runtime)
     implementation(libs.dagger.hilt)
     implementation(libs.android.composer.runtime)
+    implementation(libs.android.exoplayer)
+    implementation(libs.android.exoplayer.dash)
+    implementation(libs.android.exoplayer.ui)
     ksp(libs.dagger.compiler)
     ksp(libs.android.room.ksp)
     testImplementation(libs.junit)

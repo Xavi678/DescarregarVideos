@@ -1,13 +1,15 @@
 package database
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.ivax.descarregarvideos.dao.VideoDao
 import com.ivax.descarregarvideos.entities.SavedVideo
 
-@Database(entities = [SavedVideo::class],exportSchema = true, version = 1)
+
+@Database(entities = [SavedVideo::class],exportSchema = true, version = 2)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun videoDao(): VideoDao
     companion object {

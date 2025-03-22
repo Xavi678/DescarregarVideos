@@ -13,6 +13,7 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.exoplayer.ExoPlayer
 import com.ivax.descarregarvideos.databinding.ActivityMainBinding
 import com.ivax.descarregarvideos.requests.PlayerRequest
 import com.ivax.descarregarvideos.responses.PlayerResponse
@@ -49,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.appBarMain.toolbar)
-
+        val player = ExoPlayer.Builder(this).build()
         binding.appBarMain.fab.setOnClickListener { view ->
             lifecycleScope.launch {
 

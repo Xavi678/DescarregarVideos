@@ -11,38 +11,38 @@ import com.ivax.descarregarvideos.adapter.SavedVideosAdapter
 import com.ivax.descarregarvideos.databinding.FragmentSavedVideosBinding
 import com.ivax.descarregarvideos.ui.home.HomeViewModel
 import com.ivax.descarregarvideos.ui.search.SearchFragment
+import com.ivax.descarregarvideos.ui.search.SearchViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SavedVideosFragment : Fragment() {
     private var _binding: FragmentSavedVideosBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+    private lateinit var savedVideoAdapter: SavedVideosAdapter
+    val savedVideosViewModel : SavedVideosViewModel by lazy{
+        ViewModelProvider(this)[SavedVideosViewModel::class.java]}
 
     override fun onCreateView(        inflater: LayoutInflater,
                                        container: ViewGroup?,
                                        savedInstanceState: Bundle?): View {
-        val savedVideosViewModel =
-            ViewModelProvider(this).get(SavedVideosViewModel::class.java)
 
         _binding = FragmentSavedVideosBinding.inflate(inflater, container, false)
         val root: View = binding.root
-        binding.recylcerViewSavedVideos.layoutManager =
-            LinearLayoutManager(this@SavedVideosFragment.context)
+        savedVideoAdapter= SavedVideosAdapter()
         savedVideosViewModel.allSavedVideos.observe(viewLifecycleOwner) {
-            val savedVideoAdapter=SavedVideosAdapter(it)
-            binding.recylcerViewSavedVideos.adapter=savedVideoAdapter
-            //binding.recylcerViewSavedVideos.
+            savedVideoAdapter.addItems(it)
         }
-
-
-        /*val textView: TextView = binding.textHome
-        homeViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
-        }*/
+        setupUI()
         return root
     }
-
+    fun setupUI(){
+        binding.recylcerViewSavedVideos.layoutManager =
+            LinearLayoutManager(this@SavedVideosFragment.context)
+        binding.recylcerViewSavedVideos.adapter=savedVideoAdapter
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

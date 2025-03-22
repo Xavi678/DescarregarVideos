@@ -12,9 +12,12 @@ import com.ivax.descarregarvideos.MyApplication
 import com.ivax.descarregarvideos.entities.SavedVideo
 import com.ivax.descarregarvideos.repository.VideoRepository
 import com.ivax.descarregarvideos.ui.search.SearchViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class SavedVideosViewModel(private val repository: VideoRepository) : ViewModel() {
+@HiltViewModel
+class SavedVideosViewModel @Inject constructor(private val repository: VideoRepository) : ViewModel() {
     val allSavedVideos: LiveData<List<SavedVideo>> = repository.getAllVideos().asLiveData()
 
     /*companion object {
