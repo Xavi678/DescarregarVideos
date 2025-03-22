@@ -8,8 +8,10 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.media3.common.MediaItem
 import com.ivax.descarregarvideos.MyApplication
 import com.ivax.descarregarvideos.entities.SavedVideo
+import com.ivax.descarregarvideos.repository.MediaPlayerRepository
 import com.ivax.descarregarvideos.repository.VideoRepository
 import com.ivax.descarregarvideos.ui.search.SearchViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,26 +19,14 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 @HiltViewModel
-class SavedVideosViewModel @Inject constructor(private val repository: VideoRepository) : ViewModel() {
+class SavedVideosViewModel @Inject constructor(private val repository: VideoRepository, private val mediaPlayerRepository: MediaPlayerRepository) : ViewModel() {
     val allSavedVideos: LiveData<List<SavedVideo>> = repository.getAllVideos().asLiveData()
 
-    /*companion object {
+    fun addItemMedia(mediaItem: MediaItem){
+        mediaPlayerRepository.addItemMedia(mediaItem)
+    }
 
-        val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(
-                modelClass: Class<T>,
-                extras: CreationExtras
-            ): T {
-                // Get the Application object from extras
-                val application = checkNotNull(extras[APPLICATION_KEY])
-                // Create a SavedStateHandle for this ViewModel from extras
-                val savedStateHandle = extras.createSavedStateHandle()
-
-                return SavedVideosViewModel(
-                    (application as MyApplication).videoRepository
-                ) as T
-            }
-        }
-    }*/
+    fun play(){
+        mediaPlayerRepository.play()
+    }
 }

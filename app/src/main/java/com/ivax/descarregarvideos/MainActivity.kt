@@ -12,9 +12,11 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.exoplayer.ExoPlayer
 import com.ivax.descarregarvideos.databinding.ActivityMainBinding
+import com.ivax.descarregarvideos.general.viewmodels.MediaViewModel
 import com.ivax.descarregarvideos.requests.PlayerRequest
 import com.ivax.descarregarvideos.responses.PlayerResponse
 import dagger.hilt.android.AndroidEntryPoint
@@ -42,6 +44,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    private val mediaViewModel : MediaViewModel by lazy {
+        ViewModelProvider(this).get(MediaViewModel::class.java)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,16 +55,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.appBarMain.toolbar)
-        val player = ExoPlayer.Builder(this).build()
-        binding.appBarMain.fab.setOnClickListener { view ->
-            lifecycleScope.launch {
+        binding.appBarMain.playerControlView.player=mediaViewModel.getMediaPlayer()
+        /*binding.appBarMain.mediaPlayerPlayButton.setOnClickListener {
 
-            }
-
-            /* Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                 .setAction("Action", null)
-                 .setAnchorView(R.id.fab).show()*/
-        }
+        }*/
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_content_main)

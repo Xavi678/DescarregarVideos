@@ -5,6 +5,8 @@ import androidx.room.Room
 import com.ivax.descarregarvideos.dao.VideoDao
 import com.ivax.descarregarvideos.helpers.CustomFileWriter
 import com.ivax.descarregarvideos.helpers.FileWriter
+import com.ivax.descarregarvideos.helpers.IMediaHelper
+import com.ivax.descarregarvideos.helpers.MediaHelper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,4 +33,9 @@ object ExportModule {
     @Singleton
     @Provides
     fun provideUserDao(db: AppDatabase) = db.videoDao()
+    @Singleton
+    @Provides
+    fun provideMediaHelper(@ApplicationContext context: Context) : IMediaHelper{
+        return MediaHelper(context)
+    }
 }

@@ -6,12 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
+import androidx.media3.common.MediaItem
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ivax.descarregarvideos.adapter.SavedVideosAdapter
 import com.ivax.descarregarvideos.databinding.FragmentSavedVideosBinding
-import com.ivax.descarregarvideos.ui.home.HomeViewModel
-import com.ivax.descarregarvideos.ui.search.SearchFragment
-import com.ivax.descarregarvideos.ui.search.SearchViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -31,7 +29,10 @@ class SavedVideosFragment : Fragment() {
 
         _binding = FragmentSavedVideosBinding.inflate(inflater, container, false)
         val root: View = binding.root
-        savedVideoAdapter= SavedVideosAdapter()
+        savedVideoAdapter= SavedVideosAdapter(playMedia= fun(mediaItem: MediaItem){
+            savedVideosViewModel.addItemMedia(mediaItem)
+            savedVideosViewModel.play()
+        })
         savedVideosViewModel.allSavedVideos.observe(viewLifecycleOwner) {
             savedVideoAdapter.addItems(it)
         }

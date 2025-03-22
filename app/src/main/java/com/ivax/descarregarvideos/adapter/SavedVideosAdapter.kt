@@ -1,6 +1,5 @@
 package com.ivax.descarregarvideos.adapter
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.view.LayoutInflater
@@ -14,13 +13,11 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.ivax.descarregarvideos.R
-import com.ivax.descarregarvideos.adapter.VideoAdapter.ViewHolder
 import com.ivax.descarregarvideos.classes.MainDiffCallBack
 import com.ivax.descarregarvideos.entities.SavedVideo
 import java.io.FileInputStream
-import java.io.FileOutputStream
 
-class SavedVideosAdapter() : RecyclerView.Adapter<SavedVideosAdapter.ViewHolder>() {
+class SavedVideosAdapter(private val playMedia: (MediaItem) -> Unit) : RecyclerView.Adapter<SavedVideosAdapter.ViewHolder>() {
 
     private val items = ArrayList<SavedVideo>()
     override fun onCreateViewHolder(
@@ -54,12 +51,8 @@ class SavedVideosAdapter() : RecyclerView.Adapter<SavedVideosAdapter.ViewHolder>
         holder.tbxTitle.text=item.title
         holder.butonPlay.setOnClickListener { view->
             if(item.videoUrl!=null) {
-                val player = ExoPlayer.Builder(view.context).build()
-
                 val mediaItem = MediaItem.fromUri(item.videoUrl!!)
-                player.setMediaItem(mediaItem)
-                player.prepare()
-                player.play()
+                playMedia(mediaItem)
             }
 
         }
