@@ -27,7 +27,7 @@ object ExportModule {
         @ApplicationContext app: Context
     ) = Room.databaseBuilder(
         app, AppDatabase::class.java, "DescarregarVideosDB"
-    ).fallbackToDestructiveMigration().build()
+    ).build()
     @Singleton
     @Provides
     fun provideUserDao(db: AppDatabase) = db.videoDao()

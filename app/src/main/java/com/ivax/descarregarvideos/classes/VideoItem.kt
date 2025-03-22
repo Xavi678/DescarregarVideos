@@ -5,5 +5,5 @@ import android.net.Uri
 
 data class VideoItem(val videoId: String, val title: String, val imgUrl: Bitmap?, val viewCount: String,
                      val duration:String,
-                     var isFileDownloading:Boolean=false) {
+                     var videoUrl: String?=null) {
 }

@@ -9,12 +9,16 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.adapter.VideoAdapter.ViewHolder
 import com.ivax.descarregarvideos.classes.MainDiffCallBack
 import com.ivax.descarregarvideos.entities.SavedVideo
+import java.io.FileInputStream
+import java.io.FileOutputStream
 
 class SavedVideosAdapter() : RecyclerView.Adapter<SavedVideosAdapter.ViewHolder>() {
 
@@ -41,11 +45,24 @@ class SavedVideosAdapter() : RecyclerView.Adapter<SavedVideosAdapter.ViewHolder>
     ) {
         var item = items[position]
         var bmp: Bitmap
-        holder.itemView.context.openFileInput(item.imgUrl).use {
+        var fileInStream= FileInputStream(item.imgUrl)
+        fileInStream.use {
             bmp = BitmapFactory.decodeStream(it)
         }
+        fileInStream.close()
         holder.imgThumbnail.setImageBitmap(bmp)
         holder.tbxTitle.text=item.title
+        holder.butonPlay.setOnClickListener { view->
+            if(item.videoUrl!=null) {
+                val player = ExoPlayer.Builder(view.context).build()
+
+                val mediaItem = MediaItem.fromUri(item.videoUrl!!)
+                player.setMediaItem(mediaItem)
+                player.prepare()
+                player.play()
+            }
+
+        }
     }
 
     override fun getItemCount(): Int {
@@ -53,7 +70,8 @@ class SavedVideosAdapter() : RecyclerView.Adapter<SavedVideosAdapter.ViewHolder>
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val imgThumbnail = itemView.findViewById<ImageView>(R.id.imgSavedVideoThumbnail)
-        val tbxTitle=itemView.findViewById<TextView>(R.id.tbxSavedVideoDesc)
+        val imgThumbnail: ImageView = itemView.findViewById<ImageView>(R.id.imgSavedVideoThumbnail)
+        val tbxTitle: TextView =itemView.findViewById<TextView>(R.id.tbxSavedVideoDesc)
+        val butonPlay: ImageButton = itemView.findViewById<ImageButton>(R.id.playButton)
     }
 }

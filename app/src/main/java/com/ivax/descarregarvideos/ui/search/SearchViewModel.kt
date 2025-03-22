@@ -67,7 +67,8 @@ class SearchViewModel @Inject constructor(private val fileRepository: FileReposi
             if(found!=null) {
                 withContext(Dispatchers.IO) {
                     var bytes=downloadStreamUseCase("${found.url}&range=0-9898989")
-                    fileRepository.saveFile(savedVideo.videoId,bytes)
+                    var videoUrl=fileRepository.saveFile(savedVideo.videoId,bytes)
+                    savedVideo.videoUrl=videoUrl
                     videoRepository.insetVideo(savedVideo)
                     finished()
 

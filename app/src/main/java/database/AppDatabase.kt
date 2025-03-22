@@ -8,8 +8,14 @@ import androidx.room.RoomDatabase
 import com.ivax.descarregarvideos.dao.VideoDao
 import com.ivax.descarregarvideos.entities.SavedVideo
 
-
-@Database(entities = [SavedVideo::class],exportSchema = true, version = 2)
+/*
+* , autoMigrations = [
+    AutoMigration(from = 2,to = 3)
+]
+* */
+@Database(entities = [SavedVideo::class],exportSchema = true, version = 3,autoMigrations = [
+    AutoMigration(from = 2,to = 3)
+])
 abstract class AppDatabase : RoomDatabase() {
     abstract fun videoDao(): VideoDao
     companion object {

@@ -19,6 +19,7 @@ import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.classes.MainDiffCallBack
 import com.ivax.descarregarvideos.classes.VideoItem
 import com.ivax.descarregarvideos.entities.SavedVideo
+import java.io.File
 
 class VideoAdapter(private val itemClickListener: (saveVideo: SavedVideo,finished: ()->Unit) -> Unit) :
     RecyclerView.Adapter<VideoAdapter.ViewHolder>() {
@@ -51,10 +52,18 @@ class VideoAdapter(private val itemClickListener: (saveVideo: SavedVideo,finishe
             holder.downloadButton.setOnClickListener { view ->
 
                 val imgPath="${item.videoId}_thumbnail.bmp"
-                holder.itemView.context.openFileOutput(imgPath, Context.MODE_PRIVATE).use{
+                var dir=File("${holder.itemView.context.filesDir}/fotos")
+                var d=dir.mkdir()
+                var f=File("${dir}/${imgPath}")
+
+                if(f.exists()){
+                    f.delete()
+                }
+                f.createNewFile()
+                f.outputStream().use{
                     item.imgUrl?.compress(Bitmap.CompressFormat.PNG,100,it)
                 }
-                var saveVideo=SavedVideo(item.videoId,item.title,imgPath,item.duration,item.viewCount)
+                var saveVideo=SavedVideo(item.videoId,item.title,"${dir}/${imgPath}",item.duration,item.viewCount)
                 (view as ImageButton).setImageDrawable(ResourcesCompat.getDrawable(holder.itemView.context.resources,R.drawable.downloading,null))
                 var callback=fun(){
                     view.setImageDrawable(ResourcesCompat.getDrawable(holder.itemView.context.resources,R.drawable.finished_downloading,null))

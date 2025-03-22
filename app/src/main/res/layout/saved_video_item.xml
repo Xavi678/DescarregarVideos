@@ -55,7 +55,7 @@
             app:layout_constraintLeft_toLeftOf="@+id/imgSavedVideoThumbnail"
 
             />
-        <ImageView
+        <ImageButton
             android:id="@+id/playButton"
             android:layout_width="22dp"
             android:layout_height="22dp"
