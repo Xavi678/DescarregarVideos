@@ -3,6 +3,9 @@ package com.ivax.descarregarvideos
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
+import android.view.View
+import android.widget.ImageButton
+import android.widget.ImageView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
@@ -12,6 +15,8 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.exoplayer.ExoPlayer
@@ -55,7 +60,27 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.appBarMain.toolbar)
-        binding.appBarMain.playerControlView.player=mediaViewModel.getMediaPlayer()
+        var player=mediaViewModel.getMediaPlayer()
+        binding.appBarMain.playerView.player=player
+        var playButton=binding.appBarMain.root.findViewById<ImageButton>(R.id.mediaPlayerPlayButton)
+        var thumbnailPlayer=binding.appBarMain.root.findViewById<ImageView>(R.id.mediaPlayerThumbnail)
+        mediaViewModel.currentThumbnail.observe(this) {
+            thumbnailPlayer.setImageBitmap(it)
+        }
+        playButton.setOnClickListener { view->
+            var playPause=(view as ImageButton)
+            if(player.isPlaying()){
+                //playPause.context.resources
+                player.stop()
+                playPause.setImageDrawable(ResourcesCompat.getDrawable(view.context.resources,R.drawable.play_button_round,null) )
+            }else{
+                player.prepare()
+                player.play()
+                playPause.setImageDrawable(ResourcesCompat.getDrawable(view.context.resources,R.drawable.pause_button_white,null) )
+            }
+            Log.d("DescarregarVideos","")
+        }
+
         /*binding.appBarMain.mediaPlayerPlayButton.setOnClickListener {
 
         }*/

@@ -40,8 +40,14 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:background="@color/material_dynamic_neutral10">
+        <androidx.media3.ui.PlayerView
+            android:id="@+id/player_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:show_buffering="when_playing"
+            app:show_shuffle_button="true" app:controller_layout_id="@layout/custom_player_controls"/>
 
-        <androidx.media3.ui.PlayerControlView
+        <!--<androidx.media3.ui.PlayerControlView
             android:id="@+id/playerControlView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -50,8 +56,16 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             >
+        <androidx.media3.ui.PlayerView
+            android:id="@+id/playerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:auto_show="true"
+            app:use_controller="true"
+            >
 
-        </androidx.media3.ui.PlayerControlView>
+        </androidx.media3.ui.PlayerView>
+        </androidx.media3.ui.PlayerControlView>-->
 
         <!--<ImageButton
             android:id="@+id/mediaPlayerPlayButton"

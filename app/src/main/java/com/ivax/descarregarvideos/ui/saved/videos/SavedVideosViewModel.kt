@@ -1,5 +1,6 @@
 package com.ivax.descarregarvideos.ui.saved.videos
 
+import android.graphics.Bitmap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -28,5 +29,9 @@ class SavedVideosViewModel @Inject constructor(private val repository: VideoRepo
 
     fun play(){
         mediaPlayerRepository.play()
+    }
+
+    fun setThumbnail(bitmap: Bitmap){
+        mediaPlayerRepository.setThumbnail(bitmap)
     }
 }

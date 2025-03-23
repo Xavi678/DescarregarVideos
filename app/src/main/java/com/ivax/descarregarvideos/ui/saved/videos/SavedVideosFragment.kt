@@ -1,15 +1,20 @@
 package com.ivax.descarregarvideos.ui.saved.videos
 
+import android.graphics.Bitmap
 import androidx.fragment.app.Fragment
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.ImageView
 import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.MediaItem
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.adapter.SavedVideosAdapter
 import com.ivax.descarregarvideos.databinding.FragmentSavedVideosBinding
+import com.ivax.descarregarvideos.general.viewmodels.MediaViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -29,8 +34,9 @@ class SavedVideosFragment : Fragment() {
 
         _binding = FragmentSavedVideosBinding.inflate(inflater, container, false)
         val root: View = binding.root
-        savedVideoAdapter= SavedVideosAdapter(playMedia= fun(mediaItem: MediaItem){
+        savedVideoAdapter= SavedVideosAdapter(playMedia= fun(mediaItem: MediaItem,bitMap: Bitmap){
             savedVideosViewModel.addItemMedia(mediaItem)
+            savedVideosViewModel.setThumbnail(bitMap)
             savedVideosViewModel.play()
         })
         savedVideosViewModel.allSavedVideos.observe(viewLifecycleOwner) {
