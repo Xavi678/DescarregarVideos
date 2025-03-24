@@ -6,6 +6,7 @@ import android.view.Menu
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.SeekBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
@@ -19,6 +20,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.ivax.descarregarvideos.databinding.ActivityMainBinding
 import com.ivax.descarregarvideos.general.viewmodels.MediaViewModel
@@ -43,6 +45,7 @@ import kotlinx.coroutines.launch
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
+import kotlin.concurrent.timer
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -61,12 +64,30 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.appBarMain.toolbar)
         var player=mediaViewModel.getMediaPlayer()
+
         binding.appBarMain.playerView.player=player
         var playButton=binding.appBarMain.root.findViewById<ImageButton>(R.id.mediaPlayerPlayButton)
         var thumbnailPlayer=binding.appBarMain.root.findViewById<ImageView>(R.id.mediaPlayerThumbnail)
+        var seekBar=binding.appBarMain.root.findViewById<SeekBar>(R.id.seekBar)
+        seekBar.min=0
+        seekBar.max=100
         mediaViewModel.currentThumbnail.observe(this) {
             thumbnailPlayer.setImageBitmap(it)
         }
+        player.addListener( object : Player.Listener {
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if (isPlaying) {
+                    seekBar.progress+=1
+                    // Active playback.
+                } else {
+                    // Not playing because playback is paused, ended, suppressed, or the player
+                    // is buffering, stopped or failed. Check player.playWhenReady,
+                    // player.playbackState, player.playbackSuppressionReason and
+                    // player.playerError for details.
+                }
+            }
+
+        })
         playButton.setOnClickListener { view->
             var playPause=(view as ImageButton)
             if(player.isPlaying()){
