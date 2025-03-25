@@ -1,6 +1,9 @@
 package com.ivax.descarregarvideos
 
 import android.os.Bundle
+import android.os.CountDownTimer
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.Menu
 import android.view.View
@@ -20,6 +23,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.ivax.descarregarvideos.databinding.ActivityMainBinding
@@ -44,7 +48,12 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.launch
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.json.Json
+import java.util.Timer
+import java.util.TimerTask
+import kotlin.concurrent.fixedRateTimer
+import kotlin.concurrent.schedule
 import kotlin.concurrent.timer
 
 @AndroidEntryPoint
@@ -69,15 +78,41 @@ class MainActivity : AppCompatActivity() {
         var playButton=binding.appBarMain.root.findViewById<ImageButton>(R.id.mediaPlayerPlayButton)
         var thumbnailPlayer=binding.appBarMain.root.findViewById<ImageView>(R.id.mediaPlayerThumbnail)
         var seekBar=binding.appBarMain.root.findViewById<SeekBar>(R.id.seekBar)
-        seekBar.min=0
-        seekBar.max=100
+
         mediaViewModel.currentThumbnail.observe(this) {
             thumbnailPlayer.setImageBitmap(it)
         }
+        var videoWatchedTime = 0L
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            videoWatchedTime+=player.currentPosition/1000
+        }, 3000)
+
+        var timer=Timer()
+        var seekBarProgress=0
+        var timerStarted=false
+
         player.addListener( object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if(timerStarted) {
+                    timer.cancel()
+                }
+                var total=player.duration/1000
+                seekBar.min=0
+                seekBar.max= total.toInt()
+                var position=player.currentPosition/1000
+                seekBarProgress=position.toInt()
+                seekBar.progress=seekBarProgress
+                timer.schedule(object : TimerTask() {
+                    override fun run() {
+                        seekBarProgress+=1
+                        seekBar.progress=seekBarProgress
+                    }
+                },0,1000)
+                timerStarted=true
+                //val fixedRateTimer = fixedRateTimer(
                 if (isPlaying) {
-                    seekBar.progress+=1
+
                     // Active playback.
                 } else {
                     // Not playing because playback is paused, ended, suppressed, or the player
@@ -87,10 +122,18 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                Log.d("DescarregarVideos","")
+                super.onMediaItemTransition(mediaItem, reason)
+                Log.d("DescarregarVideos","${mediaItem?.mediaMetadata}")
+
+            }
+
+
         })
         playButton.setOnClickListener { view->
             var playPause=(view as ImageButton)
-            if(player.isPlaying()){
+            if(player.isPlaying){
                 //playPause.context.resources
                 player.stop()
                 playPause.setImageDrawable(ResourcesCompat.getDrawable(view.context.resources,R.drawable.play_button_round,null) )
@@ -119,6 +162,9 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
     }
+
+
+
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
