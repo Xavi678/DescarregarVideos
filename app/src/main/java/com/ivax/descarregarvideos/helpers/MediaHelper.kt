@@ -8,12 +8,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
+import com.ivax.descarregarvideos.entities.SavedVideo
 import javax.inject.Inject
 
 class MediaHelper @Inject constructor(private val appContext: Context) : IMediaHelper {
     private val player = ExoPlayer.Builder(appContext).build()
-    private val acutalThumbnail : MutableLiveData<Bitmap> by lazy {
-        MutableLiveData<Bitmap>()
+    private val actualVideo : MutableLiveData<SavedVideo> by lazy {
+        MutableLiveData<SavedVideo>()
     }
     override fun play(){
         player.prepare()
@@ -28,14 +29,20 @@ class MediaHelper @Inject constructor(private val appContext: Context) : IMediaH
         return player
     }
 
-    override fun setThumbnail(bitmap: Bitmap)  {
+    /*override fun setThumbnail(bitmap: Bitmap)  {
+        actualVideo.
         acutalThumbnail.postValue(bitmap)
     }
 
     override fun getCurrentThumbnail(): MutableLiveData<Bitmap> {
        return acutalThumbnail
+    }*/
+    override fun setSavedVideo(video: SavedVideo) {
+        actualVideo.postValue(video)
     }
-
+    override  fun getCurrentMedia(): MutableLiveData<SavedVideo> {
+        return actualVideo
+    }
 
 
 }

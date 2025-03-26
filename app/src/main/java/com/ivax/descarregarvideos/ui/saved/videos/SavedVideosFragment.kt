@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.adapter.SavedVideosAdapter
 import com.ivax.descarregarvideos.databinding.FragmentSavedVideosBinding
+import com.ivax.descarregarvideos.entities.SavedVideo
 import com.ivax.descarregarvideos.general.viewmodels.MediaViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -34,9 +35,10 @@ class SavedVideosFragment : Fragment() {
 
         _binding = FragmentSavedVideosBinding.inflate(inflater, container, false)
         val root: View = binding.root
-        savedVideoAdapter= SavedVideosAdapter(playMedia= fun(mediaItem: MediaItem,bitMap: Bitmap){
+        savedVideoAdapter= SavedVideosAdapter(playMedia= fun(mediaItem: MediaItem,savedVideo: SavedVideo){
             savedVideosViewModel.addItemMedia(mediaItem)
-            savedVideosViewModel.setThumbnail(bitMap)
+            savedVideosViewModel.setSavedVideo(savedVideo)
+            //savedVideosViewModel.setThumbnail(bitMap)
             savedVideosViewModel.play()
         })
         savedVideosViewModel.allSavedVideos.observe(viewLifecycleOwner) {

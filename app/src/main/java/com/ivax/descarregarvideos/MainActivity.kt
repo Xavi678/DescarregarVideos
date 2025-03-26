@@ -1,5 +1,7 @@
 package com.ivax.descarregarvideos
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Handler
@@ -10,6 +12,7 @@ import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.SeekBar
+import android.widget.TextView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
@@ -50,6 +53,8 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.json.Json
+import org.w3c.dom.Text
+import java.io.FileInputStream
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.concurrent.fixedRateTimer
@@ -77,10 +82,21 @@ class MainActivity : AppCompatActivity() {
         binding.appBarMain.playerView.player=player
         var playButton=binding.appBarMain.root.findViewById<ImageButton>(R.id.mediaPlayerPlayButton)
         var thumbnailPlayer=binding.appBarMain.root.findViewById<ImageView>(R.id.mediaPlayerThumbnail)
+        var playerSongTextView=binding.appBarMain.root.findViewById<TextView>(R.id.playerSongTextView)
+        var tbxTimeDuration=binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeDuration)
         var seekBar=binding.appBarMain.root.findViewById<SeekBar>(R.id.seekBar)
 
-        mediaViewModel.currentThumbnail.observe(this) {
-            thumbnailPlayer.setImageBitmap(it)
+        mediaViewModel.currentMedia.observe(this) {
+            it.videoUrl
+            var bmp: Bitmap
+            var fileInStream= FileInputStream(it.imgUrl)
+            fileInStream.use {
+                bmp = BitmapFactory.decodeStream(it)
+            }
+            fileInStream.close()
+            thumbnailPlayer.setImageBitmap(bmp)
+            playerSongTextView.text=it.title
+            //thumbnailPlayer.setImageBitmap(it)
         }
         var videoWatchedTime = 0L
 
@@ -90,31 +106,36 @@ class MainActivity : AppCompatActivity() {
 
         var timer=Timer()
         var seekBarProgress=0
-        var timerStarted=false
+        var isTimerCnacelled=false
 
         player.addListener( object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-                if(timerStarted) {
-                    timer.cancel()
-                }
                 var total=player.duration/1000
                 seekBar.min=0
                 seekBar.max= total.toInt()
                 var position=player.currentPosition/1000
                 seekBarProgress=position.toInt()
                 seekBar.progress=seekBarProgress
-                timer.schedule(object : TimerTask() {
-                    override fun run() {
-                        seekBarProgress+=1
-                        seekBar.progress=seekBarProgress
-                    }
-                },0,1000)
-                timerStarted=true
+                tbxTimeDuration.text=(seekBarProgress/60F).toString()
                 //val fixedRateTimer = fixedRateTimer(
                 if (isPlaying) {
+                    isTimerCnacelled=false
+                    timer.schedule(object : TimerTask() {
+                        override fun run() {
+                            if(isTimerCnacelled){
+                                this.cancel()
+                            }
+                            seekBarProgress+=1
+                            Handler(Looper.getMainLooper()).post {
+                                tbxTimeDuration.text=(seekBarProgress/60F).toString()
+                                seekBar.progress=seekBarProgress
+                            }
 
+                        }
+                    },0,1000)
                     // Active playback.
                 } else {
+                    isTimerCnacelled=true
                     // Not playing because playback is paused, ended, suppressed, or the player
                     // is buffering, stopped or failed. Check player.playWhenReady,
                     // player.playbackState, player.playbackSuppressionReason and

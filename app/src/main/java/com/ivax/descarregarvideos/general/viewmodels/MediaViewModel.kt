@@ -15,8 +15,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MediaViewModel @Inject constructor(private val mediaPlayerRepository:MediaPlayerRepository) : ViewModel() {
 
-    val currentThumbnail=mediaPlayerRepository.getCurrentThumbnail()
-
+    //val currentThumbnail=mediaPlayerRepository.getCurrentThumbnail()
+    val currentMedia=mediaPlayerRepository.getCurrentMedia()
     fun addItemMedia(mediaItem: MediaItem){
         mediaPlayerRepository.addItemMedia(mediaItem)
     }
