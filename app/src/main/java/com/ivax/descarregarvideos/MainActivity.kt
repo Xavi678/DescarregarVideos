@@ -3,17 +3,14 @@ package com.ivax.descarregarvideos
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.Menu
-import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -22,44 +19,17 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import androidx.media3.exoplayer.ExoPlayer
+import com.ivax.descarregarvideos.classes.MathExtensions
 import com.ivax.descarregarvideos.databinding.ActivityMainBinding
 import com.ivax.descarregarvideos.general.viewmodels.MediaViewModel
-import com.ivax.descarregarvideos.requests.PlayerRequest
-import com.ivax.descarregarvideos.responses.PlayerResponse
 import dagger.hilt.android.AndroidEntryPoint
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.get
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.contentType
-import io.ktor.http.headers
-import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.launch
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.serialization.json.Json
-import org.w3c.dom.Text
 import java.io.FileInputStream
 import java.util.Timer
 import java.util.TimerTask
-import kotlin.concurrent.fixedRateTimer
-import kotlin.concurrent.schedule
-import kotlin.concurrent.timer
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -106,8 +76,30 @@ class MainActivity : AppCompatActivity() {
 
         var timer=Timer()
         var seekBarProgress=0
-        var isTimerCnacelled=false
+        var isTimerCancelled=false
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
+            override fun onProgressChanged(
+                seekBar: SeekBar?,
+                progress: Int,
+                fromUser: Boolean
+            ) {
+                if(fromUser){
+                    player.seekTo(progress.toLong())
+                }
+            }
 
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                //super.onStartTrackingTouch(seekBar)
+                isTimerCancelled=true
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                //onStopTrackingTouch(seekBar)
+                isTimerCancelled=false
+
+            }
+
+        })
         player.addListener( object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 var total=player.duration/1000
@@ -116,18 +108,19 @@ class MainActivity : AppCompatActivity() {
                 var position=player.currentPosition/1000
                 seekBarProgress=position.toInt()
                 seekBar.progress=seekBarProgress
-                tbxTimeDuration.text=(seekBarProgress/60F).toString()
+
+                tbxTimeDuration.text=MathExtensions.toTime(seekBarProgress)
                 //val fixedRateTimer = fixedRateTimer(
                 if (isPlaying) {
-                    isTimerCnacelled=false
+                    isTimerCancelled=false
                     timer.schedule(object : TimerTask() {
                         override fun run() {
-                            if(isTimerCnacelled){
+                            if(isTimerCancelled){
                                 this.cancel()
                             }
                             seekBarProgress+=1
                             Handler(Looper.getMainLooper()).post {
-                                tbxTimeDuration.text=(seekBarProgress/60F).toString()
+                                tbxTimeDuration.text=MathExtensions.toTime(seekBarProgress)
                                 seekBar.progress=seekBarProgress
                             }
 
@@ -135,7 +128,7 @@ class MainActivity : AppCompatActivity() {
                     },0,1000)
                     // Active playback.
                 } else {
-                    isTimerCnacelled=true
+                    isTimerCancelled=true
                     // Not playing because playback is paused, ended, suppressed, or the player
                     // is buffering, stopped or failed. Check player.playWhenReady,
                     // player.playbackState, player.playbackSuppressionReason and

@@ -45,7 +45,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:show_buffering="when_playing"
-            app:show_shuffle_button="true" app:controller_layout_id="@layout/custom_player_controls"/>
+            app:show_shuffle_button="true" app:controller_layout_id="@layout/custom_player_controls"
+            app:show_timeout="0"/>
 
         <!--<androidx.media3.ui.PlayerControlView
             android:id="@+id/playerControlView"
