@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         var thumbnailPlayer=binding.appBarMain.root.findViewById<ImageView>(R.id.mediaPlayerThumbnail)
         var playerSongTextView=binding.appBarMain.root.findViewById<TextView>(R.id.playerSongTextView)
         var tbxTimeDuration=binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeDuration)
-        var seekBar=binding.appBarMain.root.findViewById<SeekBar>(R.id.seekBar)
+        var seekBarI=binding.appBarMain.root.findViewById<SeekBar>(R.id.seekBar)
 
         mediaViewModel.currentMedia.observe(this) {
             it.videoUrl
@@ -77,62 +77,128 @@ class MainActivity : AppCompatActivity() {
         var timer=Timer()
         var seekBarProgress=0
         var isTimerCancelled=false
-        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
+        var isSeeking=false
+        var timerTask: TimerTask?=null
+        seekBarI.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(
                 seekBar: SeekBar?,
                 progress: Int,
                 fromUser: Boolean
             ) {
                 if(fromUser){
-                    player.seekTo(progress.toLong())
+                    try {
+                        timerTask?.cancel()
+                    }catch (e: Exception){
+                        Log.d("DescarregarVideos",e.message.toString())
+                    }
+                    var seekTo=(progress*1000).toLong()
+                    Log.d("DescarregarVideos",seekTo.toString())
+                    seekBarProgress=progress
+                    player.seekTo(seekTo)
+                    tbxTimeDuration.text = MathExtensions.toTime(progress)
+                    playButton.setImageDrawable(ResourcesCompat.getDrawable(this@MainActivity.resources,R.drawable.pause_button_white,null) )
+                    try {
+
+
+                        if (timerTask != null) {
+                            timerTask=object : TimerTask() {
+
+                                override fun run() {
+                                    if (!isSeeking) {
+                                        if(isTimerCancelled){
+                                            this.cancel()
+                                        }
+                                        /*if (isTimerCancelled) {
+                                            this.cancel()
+                                        }*/
+                                        seekBarProgress += 1
+                                        Handler(Looper.getMainLooper()).post {
+                                            tbxTimeDuration.text =
+                                                MathExtensions.toTime(seekBarProgress)
+                                            seekBarI.progress = seekBarProgress
+                                        }
+                                    }
+
+                                }
+                            }
+                            timer.schedule(timerTask, 0, 1000)
+                        }
+                    }catch (e: Exception){
+                        Log.d("DescarregarVideos",e.message.toString())
+                    }
                 }
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
                 //super.onStartTrackingTouch(seekBar)
+                isSeeking=true
                 isTimerCancelled=true
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 //onStopTrackingTouch(seekBar)
+                isSeeking=false
                 isTimerCancelled=false
+                player.prepare()
+                player.play()
 
             }
 
         })
         player.addListener( object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-                var total=player.duration/1000
-                seekBar.min=0
-                seekBar.max= total.toInt()
-                var position=player.currentPosition/1000
-                seekBarProgress=position.toInt()
-                seekBar.progress=seekBarProgress
+                if(!isSeeking) {
 
-                tbxTimeDuration.text=MathExtensions.toTime(seekBarProgress)
-                //val fixedRateTimer = fixedRateTimer(
-                if (isPlaying) {
-                    isTimerCancelled=false
-                    timer.schedule(object : TimerTask() {
-                        override fun run() {
-                            if(isTimerCancelled){
-                                this.cancel()
+                    var total = player.duration / 1000
+                    seekBarI.min = 0
+                    seekBarI.max = total.toInt()
+                    var position = player.currentPosition / 1000
+                    Log.d("DescarregarVideos",(player.currentPosition / 1000).toString())
+                    seekBarProgress = position.toInt()
+                    seekBarI.progress = seekBarProgress
+
+                    tbxTimeDuration.text = MathExtensions.toTime(seekBarProgress)
+                    //val fixedRateTimer = fixedRateTimer(
+                    if (isPlaying) {
+                        isTimerCancelled = false
+                        try {
+                            timerTask=object : TimerTask() {
+
+                                override fun run() {
+                                    if (!isSeeking) {
+                                        /*if (isTimerCancelled) {
+                                            this.cancel()
+                                        }*/
+                                        seekBarProgress += 1
+                                        Handler(Looper.getMainLooper()).post {
+                                            tbxTimeDuration.text =
+                                                MathExtensions.toTime(seekBarProgress)
+                                            seekBarI.progress = seekBarProgress
+                                        }
+                                    }
+
+                                }
                             }
-                            seekBarProgress+=1
-                            Handler(Looper.getMainLooper()).post {
-                                tbxTimeDuration.text=MathExtensions.toTime(seekBarProgress)
-                                seekBar.progress=seekBarProgress
-                            }
+                            timer.schedule(timerTask, 0, 1000)
+                        }catch (e: Exception){
+                            e.message.let {  Log.d("DescarregarVideo", it.toString())}
 
                         }
-                    },0,1000)
-                    // Active playback.
-                } else {
-                    isTimerCancelled=true
-                    // Not playing because playback is paused, ended, suppressed, or the player
-                    // is buffering, stopped or failed. Check player.playWhenReady,
-                    // player.playbackState, player.playbackSuppressionReason and
-                    // player.playerError for details.
+
+                        // Active playback.
+                    } else {
+                        try {
+                            //timer.cancel()
+                            timerTask?.cancel()
+                        }catch (e: Exception){
+                            Log.d("DescarregarVideos",e.message.toString())
+                        }
+                        isTimerCancelled = true
+                        // Not playing because playback is paused, ended, suppressed, or the player
+                        // is buffering, stopped or failed. Check player.playWhenReady,
+                        // player.playbackState, player.playbackSuppressionReason and
+                        // player.playerError for details.
+                    }
                 }
             }
 
