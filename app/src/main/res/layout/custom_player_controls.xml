@@ -11,8 +11,8 @@
         android:id="@+id/mediaPlayerPlayButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="82dp"
-        android:layout_marginTop="7dp"
+        android:layout_marginStart="128dp"
+        android:layout_marginTop="4dp"
         android:background="@android:color/transparent"
         app:layout_constraintStart_toEndOf="@+id/mediaPlayerThumbnail"
         app:layout_constraintTop_toBottomOf="@+id/playerSongTextView"
@@ -45,7 +45,7 @@
 
     <SeekBar
         android:id="@+id/seekBar"
-        android:layout_width="100dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginTop="36dp"
@@ -56,18 +56,64 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/mediaPlayerPlayButton"
-        app:layout_constraintWidth="290dp" />
+        app:layout_constraintWidth="match_constraint" />
 
     <TextView
         android:id="@+id/tbxTimeDuration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="60dp"
-        android:layout_marginBottom="16dp"
-        android:text="TextView"
-        app:layout_constraintBottom_toTopOf="@+id/seekBar"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:textColor="@color/white"/>
 
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="12dp"
+        android:text="1:22"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/seekBar"
+        app:layout_constraintEnd_toStartOf="@+id/tbxSeparator" />
+
+    <ImageButton
+        android:id="@+id/skipBackward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toEndOf="@+id/mediaPlayerThumbnail"
+        app:layout_constraintTop_toBottomOf="@+id/playerSongTextView"
+        app:srcCompat="@drawable/skip_backward"
+
+        android:background="@android:color/transparent"/>
+
+    <ImageButton
+        android:id="@+id/skipBForward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="60dp"
+        android:background="@android:color/transparent"
+
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/playerSongTextView"
+        app:srcCompat="@drawable/skip_forward" />
+
+    <TextView
+        android:id="@+id/tbxSeparator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="7dp"
+        android:layout_marginBottom="12dp"
+        android:text="/"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/seekBar"
+        app:layout_constraintEnd_toStartOf="@+id/tbxTimeTotal" />
+
+    <TextView
+        android:id="@+id/tbxTimeTotal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="12dp"
+        android:text="3:66"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/seekBar"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

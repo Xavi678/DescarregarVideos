@@ -55,6 +55,7 @@ class MainActivity : AppCompatActivity() {
         var playerSongTextView=binding.appBarMain.root.findViewById<TextView>(R.id.playerSongTextView)
         var tbxTimeDuration=binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeDuration)
         var seekBarI=binding.appBarMain.root.findViewById<SeekBar>(R.id.seekBar)
+        var tbxTimeTotal=binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeTotal)
 
         mediaViewModel.currentMedia.observe(this) {
             it.videoUrl
@@ -147,6 +148,7 @@ class MainActivity : AppCompatActivity() {
         })
         player.addListener( object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
+                tbxTimeTotal.text= MathExtensions.toTime ((player.duration/1000).toInt())
                 if(!isSeeking) {
 
                     var total = player.duration / 1000
