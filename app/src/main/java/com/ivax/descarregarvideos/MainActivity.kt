@@ -29,6 +29,8 @@ import com.ivax.descarregarvideos.databinding.ActivityMainBinding
 import com.ivax.descarregarvideos.general.viewmodels.MediaViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.FileInputStream
+import android.view.animation.AnimationUtils
+
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -76,6 +78,7 @@ class MainActivity : AppCompatActivity() {
         var playerSongTextView=binding.appBarMain.root.findViewById<TextView>(R.id.playerSongTextView)
         tbxTimeDuration=binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeDuration)
         seekBarI=binding.appBarMain.root.findViewById<SeekBar>(R.id.seekBar)
+        val animMove=AnimationUtils.loadAnimation(this,R.anim.move)
         var tbxTimeTotal=binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeTotal)
 
         mediaViewModel.currentMedia.observe(this) {
@@ -88,6 +91,7 @@ class MainActivity : AppCompatActivity() {
             fileInStream.close()
             thumbnailPlayer.setImageBitmap(bmp)
             playerSongTextView.text=it.title
+            playerSongTextView.startAnimation(animMove)
             //thumbnailPlayer.setImageBitmap(it)
         }
 
