@@ -23,19 +23,40 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import com.ivax.descarregarvideos.classes.CustomTimer
 import com.ivax.descarregarvideos.classes.MathExtensions
 import com.ivax.descarregarvideos.databinding.ActivityMainBinding
 import com.ivax.descarregarvideos.general.viewmodels.MediaViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.FileInputStream
-import java.util.Timer
-import java.util.TimerTask
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    private lateinit var tbxTimeDuration: TextView
+    private lateinit var seekBarI: SeekBar
+    //private var timer=Timer()
+    private var seekBarProgress=0
+    private var isTimerCancelled=false
+    private var isSeeking=false
+
+    val callbackTimer=fun (){
+        if (!isSeeking) {
+            /*if (isTimerCancelled) {
+                this.cancel()
+            }*/
+            seekBarProgress += 1
+            Handler(Looper.getMainLooper()).post {
+                tbxTimeDuration.text =
+                    MathExtensions.toTime(seekBarProgress)
+                seekBarI.progress = seekBarProgress
+            }
+        }
+    }
+    private var timer=CustomTimer(callbackTimer)
+
     private val mediaViewModel : MediaViewModel by lazy {
         ViewModelProvider(this).get(MediaViewModel::class.java)
     }
@@ -53,8 +74,8 @@ class MainActivity : AppCompatActivity() {
         var playButton=binding.appBarMain.root.findViewById<ImageButton>(R.id.mediaPlayerPlayButton)
         var thumbnailPlayer=binding.appBarMain.root.findViewById<ImageView>(R.id.mediaPlayerThumbnail)
         var playerSongTextView=binding.appBarMain.root.findViewById<TextView>(R.id.playerSongTextView)
-        var tbxTimeDuration=binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeDuration)
-        var seekBarI=binding.appBarMain.root.findViewById<SeekBar>(R.id.seekBar)
+        tbxTimeDuration=binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeDuration)
+        seekBarI=binding.appBarMain.root.findViewById<SeekBar>(R.id.seekBar)
         var tbxTimeTotal=binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeTotal)
 
         mediaViewModel.currentMedia.observe(this) {
@@ -69,17 +90,8 @@ class MainActivity : AppCompatActivity() {
             playerSongTextView.text=it.title
             //thumbnailPlayer.setImageBitmap(it)
         }
-        var videoWatchedTime = 0L
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            videoWatchedTime+=player.currentPosition/1000
-        }, 3000)
 
-        var timer=Timer()
-        var seekBarProgress=0
-        var isTimerCancelled=false
-        var isSeeking=false
-        var timerTask: TimerTask?=null
         seekBarI.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(
                 seekBar: SeekBar?,
@@ -88,7 +100,7 @@ class MainActivity : AppCompatActivity() {
             ) {
                 if(fromUser){
                     try {
-                        timerTask?.cancel()
+                        timer.cancel()
                     }catch (e: Exception){
                         Log.d("DescarregarVideos",e.message.toString())
                     }
@@ -101,29 +113,9 @@ class MainActivity : AppCompatActivity() {
                     try {
 
 
-                        if (timerTask != null) {
-                            timerTask=object : TimerTask() {
 
-                                override fun run() {
-                                    if (!isSeeking) {
-                                        if(isTimerCancelled){
-                                            this.cancel()
-                                        }
-                                        /*if (isTimerCancelled) {
-                                            this.cancel()
-                                        }*/
-                                        seekBarProgress += 1
-                                        Handler(Looper.getMainLooper()).post {
-                                            tbxTimeDuration.text =
-                                                MathExtensions.toTime(seekBarProgress)
-                                            seekBarI.progress = seekBarProgress
-                                        }
-                                    }
+                            timer.schedule()
 
-                                }
-                            }
-                            timer.schedule(timerTask, 0, 1000)
-                        }
                     }catch (e: Exception){
                         Log.d("DescarregarVideos",e.message.toString())
                     }
@@ -131,13 +123,11 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                //super.onStartTrackingTouch(seekBar)
                 isSeeking=true
                 isTimerCancelled=true
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                //onStopTrackingTouch(seekBar)
                 isSeeking=false
                 isTimerCancelled=false
                 player.prepare()
@@ -164,24 +154,8 @@ class MainActivity : AppCompatActivity() {
                     if (isPlaying) {
                         isTimerCancelled = false
                         try {
-                            timerTask=object : TimerTask() {
-
-                                override fun run() {
-                                    if (!isSeeking) {
-                                        /*if (isTimerCancelled) {
-                                            this.cancel()
-                                        }*/
-                                        seekBarProgress += 1
-                                        Handler(Looper.getMainLooper()).post {
-                                            tbxTimeDuration.text =
-                                                MathExtensions.toTime(seekBarProgress)
-                                            seekBarI.progress = seekBarProgress
-                                        }
-                                    }
-
-                                }
-                            }
-                            timer.schedule(timerTask, 0, 1000)
+                            //timerTask= TimerTask()
+                            timer.schedule()
                         }catch (e: Exception){
                             e.message.let {  Log.d("DescarregarVideo", it.toString())}
 
@@ -191,7 +165,7 @@ class MainActivity : AppCompatActivity() {
                     } else {
                         try {
                             //timer.cancel()
-                            timerTask?.cancel()
+                            timer.cancel()
                         }catch (e: Exception){
                             Log.d("DescarregarVideos",e.message.toString())
                         }
