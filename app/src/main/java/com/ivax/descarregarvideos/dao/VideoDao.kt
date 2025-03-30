@@ -23,6 +23,8 @@ interface VideoDao {
 
     @Insert
     fun insertAll(vararg savedVideo: SavedVideo)
+    @Query("UPDATE savedvideo SET playListId=:playListId WHERE videoId=:videoId")
+    fun addVideoToPlaylist(playListId: Int,videoId: String)
 
     /*@Delete
     fun delete(user: User)*/
