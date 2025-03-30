@@ -1,21 +1,17 @@
 package com.ivax.descarregarvideos.ui.saved.videos
 
-import android.graphics.Bitmap
 import androidx.fragment.app.Fragment
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.ImageView
 import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.MediaItem
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.adapter.SavedVideosAdapter
 import com.ivax.descarregarvideos.databinding.FragmentSavedVideosBinding
+import com.ivax.descarregarvideos.dialog_fragments.SavedVideosMenuFragment
 import com.ivax.descarregarvideos.entities.SavedVideo
-import com.ivax.descarregarvideos.general.viewmodels.MediaViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -40,6 +36,12 @@ class SavedVideosFragment : Fragment() {
             savedVideosViewModel.setSavedVideo(savedVideo)
             //savedVideosViewModel.setThumbnail(bitMap)
             savedVideosViewModel.play()
+        }, openMenu = fun(videoId: String){
+            var savedVideosMenuFragment=SavedVideosMenuFragment()
+            val bundle = Bundle()
+            bundle.putString("id", videoId)
+            savedVideosMenuFragment.arguments=bundle
+            savedVideosMenuFragment.show(requireActivity().supportFragmentManager,"SavedVideosMenu")
         })
         savedVideosViewModel.allSavedVideos.observe(viewLifecycleOwner) {
             savedVideoAdapter.addItems(it)

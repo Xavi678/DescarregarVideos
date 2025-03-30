@@ -1,6 +1,5 @@
 package com.ivax.descarregarvideos.adapter
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
@@ -98,7 +97,7 @@ class VideoAdapter(private val itemClickListener: (saveVideo: SavedVideo,finishe
         val thumbnail: ImageView = itemView.findViewById<ImageView>(R.id.imgVideoThumbnail)
         val duration: TextView = itemView.findViewById<TextView>(R.id.videoDuration)
         val viewCount: TextView = itemView.findViewById<TextView>(R.id.tbxViewCount)
-        val downloadButton: ImageButton = itemView.findViewById<ImageButton>(R.id.downloadButton)
+        val downloadButton: ImageButton = itemView.findViewById<ImageButton>(R.id.savedVideoButtonMenuOptions)
 
     }
 }
