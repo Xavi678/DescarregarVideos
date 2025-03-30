@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
             fileInStream.close()
             thumbnailPlayer.setImageBitmap(bmp)
             playerSongTextView.text=it.title
-            playerSongTextView.startAnimation(animMove)
+            //playerSongTextView.startAnimation(animMove)
             //thumbnailPlayer.setImageBitmap(it)
         }
 

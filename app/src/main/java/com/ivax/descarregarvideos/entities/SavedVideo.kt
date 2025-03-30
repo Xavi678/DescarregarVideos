@@ -6,5 +6,5 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class SavedVideo(@PrimaryKey val videoId: String, val title: String, val imgUrl: String?,
-                      val duration: String, val viewCount: String, var videoUrl: String?=null) {
+                      val duration: String, val viewCount: String, var videoUrl: String?=null,var playListId: Int?=null) {
 }
