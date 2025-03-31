@@ -65,7 +65,7 @@ class SavedVideosAdapter(private val playMedia: (MediaItem, SavedVideo) -> Unit,
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val imgThumbnail: ImageView = itemView.findViewById<ImageView>(R.id.imgSavedVideoThumbnail)
+        val imgThumbnail: ImageView = itemView.findViewById<ImageView>(R.id.imageViewPlaylist)
         val tbxTitle: TextView =itemView.findViewById<TextView>(R.id.tbxSavedVideoDesc)
         val buttonPlay: ImageButton = itemView.findViewById<ImageButton>(R.id.playButton)
         val buttonOptions: ImageButton=itemView.findViewById<ImageButton>(R.id.savedVideoButtonMenuOptions)

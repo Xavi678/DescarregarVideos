@@ -31,7 +31,7 @@
         >
 
         <ImageView
-            android:id="@+id/imgSavedVideoThumbnail"
+            android:id="@+id/imageViewPlaylist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
@@ -51,8 +51,8 @@
             android:text="3:50"
             android:textAlignment="center"
             android:textColor="@color/white"
-            app:layout_constraintBottom_toBottomOf="@+id/imgSavedVideoThumbnail"
-            app:layout_constraintLeft_toLeftOf="@+id/imgSavedVideoThumbnail"
+            app:layout_constraintBottom_toBottomOf="@+id/imageViewPlaylist"
+            app:layout_constraintLeft_toLeftOf="@+id/imageViewPlaylist"
 
             />
         <ImageButton
@@ -61,10 +61,10 @@
             android:layout_height="22dp"
             app:srcCompat="@drawable/play_button_rect"
             android:background="@android:color/secondary_text_light"
-            app:layout_constraintBottom_toBottomOf="@+id/imgSavedVideoThumbnail"
-            app:layout_constraintTop_toTopOf="@+id/imgSavedVideoThumbnail"
-            app:layout_constraintStart_toStartOf="@+id/imgSavedVideoThumbnail"
-            app:layout_constraintEnd_toEndOf="@+id/imgSavedVideoThumbnail"/>
+            app:layout_constraintBottom_toBottomOf="@+id/imageViewPlaylist"
+            app:layout_constraintTop_toTopOf="@+id/imageViewPlaylist"
+            app:layout_constraintStart_toStartOf="@+id/imageViewPlaylist"
+            app:layout_constraintEnd_toEndOf="@+id/imageViewPlaylist"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
