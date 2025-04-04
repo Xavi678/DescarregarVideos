@@ -4,32 +4,74 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/playlistMenu"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="130dp"
     android:background="@color/cardview_dark_background"
     android:orientation="vertical"
-    tools:context=".dialog_fragments.SavedVideosMenuFragment">
+    tools:context=".dialog_fragments.saved.videos.SavedVideosMenuFragment">
 
-    <TextView
-        android:id="@+id/tbxAddToPlaylist"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="5dp"
-        android:text="Add to Playlist"
-        android:textColor="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnAddToPlaylist"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <ImageButton
-        android:id="@+id/btnAddToPlaylist"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="3dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutAddToPlaylist"
+        android:layout_width="0dp"
+        android:layout_height="45dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/add_video" android:background="@android:color/transparent" />
+        app:layout_constraintTop_toTopOf="parent" android:clickable="true">
+
+        <ImageButton
+            android:id="@+id/btnAddToPlaylist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@android:color/transparent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/add_video" />
+
+        <TextView
+            android:id="@+id/tbxAddToPlaylist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="28dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="5dp"
+            android:text="Add to Playlist"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/btnAddToPlaylist"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutDeleteAudio"
+        android:layout_width="0dp"
+        android:layout_height="45dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layoutAddToPlaylist"
+        android:clickable="true">
+
+        <ImageButton
+            android:id="@+id/btnRemoveVideo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@android:color/transparent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/remove" />
+
+        <TextView
+            android:id="@+id/tbxRemoveVideo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="28dp"
+            android:layout_marginTop="16dp"
+            android:text="Delete Audio"
+            android:textColor="@color/white"
+            app:layout_constraintStart_toEndOf="@+id/btnRemoveVideo"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

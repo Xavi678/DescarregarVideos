@@ -1,6 +1,7 @@
 package com.ivax.descarregarvideos.repository
 
 import com.ivax.descarregarvideos.dao.VideoDao
+import com.ivax.descarregarvideos.entities.Playlist
 import com.ivax.descarregarvideos.entities.SavedVideo
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -18,5 +19,8 @@ class VideoRepository @Inject constructor(private val videoDao: VideoDao) {
 
     fun addVideoToPlaylist(playListId: Int,videoId: String) {
         videoDao.addVideoToPlaylist(playListId,videoId)
+    }
+    fun getAllPlaylists(): Flow<List<Playlist>>{
+        return videoDao.getAllPlaylists()
     }
 }

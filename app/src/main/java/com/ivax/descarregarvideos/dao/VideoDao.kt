@@ -3,6 +3,7 @@ package com.ivax.descarregarvideos.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import com.ivax.descarregarvideos.entities.Playlist
 import com.ivax.descarregarvideos.entities.SavedVideo
 import kotlinx.coroutines.flow.Flow
 
@@ -20,6 +21,9 @@ interface VideoDao {
 
     @Query("SELECT * FROM savedvideo")
     fun getAll(): Flow<List<SavedVideo>>
+
+    @Query("SELECT * FROM playlist")
+    fun getAllPlaylists(): Flow<List<Playlist>>
 
     @Insert
     fun insertAll(vararg savedVideo: SavedVideo)

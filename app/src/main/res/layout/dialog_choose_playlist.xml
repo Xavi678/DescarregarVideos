@@ -1,10 +1,58 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@color/cardview_dark_background">
+
+
+
     <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="100dp"
-        android:layout_height="wrap_content">
+        android:id="@+id/choosePlaylistRecyclerView"
+        android:layout_width="214dp"
+        android:layout_height="82dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
     </androidx.recyclerview.widget.RecyclerView>
-</LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutCreatePlaylist"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/choosePlaylistRecyclerView">
+
+        <ImageButton
+            android:id="@+id/imageButtonCreatePlaylist"
+            android:layout_width="41dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="5dp"
+            android:background="@android:color/transparent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/add_dotted" />
+
+        <TextView
+            android:id="@+id/tbxCreatePlaylist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:text="Create new Playlist"
+            android:textColor="@color/white"
+            app:layout_constraintStart_toEndOf="@+id/imageButtonCreatePlaylist"
+            app:layout_constraintTop_toTopOf="parent">
+
+
+        </TextView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

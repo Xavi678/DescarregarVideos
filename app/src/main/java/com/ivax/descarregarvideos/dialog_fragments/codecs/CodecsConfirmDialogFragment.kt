@@ -1,4 +1,4 @@
-package com.ivax.descarregarvideos.dialog_fragments
+package com.ivax.descarregarvideos.dialog_fragments.codecs
 
 import android.app.AlertDialog
 import android.app.Dialog

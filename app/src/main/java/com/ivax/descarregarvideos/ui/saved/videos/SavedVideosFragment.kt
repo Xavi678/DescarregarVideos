@@ -10,7 +10,7 @@ import androidx.media3.common.MediaItem
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ivax.descarregarvideos.adapter.SavedVideosAdapter
 import com.ivax.descarregarvideos.databinding.FragmentSavedVideosBinding
-import com.ivax.descarregarvideos.dialog_fragments.SavedVideosMenuFragment
+import com.ivax.descarregarvideos.dialog_fragments.saved.videos.SavedVideosMenuFragment
 import com.ivax.descarregarvideos.entities.SavedVideo
 import dagger.hilt.android.AndroidEntryPoint
 
