@@ -5,20 +5,25 @@ import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.ivax.descarregarvideos.dao.PlayListDao
 import com.ivax.descarregarvideos.dao.VideoDao
+import com.ivax.descarregarvideos.entities.Playlist
 import com.ivax.descarregarvideos.entities.SavedVideo
+import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
 
 /*
 * , autoMigrations = [
     AutoMigration(from = 2,to = 3)
 ]
 * */
-@Database(entities = [SavedVideo::class],exportSchema = true, version = 4,autoMigrations = [
+@Database(entities = [SavedVideo::class, Playlist::class],exportSchema = true, version = 5,autoMigrations = [
     AutoMigration(from = 2,to = 3),
-    AutoMigration(from = 3,to = 4)
+    AutoMigration(from = 3,to = 4),
+    AutoMigration(from = 4,to = 5)
 ])
 abstract class AppDatabase : RoomDatabase() {
     abstract fun videoDao(): VideoDao
+    abstract fun playlistDao(): PlayListDao
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null

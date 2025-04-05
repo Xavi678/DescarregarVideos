@@ -32,7 +32,10 @@ object ExportModule {
     ).build()
     @Singleton
     @Provides
-    fun provideUserDao(db: AppDatabase) = db.videoDao()
+    fun provideVideoDao(db: AppDatabase) = db.videoDao()
+    @Singleton
+    @Provides
+    fun providePlaylistDao(db: AppDatabase) = db.playlistDao()
     @Singleton
     @Provides
     fun provideMediaHelper(@ApplicationContext context: Context) : IMediaHelper{

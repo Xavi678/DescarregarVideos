@@ -1,5 +1,6 @@
 package com.ivax.descarregarvideos.repository
 
+import com.ivax.descarregarvideos.dao.PlayListDao
 import com.ivax.descarregarvideos.dao.VideoDao
 import com.ivax.descarregarvideos.entities.Playlist
 import com.ivax.descarregarvideos.entities.SavedVideo
@@ -8,7 +9,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 
-class VideoRepository @Inject constructor(private val videoDao: VideoDao) {
+class VideoRepository @Inject constructor(private val videoDao: VideoDao,private val playListDao: PlayListDao) {
     fun insetVideo(video: SavedVideo) {
         videoDao.insertAll(video)
     }
@@ -21,6 +22,6 @@ class VideoRepository @Inject constructor(private val videoDao: VideoDao) {
         videoDao.addVideoToPlaylist(playListId,videoId)
     }
     fun getAllPlaylists(): Flow<List<Playlist>>{
-        return videoDao.getAllPlaylists()
+        return playListDao.getAllPlaylists()
     }
 }

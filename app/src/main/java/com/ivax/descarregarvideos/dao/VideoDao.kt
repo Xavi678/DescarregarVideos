@@ -22,9 +22,6 @@ interface VideoDao {
     @Query("SELECT * FROM savedvideo")
     fun getAll(): Flow<List<SavedVideo>>
 
-    @Query("SELECT * FROM playlist")
-    fun getAllPlaylists(): Flow<List<Playlist>>
-
     @Insert
     fun insertAll(vararg savedVideo: SavedVideo)
     @Query("UPDATE savedvideo SET playListId=:playListId WHERE videoId=:videoId")

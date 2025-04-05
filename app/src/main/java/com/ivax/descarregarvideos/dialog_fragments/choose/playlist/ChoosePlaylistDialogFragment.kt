@@ -13,7 +13,9 @@ import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.adapter.PlaylistListAdapter
 import com.ivax.descarregarvideos.databinding.DialogChoosePlaylistBinding
 import com.ivax.descarregarvideos.ui.saved.videos.SavedVideosFragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class ChoosePlaylistDialogFragment : DialogFragment() {
 
     private var _binding: DialogChoosePlaylistBinding? = null
@@ -35,13 +37,16 @@ class ChoosePlaylistDialogFragment : DialogFragment() {
             playlistListAdapter.addItems(it)
 
         }
+        binding.layoutCreatePlaylist.setOnClickListener { view ->
+
+        }
         return root
     }
 
     fun setupUi(){
-        binding.choosePlaylistRecylcerView.layoutManager =
+        binding.choosePlaylistRecyclerView.layoutManager =
             LinearLayoutManager(this@ChoosePlaylistDialogFragment.context)
-        binding.choosePlaylistRecylcerView.adapter=playlistListAdapter
+        binding.choosePlaylistRecyclerView.adapter=playlistListAdapter
     }
     /*override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
