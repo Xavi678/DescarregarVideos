@@ -5,6 +5,7 @@ import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.ivax.descarregarvideos.dao.VideoDao
+import com.ivax.descarregarvideos.entities.PlaylistSavedVideoCrossRef
 import com.ivax.descarregarvideos.helpers.CustomFileWriter
 import com.ivax.descarregarvideos.helpers.FileWriter
 import com.ivax.descarregarvideos.helpers.IMediaHelper
@@ -38,6 +39,9 @@ object ExportModule {
     @Singleton
     @Provides
     fun providePlaylistDao(db: AppDatabase) = db.playlistDao()
+    @Singleton
+    @Provides
+    fun providePlaylistSavedVideoCrossRefDao(db: AppDatabase) = db.playlistSavedVideoCrossRefDao()
     @Singleton
     @Provides
     fun provideMediaHelper(@ApplicationContext context: Context) : IMediaHelper{

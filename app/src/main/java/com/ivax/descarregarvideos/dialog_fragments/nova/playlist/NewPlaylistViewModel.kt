@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivax.descarregarvideos.entities.Playlist
+import com.ivax.descarregarvideos.entities.PlaylistSavedVideoCrossRef
 import com.ivax.descarregarvideos.repository.VideoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -25,5 +26,16 @@ class NewPlaylistViewModel @Inject constructor(private val videoRepository: Vide
 
         }
     }
+
+    fun insertPlaylistSavedVideo(playlistSavedVideoCrossRef: PlaylistSavedVideoCrossRef){
+        viewModelScope.launch(Dispatchers.IO) {
+            videoRepository.addPlaylistSavedVideo(playlistSavedVideoCrossRef)
+        }
+    }
+
+    fun exists(playlistSavedVideoCrossRef: PlaylistSavedVideoCrossRef) : Boolean{
+       return videoRepository.playlistSavedVideoCrossRefExists(playlistSavedVideoCrossRef)
+    }
+
     val insertedId: LiveData<Int?> = _insertedId
 }

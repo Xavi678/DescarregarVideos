@@ -13,6 +13,7 @@ import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.adapter.PlaylistListAdapter
 import com.ivax.descarregarvideos.databinding.DialogChoosePlaylistBinding
 import com.ivax.descarregarvideos.dialog_fragments.nova.playlist.NewPlaylistDialogFragment
+import com.ivax.descarregarvideos.entities.PlaylistSavedVideoCrossRef
 import com.ivax.descarregarvideos.ui.saved.videos.SavedVideosFragment
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -45,6 +46,20 @@ class ChoosePlaylistDialogFragment : DialogFragment() {
             newPlaylistDialogFragment.arguments=bundle
             newPlaylistDialogFragment.show(requireActivity().supportFragmentManager,"DescarregarVideos")
         }
+        binding.btnChoosePlaylistCancel.setOnClickListener {
+            close()
+        }
+        binding.btnChoosePlaylistOk.setOnClickListener {
+            val checkedItems=playlistListAdapter.getCheckedItems()
+            if(checkedItems.isNotEmpty()){
+
+                for (checkedItem in checkedItems){
+                    var playlistSavedVideoCrossRef=PlaylistSavedVideoCrossRef(videoId = videoId, playListId = checkedItem.playListId)
+                    choosePlaylistViewModel.insertSavedVideoToPlaylist(playlistSavedVideoCrossRef)
+                }
+            }
+            close()
+        }
         return root
     }
 
@@ -67,4 +82,12 @@ class ChoosePlaylistDialogFragment : DialogFragment() {
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
     }*/
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+}
+
+private fun ChoosePlaylistDialogFragment.close() {
+    dialog?.dismiss()
 }

@@ -3,6 +3,7 @@ package com.ivax.descarregarvideos.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -23,27 +24,38 @@ class PlaylistListAdapter : RecyclerView.Adapter<PlaylistListAdapter.ViewHolder>
             LayoutInflater.from(parent.context).inflate(R.layout.playlist_item, parent, false)
         return ViewHolder(itemView)
     }
-    fun addItems(items: List<Playlist>){
+
+    fun addItems(items: List<Playlist>) {
         val diffResult = DiffUtil.calculateDiff(MainDiffCallBack(this.items, items))
         this.items.clear()
         this.items.addAll(items)
         diffResult.dispatchUpdatesTo(this)
     }
+
+    fun getCheckedItems() : List<Playlist>{
+        return items.filter { it.checked }
+    }
+
     override fun onBindViewHolder(
         holder: ViewHolder,
         position: Int
     ) {
-       val item= items[position]
+        val item = items[position]
 
-        holder.tbxPlaylistTitle.text=item.name
+        holder.tbxPlaylistTitle.text = item.name
+        holder.cbxPlaylist.setOnClickListener { view ->
+            var cbx = view as CheckBox
+            item.checked = cbx.isChecked
+        }
     }
 
     override fun getItemCount(): Int {
-       return items.size
+        return items.size
     }
 
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-       val tbxPlaylistTitle= itemView.findViewById<TextView>(R.id.tbxPlaylist)
+        val tbxPlaylistTitle = itemView.findViewById<TextView>(R.id.tbxPlaylist)
+        val cbxPlaylist = itemView.findViewById<CheckBox>(R.id.checkboxPlaylist)
     }
 }

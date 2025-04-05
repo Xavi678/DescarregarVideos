@@ -1,15 +1,19 @@
 package com.ivax.descarregarvideos.repository
 
 import com.ivax.descarregarvideos.dao.PlayListDao
+import com.ivax.descarregarvideos.dao.PlaylistSavedVideoCrossRefDao
 import com.ivax.descarregarvideos.dao.VideoDao
 import com.ivax.descarregarvideos.entities.Playlist
+import com.ivax.descarregarvideos.entities.PlaylistSavedVideoCrossRef
 import com.ivax.descarregarvideos.entities.SavedVideo
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
 
-class VideoRepository @Inject constructor(private val videoDao: VideoDao,private val playListDao: PlayListDao) {
+class VideoRepository @Inject constructor(private val videoDao: VideoDao,
+                                          private val playListDao: PlayListDao,
+                                          private val playlistSavedVideoCrossRefDao: PlaylistSavedVideoCrossRefDao) {
     fun insetVideo(video: SavedVideo) {
         videoDao.insertAll(video)
     }
@@ -30,5 +34,15 @@ class VideoRepository @Inject constructor(private val videoDao: VideoDao,private
     }
     fun firstPlaylist(id: Int): Playlist?{
        return playListDao.first(id)
+    }
+    fun addPlaylistSavedVideo(playlistSavedVideoCrossRef: PlaylistSavedVideoCrossRef){
+        if(!playlistSavedVideoCrossRefExists(playlistSavedVideoCrossRef)) {
+            playlistSavedVideoCrossRefDao.insert(playlistSavedVideoCrossRef)
+        }
+    }
+
+    fun playlistSavedVideoCrossRefExists(playlistSavedVideoCrossRef: PlaylistSavedVideoCrossRef): Boolean {
+
+        return playlistSavedVideoCrossRefDao.first(playlistSavedVideoCrossRef.playListId,playlistSavedVideoCrossRef.videoId)!=null
     }
 }

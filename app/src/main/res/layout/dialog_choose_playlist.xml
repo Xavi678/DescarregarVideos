@@ -9,9 +9,10 @@
 
 
 
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/choosePlaylistRecyclerView"
-        android:layout_width="214dp"
+        android:layout_width="230dp"
         android:layout_height="82dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -35,7 +36,8 @@
             android:background="@android:color/transparent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/add_dotted" />
+            app:srcCompat="@drawable/add_dotted"
+            android:duplicateParentState="true"/>
 
         <TextView
             android:id="@+id/tbxCreatePlaylist"
@@ -46,14 +48,29 @@
             android:text="Crear Nova Playlist"
             android:textColor="@color/white"
             app:layout_constraintStart_toEndOf="@+id/imageButtonCreatePlaylist"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            android:duplicateParentState="true">
 
 
         </TextView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
+    <Button
+        android:id="@+id/btnChoosePlaylistCancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cancel·lar"
+        app:layout_constraintTop_toBottomOf="@+id/layoutCreatePlaylist"
+        app:layout_constraintStart_toStartOf="parent"
+        android:backgroundTint="@color/cardview_dark_background"/>
+    <Button
+        android:id="@+id/btnChoosePlaylistOk"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Guardar"
+        app:layout_constraintTop_toBottomOf="@+id/layoutCreatePlaylist"
+        app:layout_constraintStart_toEndOf="@+id/btnChoosePlaylistCancel"
+        android:backgroundTint="@color/cardview_dark_background"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

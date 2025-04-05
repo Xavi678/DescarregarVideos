@@ -52,4 +52,8 @@ class SavedVideosMenuFragment : BottomSheetDialogFragment() {
             "DescarregarVideos"
         )
     }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }
