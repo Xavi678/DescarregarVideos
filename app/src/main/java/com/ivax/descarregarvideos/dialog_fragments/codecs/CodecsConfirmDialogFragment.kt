@@ -23,9 +23,4 @@ class CodecsConfirmDialogFragment(val formats: List<AdaptiveFormats>?, private v
                 // Do something.
             }
             .create()
-
-    companion object {
-        const val TAG = "PurchaseConfirmationDialog"
-    }
-
 }

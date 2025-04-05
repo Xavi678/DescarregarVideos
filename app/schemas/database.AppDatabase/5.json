@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 5,
-    "identityHash": "2f7c83b5707951dcd063e3e924f1a495",
+    "identityHash": "b4e2f24bd2e2b1aafc1abb98a01551ee",
     "entities": [
       {
         "tableName": "SavedVideo",
@@ -62,11 +62,11 @@
       },
       {
         "tableName": "Playlist",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uid` INTEGER NOT NULL, `name` TEXT, PRIMARY KEY(`uid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`playListId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT)",
         "fields": [
           {
-            "fieldPath": "uid",
-            "columnName": "uid",
+            "fieldPath": "playListId",
+            "columnName": "playListId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -78,9 +78,9 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
-            "uid"
+            "playListId"
           ]
         },
         "indices": [],
@@ -90,7 +90,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2f7c83b5707951dcd063e3e924f1a495')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b4e2f24bd2e2b1aafc1abb98a01551ee')"
     ]
   }
 }

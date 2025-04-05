@@ -24,4 +24,11 @@ class VideoRepository @Inject constructor(private val videoDao: VideoDao,private
     fun getAllPlaylists(): Flow<List<Playlist>>{
         return playListDao.getAllPlaylists()
     }
+
+    fun addPlaylist(playlist: Playlist):Int {
+      return  playListDao.insert(playlist).toInt()
+    }
+    fun firstPlaylist(id: Int): Playlist?{
+       return playListDao.first(id)
+    }
 }

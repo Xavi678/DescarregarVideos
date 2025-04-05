@@ -7,13 +7,12 @@ import com.ivax.descarregarvideos.entities.Playlist
 import com.ivax.descarregarvideos.entities.PlaylistSavedVideoCrossRef
 import com.ivax.descarregarvideos.entities.SavedVideo
 
-data class PlaylistWithSavedVideos(
-    @Embedded val playlist: Playlist,
+data class SavedVideoWithPlaylists(
+    @Embedded val savedVideo: SavedVideo,
     @Relation(
-        parentColumn = "playlistId",
-        entityColumn = "videoId",
+        parentColumn = "videoId",
+        entityColumn = "playlistId",
         associateBy = Junction(PlaylistSavedVideoCrossRef::class)
     )
-    val songs: List<SavedVideo>
+    val playlists: List<Playlist>
 )
-

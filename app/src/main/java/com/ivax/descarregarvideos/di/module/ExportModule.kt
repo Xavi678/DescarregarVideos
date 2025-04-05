@@ -2,6 +2,8 @@ package com.ivax.descarregarvideos.di.module
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.ivax.descarregarvideos.dao.VideoDao
 import com.ivax.descarregarvideos.helpers.CustomFileWriter
 import com.ivax.descarregarvideos.helpers.FileWriter
@@ -29,7 +31,7 @@ object ExportModule {
         @ApplicationContext app: Context
     ) = Room.databaseBuilder(
         app, AppDatabase::class.java, "DescarregarVideosDB"
-    ).build()
+    ).addMigrations(MIGRATION_5_6).build()
     @Singleton
     @Provides
     fun provideVideoDao(db: AppDatabase) = db.videoDao()
@@ -40,5 +42,13 @@ object ExportModule {
     @Provides
     fun provideMediaHelper(@ApplicationContext context: Context) : IMediaHelper{
         return MediaHelper(context)
+    }
+    val MIGRATION_5_6 = object: Migration (5, 6) {
+        override fun migrate (database: SupportSQLiteDatabase) {
+            database.execSQL("DROP TABLE playlist")
+            database.execSQL("CREATE TABLE playlist(" +
+                    "playListId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
+                    "name TEXT)")
+        }
     }
 }

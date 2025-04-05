@@ -1,6 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".dialog_fragments.new.playlist.NewPlaylistDialogFragment"/>
+    android:background="@color/cardview_dark_background"
+    tools:context=".dialog_fragments.nova.playlist.NewPlaylistDialogFragment">
+
+    <EditText
+        android:id="@+id/tbxPlayListName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnNewPlaylistOk"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/cardview_dark_background"
+        android:text="Create"
+        app:layout_constraintStart_toEndOf="@+id/btnNewPlaylistCancel"
+        app:layout_constraintTop_toBottomOf="@id/tbxPlayListName">
+
+    </Button>
+
+    <Button
+        android:id="@+id/btnNewPlaylistCancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/cardview_dark_background"
+        android:text="Cancel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tbxPlayListName">
+
+    </Button>
+</androidx.constraintlayout.widget.ConstraintLayout>

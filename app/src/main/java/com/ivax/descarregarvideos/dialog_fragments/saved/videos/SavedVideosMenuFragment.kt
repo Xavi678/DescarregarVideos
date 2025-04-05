@@ -9,7 +9,9 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.databinding.FragmentSavedVideoMenuBinding
 import com.ivax.descarregarvideos.dialog_fragments.choose.playlist.ChoosePlaylistDialogFragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SavedVideosMenuFragment : BottomSheetDialogFragment() {
     private var _binding: FragmentSavedVideoMenuBinding? = null
 

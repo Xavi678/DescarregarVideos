@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.adapter.PlaylistListAdapter
 import com.ivax.descarregarvideos.databinding.DialogChoosePlaylistBinding
+import com.ivax.descarregarvideos.dialog_fragments.nova.playlist.NewPlaylistDialogFragment
 import com.ivax.descarregarvideos.ui.saved.videos.SavedVideosFragment
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -30,7 +31,7 @@ class ChoosePlaylistDialogFragment : DialogFragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding=DialogChoosePlaylistBinding.inflate(inflater,container,false)
-        videoId= requireArguments().getString("id").toString()
+        videoId= requireArguments().getString("videoId").toString()
         val root: View =binding.root
         setupUi()
         choosePlaylistViewModel.allPlaylists.observe(this) {
@@ -38,7 +39,11 @@ class ChoosePlaylistDialogFragment : DialogFragment() {
 
         }
         binding.layoutCreatePlaylist.setOnClickListener { view ->
-
+            val newPlaylistDialogFragment=NewPlaylistDialogFragment()
+            val bundle=Bundle()
+            bundle.putString("videoId",videoId)
+            newPlaylistDialogFragment.arguments=bundle
+            newPlaylistDialogFragment.show(requireActivity().supportFragmentManager,"DescarregarVideos")
         }
         return root
     }
