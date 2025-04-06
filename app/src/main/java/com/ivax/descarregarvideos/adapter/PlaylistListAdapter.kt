@@ -3,6 +3,7 @@ package com.ivax.descarregarvideos.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -12,10 +13,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.adapter.VideoAdapter.ViewHolder
 import com.ivax.descarregarvideos.classes.MainDiffCallBack
+import com.ivax.descarregarvideos.dialog_fragments.del.playlist.DeletePlaylistDialogFragment
 import com.ivax.descarregarvideos.entities.Playlist
 import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
 
-class PlaylistListAdapter : RecyclerView.Adapter<PlaylistListAdapter.ViewHolder>() {
+class PlaylistListAdapter(private val openDialog: (Int)->Unit) : RecyclerView.Adapter<PlaylistListAdapter.ViewHolder>() {
     private val items = ArrayList<PlaylistWithSavedVideos>()
     private lateinit var videoId: String
     override fun onCreateViewHolder(
@@ -50,6 +52,11 @@ class PlaylistListAdapter : RecyclerView.Adapter<PlaylistListAdapter.ViewHolder>
             var cbx = view as CheckBox
             item.playlist.checked = cbx.isChecked
         }
+        holder.btnRemovePlayList.setOnClickListener { view->
+            this.openDialog(item.playlist.playListId)
+            val deletePlaylistDialogFragment=DeletePlaylistDialogFragment()
+            //deletePlaylistDialogFragment.show(holder.itemView)
+        }
     }
 
     override fun getItemCount(): Int {
@@ -64,5 +71,6 @@ class PlaylistListAdapter : RecyclerView.Adapter<PlaylistListAdapter.ViewHolder>
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tbxPlaylistTitle = itemView.findViewById<TextView>(R.id.tbxPlaylist)
         val cbxPlaylist = itemView.findViewById<CheckBox>(R.id.checkboxPlaylist)
+        val btnRemovePlayList=itemView.findViewById<Button>(R.id.imageButtonRemovePlaylist)
     }
 }

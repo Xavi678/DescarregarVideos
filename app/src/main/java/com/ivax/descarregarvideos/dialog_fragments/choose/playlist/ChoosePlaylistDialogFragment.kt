@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.adapter.PlaylistListAdapter
 import com.ivax.descarregarvideos.databinding.DialogChoosePlaylistBinding
+import com.ivax.descarregarvideos.dialog_fragments.del.playlist.DeletePlaylistDialogFragment
 import com.ivax.descarregarvideos.dialog_fragments.nova.playlist.NewPlaylistDialogFragment
 import com.ivax.descarregarvideos.entities.PlaylistSavedVideoCrossRef
 import com.ivax.descarregarvideos.ui.saved.videos.SavedVideosFragment
@@ -21,7 +22,16 @@ import dagger.hilt.android.AndroidEntryPoint
 class ChoosePlaylistDialogFragment : DialogFragment() {
 
     private var _binding: DialogChoosePlaylistBinding? = null
-    private var playlistListAdapter=PlaylistListAdapter()
+
+    val openDialog=fun (playListId: Int){
+        val deletePlaylistDialogFragment= DeletePlaylistDialogFragment()
+        var bundle=Bundle()
+        bundle.putInt("playlistId",playListId)
+        deletePlaylistDialogFragment.arguments=bundle
+        deletePlaylistDialogFragment.show(requireActivity().supportFragmentManager,"DescarregarVideos")
+    }
+
+    private var playlistListAdapter=PlaylistListAdapter(openDialog = openDialog)
     private lateinit var videoId : String
     val choosePlaylistViewModel : ChoosePlaylistViewModel by lazy{
         ViewModelProvider(this)[ChoosePlaylistViewModel::class.java]}
@@ -87,6 +97,7 @@ class ChoosePlaylistDialogFragment : DialogFragment() {
         super.onDestroyView()
         _binding = null
     }
+
 }
 
 private fun ChoosePlaylistDialogFragment.close() {

@@ -50,4 +50,8 @@ class VideoRepository @Inject constructor(private val videoDao: VideoDao,
     fun getAllPlaylistsWithVideos() : Flow<List<PlaylistWithSavedVideos>>  {
         return playListDao.getAllPlaylistsWithVideos()
     }
+
+    fun deletePlaylist(playlistId: Int) {
+        playListDao.deletePlaylist(playlistId)
+    }
 }
