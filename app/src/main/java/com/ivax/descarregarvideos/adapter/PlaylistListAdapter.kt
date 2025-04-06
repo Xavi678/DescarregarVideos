@@ -13,9 +13,11 @@ import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.adapter.VideoAdapter.ViewHolder
 import com.ivax.descarregarvideos.classes.MainDiffCallBack
 import com.ivax.descarregarvideos.entities.Playlist
+import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
 
 class PlaylistListAdapter : RecyclerView.Adapter<PlaylistListAdapter.ViewHolder>() {
-    private val items = ArrayList<Playlist>()
+    private val items = ArrayList<PlaylistWithSavedVideos>()
+    private lateinit var videoId: String
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
@@ -25,7 +27,7 @@ class PlaylistListAdapter : RecyclerView.Adapter<PlaylistListAdapter.ViewHolder>
         return ViewHolder(itemView)
     }
 
-    fun addItems(items: List<Playlist>) {
+    fun addItems(items: List<PlaylistWithSavedVideos>) {
         val diffResult = DiffUtil.calculateDiff(MainDiffCallBack(this.items, items))
         this.items.clear()
         this.items.addAll(items)
@@ -33,7 +35,7 @@ class PlaylistListAdapter : RecyclerView.Adapter<PlaylistListAdapter.ViewHolder>
     }
 
     fun getCheckedItems() : List<Playlist>{
-        return items.filter { it.checked }
+        return items.filter { it.playlist.checked }.map { it.playlist }
     }
 
     override fun onBindViewHolder(
@@ -41,16 +43,21 @@ class PlaylistListAdapter : RecyclerView.Adapter<PlaylistListAdapter.ViewHolder>
         position: Int
     ) {
         val item = items[position]
+        holder.cbxPlaylist.isChecked=item.videos.firstOrNull { it.videoId==this.videoId }!=null
 
-        holder.tbxPlaylistTitle.text = item.name
+        holder.tbxPlaylistTitle.text = item.playlist.name
         holder.cbxPlaylist.setOnClickListener { view ->
             var cbx = view as CheckBox
-            item.checked = cbx.isChecked
+            item.playlist.checked = cbx.isChecked
         }
     }
 
     override fun getItemCount(): Int {
         return items.size
+    }
+
+    fun setVideoId(videoId: String) {
+        this.videoId=videoId
     }
 
 

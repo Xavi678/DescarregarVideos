@@ -6,6 +6,7 @@ import com.ivax.descarregarvideos.dao.VideoDao
 import com.ivax.descarregarvideos.entities.Playlist
 import com.ivax.descarregarvideos.entities.PlaylistSavedVideoCrossRef
 import com.ivax.descarregarvideos.entities.SavedVideo
+import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -44,5 +45,9 @@ class VideoRepository @Inject constructor(private val videoDao: VideoDao,
     fun playlistSavedVideoCrossRefExists(playlistSavedVideoCrossRef: PlaylistSavedVideoCrossRef): Boolean {
 
         return playlistSavedVideoCrossRefDao.first(playlistSavedVideoCrossRef.playListId,playlistSavedVideoCrossRef.videoId)!=null
+    }
+
+    fun getAllPlaylistsWithVideos() : Flow<List<PlaylistWithSavedVideos>>  {
+        return playListDao.getAllPlaylistsWithVideos()
     }
 }

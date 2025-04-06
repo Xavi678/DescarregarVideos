@@ -35,7 +35,8 @@ class ChoosePlaylistDialogFragment : DialogFragment() {
         videoId= requireArguments().getString("videoId").toString()
         val root: View =binding.root
         setupUi()
-        choosePlaylistViewModel.allPlaylists.observe(this) {
+        choosePlaylistViewModel.allPlaylistsWithVideos.observe(this) {
+            playlistListAdapter.setVideoId(videoId)
             playlistListAdapter.addItems(it)
 
         }

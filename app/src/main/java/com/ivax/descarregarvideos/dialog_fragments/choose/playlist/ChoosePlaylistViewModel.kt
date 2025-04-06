@@ -6,6 +6,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.ivax.descarregarvideos.entities.Playlist
 import com.ivax.descarregarvideos.entities.PlaylistSavedVideoCrossRef
+import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
 import com.ivax.descarregarvideos.repository.VideoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -21,5 +22,7 @@ class ChoosePlaylistViewModel @Inject constructor(private val videoRepository: V
     }
 
     val allPlaylists: LiveData<List<Playlist>> = videoRepository.getAllPlaylists().asLiveData()
+
+    val allPlaylistsWithVideos: LiveData<List<PlaylistWithSavedVideos>> = videoRepository.getAllPlaylistsWithVideos().asLiveData()
 
 }
