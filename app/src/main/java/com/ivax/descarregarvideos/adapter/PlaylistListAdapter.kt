@@ -71,6 +71,6 @@ class PlaylistListAdapter(private val openDialog: (Int)->Unit) : RecyclerView.Ad
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tbxPlaylistTitle = itemView.findViewById<TextView>(R.id.tbxPlaylist)
         val cbxPlaylist = itemView.findViewById<CheckBox>(R.id.checkboxPlaylist)
-        val btnRemovePlayList=itemView.findViewById<Button>(R.id.imageButtonRemovePlaylist)
+        val btnRemovePlayList=itemView.findViewById<ImageButton>(R.id.imageButtonRemovePlaylist)
     }
 }

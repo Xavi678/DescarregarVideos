@@ -8,7 +8,9 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import com.ivax.descarregarvideos.databinding.DialogDeletePlaylistBinding
 import com.ivax.descarregarvideos.dialog_fragments.choose.playlist.ChoosePlaylistViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class DeletePlaylistDialogFragment : DialogFragment() {
 
     private var _binding: DialogDeletePlaylistBinding? = null
