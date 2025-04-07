@@ -28,4 +28,8 @@ class MediaPlayerRepository @Inject constructor(private val mediaHelper: IMediaH
     fun setSavedVideo(savedVideo: SavedVideo) {
         mediaHelper.setSavedVideo(savedVideo)
     }
+
+    fun getCurrentMediaVisibility() : MutableLiveData<Boolean> {
+        return mediaHelper.getCurrentMediaVisibility()
+    }
 }

@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.Menu
+import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.SeekBar
@@ -81,6 +82,11 @@ class MainActivity : AppCompatActivity() {
         val animMove=AnimationUtils.loadAnimation(this,R.anim.move)
         var tbxTimeTotal=binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeTotal)
 
+        mediaViewModel.isMediaVisible.observe(this) {
+
+            binding.appBarMain.mediaPlayer.visibility=if(it) View.VISIBLE else View.INVISIBLE
+        }
+        //binding.appBarMain.mediaPlayer.visibility=View.VISIBLE
         mediaViewModel.currentMedia.observe(this) {
             it.videoUrl
             var bmp: Bitmap

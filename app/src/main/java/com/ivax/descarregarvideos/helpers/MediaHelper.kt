@@ -16,6 +16,9 @@ class MediaHelper @Inject constructor(private val appContext: Context) : IMediaH
     private val actualVideo : MutableLiveData<SavedVideo> by lazy {
         MutableLiveData<SavedVideo>()
     }
+    private val actualVisibility : MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>()
+    }
     override fun play(){
         player.prepare()
         player.play()
@@ -40,6 +43,11 @@ class MediaHelper @Inject constructor(private val appContext: Context) : IMediaH
     override fun setSavedVideo(video: SavedVideo) {
         actualVideo.postValue(video)
     }
+
+    override fun getCurrentMediaVisibility(): MutableLiveData<Boolean> {
+        return actualVisibility
+    }
+
     override  fun getCurrentMedia(): MutableLiveData<SavedVideo> {
         return actualVideo
     }

@@ -40,8 +40,9 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:background="@android:color/transparent"
-        android:backgroundTint="@android:color/transparent"
         android:elevation="2dp"
+        android:visibility="invisible"
+
         >
         <androidx.media3.ui.PlayerView
             android:id="@+id/player_view"
@@ -52,7 +53,8 @@
             app:show_timeout="0"
             android:elevation="2dp"
             android:background="@android:color/transparent"
-            android:backgroundTint="@android:color/transparent"/>
+            app:shutter_background_color="@color/white"
+            />
 
         <!--<androidx.media3.ui.PlayerControlView
             android:id="@+id/playerControlView"

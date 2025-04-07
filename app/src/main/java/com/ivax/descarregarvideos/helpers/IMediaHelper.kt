@@ -15,4 +15,5 @@ interface IMediaHelper {
     //fun getCurrentThumbnail() : MutableLiveData<Bitmap>
     fun getCurrentMedia() : MutableLiveData<SavedVideo>
     fun setSavedVideo(video: com.ivax.descarregarvideos.entities.SavedVideo)
+    fun getCurrentMediaVisibility() : MutableLiveData<Boolean>
 }

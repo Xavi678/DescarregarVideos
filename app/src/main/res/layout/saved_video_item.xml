@@ -57,10 +57,10 @@
             />
         <ImageButton
             android:id="@+id/playButton"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            app:srcCompat="@drawable/play_button_rect"
-            android:background="@android:color/secondary_text_light"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            app:srcCompat="@drawable/play_button_rect_mod"
+            android:background="@android:color/transparent"
             app:layout_constraintBottom_toBottomOf="@+id/imageViewPlaylist"
             app:layout_constraintTop_toTopOf="@+id/imageViewPlaylist"
             app:layout_constraintStart_toStartOf="@+id/imageViewPlaylist"

@@ -36,12 +36,14 @@ class SavedVideosFragment : Fragment() {
             savedVideosViewModel.setSavedVideo(savedVideo)
             //savedVideosViewModel.setThumbnail(bitMap)
             savedVideosViewModel.play()
+            savedVideosViewModel.setMediaVisibility(true)
         }, openMenu = fun(videoId: String){
             var savedVideosMenuFragment=SavedVideosMenuFragment()
             val bundle = Bundle()
             bundle.putString("id", videoId)
             savedVideosMenuFragment.arguments=bundle
             savedVideosMenuFragment.show(requireActivity().supportFragmentManager,"SavedVideosMenu")
+
         })
         savedVideosViewModel.allSavedVideos.observe(viewLifecycleOwner) {
             savedVideoAdapter.addItems(it)

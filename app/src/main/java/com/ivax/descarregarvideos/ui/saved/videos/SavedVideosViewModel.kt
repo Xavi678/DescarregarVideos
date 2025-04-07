@@ -1,6 +1,7 @@
 package com.ivax.descarregarvideos.ui.saved.videos
 
 import android.graphics.Bitmap
+import android.text.BoringLayout
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -37,5 +38,9 @@ class SavedVideosViewModel @Inject constructor(private val repository: VideoRepo
 
     fun setSavedVideo(savedVideo: SavedVideo){
         mediaPlayerRepository.setSavedVideo(savedVideo)
+    }
+
+    fun setMediaVisibility(visibility: Boolean){
+        mediaPlayerRepository.getCurrentMediaVisibility().postValue(visibility)
     }
 }

@@ -16,6 +16,7 @@ import javax.inject.Inject
 class MediaViewModel @Inject constructor(private val mediaPlayerRepository:MediaPlayerRepository) : ViewModel() {
 
     //val currentThumbnail=mediaPlayerRepository.getCurrentThumbnail()
+    val isMediaVisible=mediaPlayerRepository.getCurrentMediaVisibility()
     val currentMedia=mediaPlayerRepository.getCurrentMedia()
     fun addItemMedia(mediaItem: MediaItem){
         mediaPlayerRepository.addItemMedia(mediaItem)
