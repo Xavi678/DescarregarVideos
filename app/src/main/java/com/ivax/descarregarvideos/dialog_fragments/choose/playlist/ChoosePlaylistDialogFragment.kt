@@ -1,7 +1,5 @@
 package com.ivax.descarregarvideos.dialog_fragments.choose.playlist
 
-import android.app.AlertDialog
-import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,13 +7,11 @@ import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.ivax.descarregarvideos.R
-import com.ivax.descarregarvideos.adapter.PlaylistListAdapter
+import com.ivax.descarregarvideos.adapter.ChoosePlaylistListAdapter
 import com.ivax.descarregarvideos.databinding.DialogChoosePlaylistBinding
 import com.ivax.descarregarvideos.dialog_fragments.del.playlist.DeletePlaylistDialogFragment
 import com.ivax.descarregarvideos.dialog_fragments.nova.playlist.NewPlaylistDialogFragment
 import com.ivax.descarregarvideos.entities.PlaylistSavedVideoCrossRef
-import com.ivax.descarregarvideos.ui.saved.videos.SavedVideosFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -31,7 +27,7 @@ class ChoosePlaylistDialogFragment : DialogFragment() {
         deletePlaylistDialogFragment.show(requireActivity().supportFragmentManager,"DescarregarVideos")
     }
 
-    private var playlistListAdapter=PlaylistListAdapter(openDialog = openDialog)
+    private var playlistListAdapter=ChoosePlaylistListAdapter(openDialog = openDialog)
     private lateinit var videoId : String
     val choosePlaylistViewModel : ChoosePlaylistViewModel by lazy{
         ViewModelProvider(this)[ChoosePlaylistViewModel::class.java]}

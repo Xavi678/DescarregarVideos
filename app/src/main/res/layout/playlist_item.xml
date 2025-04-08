@@ -1,56 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/cardview_dark_background"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:layout_height="match_parent">
 
-    <!--<ImageView
-        android:id="@+id/imageViewPlaylist"
+    <TextView
+        android:id="@+id/tbxPlaylistTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:adjustViewBounds="true"
-        android:scaleType="centerInside"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@tools:sample/avatars" />-->
-
-    <TextView
-        android:id="@+id/tbxPlaylist"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
-        android:maxWidth="180dp"
+        android:layout_marginTop="12dp"
         android:text="TextView"
-        android:textColor="@color/white"
-        app:layout_constraintStart_toEndOf="@+id/checkboxPlaylist"
+        app:layout_constraintStart_toEndOf="@+id/imgPlaylistFirst"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <CheckBox
-        android:id="@+id/checkboxPlaylist"
+    <LinearLayout
+        android:id="@+id/layoutImageButtonPlaylistPlayAll"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:backgroundTint="@color/white"
-        android:textColor="@color/white"
+
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="13dp"
+        android:background="@drawable/rounded_rect"
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingEnd="5dp"
+        android:paddingBottom="5dp"
+        app:layout_constraintStart_toEndOf="@+id/imgPlaylistFirst"
+        app:layout_constraintTop_toBottomOf="@+id/tbxPlaylistTitle">
+
+        <ImageButton
+            android:id="@+id/imageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:background="@android:color/transparent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/play_button" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="2dp"
+            android:text="Reproduir"
+            android:textColor="@color/white"
+            android:textSize="11sp">
+
+        </TextView>
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/imgPlaylistFirst"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="5dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        />
-
-    <ImageButton
-        android:id="@+id/imageButtonRemovePlaylist"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="8dp"
-        android:background="@android:color/transparent"
-        android:src="@drawable/remove_trash"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-    </ImageButton>
+        tools:srcCompat="@tools:sample/avatars" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

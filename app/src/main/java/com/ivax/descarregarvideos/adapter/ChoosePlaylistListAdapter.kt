@@ -3,21 +3,18 @@ package com.ivax.descarregarvideos.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.ivax.descarregarvideos.R
-import com.ivax.descarregarvideos.adapter.VideoAdapter.ViewHolder
 import com.ivax.descarregarvideos.classes.MainDiffCallBack
 import com.ivax.descarregarvideos.dialog_fragments.del.playlist.DeletePlaylistDialogFragment
 import com.ivax.descarregarvideos.entities.Playlist
 import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
 
-class PlaylistListAdapter(private val openDialog: (Int)->Unit) : RecyclerView.Adapter<PlaylistListAdapter.ViewHolder>() {
+class ChoosePlaylistListAdapter(private val openDialog: (Int)->Unit) : RecyclerView.Adapter<ChoosePlaylistListAdapter.ViewHolder>() {
     private val items = ArrayList<PlaylistWithSavedVideos>()
     private lateinit var videoId: String
     override fun onCreateViewHolder(
@@ -25,7 +22,7 @@ class PlaylistListAdapter(private val openDialog: (Int)->Unit) : RecyclerView.Ad
         viewType: Int
     ): ViewHolder {
         val itemView =
-            LayoutInflater.from(parent.context).inflate(R.layout.playlist_item, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.playlist_choose_item, parent, false)
         return ViewHolder(itemView)
     }
 
