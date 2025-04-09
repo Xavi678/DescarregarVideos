@@ -1,8 +1,10 @@
 package com.ivax.descarregarvideos.repository
 
 import android.graphics.Bitmap
+import android.net.Uri
 import androidx.lifecycle.MutableLiveData
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.exoplayer.ExoPlayer
 import com.ivax.descarregarvideos.entities.SavedVideo
 import com.ivax.descarregarvideos.helpers.IMediaHelper
@@ -31,5 +33,19 @@ class MediaPlayerRepository @Inject constructor(private val mediaHelper: IMediaH
 
     fun getCurrentMediaVisibility() : MutableLiveData<Boolean> {
         return mediaHelper.getCurrentMediaVisibility()
+    }
+
+    fun addPlaylist(items: ArrayList<MediaItem>) {
+        for (item in items){
+            mediaHelper.addMediaItem(item)
+        }
+        mediaHelper.play()
+    }
+
+    fun SavedVideoToMediaItem(video: SavedVideo): MediaItem {
+        val uri=Uri.Builder().path(video.imgUrl).build()
+        val metaData=MediaMetadata.Builder().setArtworkUri(uri).setTitle(video.title).build()
+        val mediaItem = MediaItem.Builder().setUri(video.videoUrl!!).setMediaMetadata(metaData).setMediaId(video.videoId).build()
+        return mediaItem
     }
 }

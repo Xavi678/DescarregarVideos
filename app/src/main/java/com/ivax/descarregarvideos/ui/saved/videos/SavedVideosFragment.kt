@@ -31,8 +31,8 @@ class SavedVideosFragment : Fragment() {
 
         _binding = FragmentSavedVideosBinding.inflate(inflater, container, false)
         val root: View = binding.root
-        savedVideoAdapter= SavedVideosAdapter(playMedia= fun(mediaItem: MediaItem,savedVideo: SavedVideo){
-            savedVideosViewModel.addItemMedia(mediaItem)
+        savedVideoAdapter= SavedVideosAdapter(playMedia= fun(savedVideo: SavedVideo){
+            savedVideosViewModel.addItemMedia(savedVideo)
             savedVideosViewModel.setSavedVideo(savedVideo)
             //savedVideosViewModel.setThumbnail(bitMap)
             savedVideosViewModel.play()

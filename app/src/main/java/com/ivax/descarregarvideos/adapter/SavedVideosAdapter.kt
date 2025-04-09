@@ -16,7 +16,7 @@ import com.ivax.descarregarvideos.classes.MainDiffCallBack
 import com.ivax.descarregarvideos.entities.SavedVideo
 import java.io.FileInputStream
 
-class SavedVideosAdapter(private val playMedia: (MediaItem, SavedVideo) -> Unit,private val openMenu: (String)->Unit) : RecyclerView.Adapter<SavedVideosAdapter.ViewHolder>() {
+class SavedVideosAdapter(private val playMedia: (SavedVideo) -> Unit,private val openMenu: (String)->Unit) : RecyclerView.Adapter<SavedVideosAdapter.ViewHolder>() {
 
     private val items = ArrayList<SavedVideo>()
     override fun onCreateViewHolder(
@@ -50,8 +50,7 @@ class SavedVideosAdapter(private val playMedia: (MediaItem, SavedVideo) -> Unit,
         holder.tbxTitle.text=item.title
         holder.buttonPlay.setOnClickListener { view->
             if(item.videoUrl!=null) {
-                val mediaItem = MediaItem.fromUri(item.videoUrl!!)
-                playMedia(mediaItem,item)
+                playMedia(item)
             }
 
         }

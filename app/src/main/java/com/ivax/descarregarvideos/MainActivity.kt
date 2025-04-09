@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity() {
             binding.appBarMain.mediaPlayer.visibility=if(it) View.VISIBLE else View.INVISIBLE
         }
         //binding.appBarMain.mediaPlayer.visibility=View.VISIBLE
-        mediaViewModel.currentMedia.observe(this) {
+        /*mediaViewModel.currentMedia.observe(this) {
             it.videoUrl
             var bmp: Bitmap
             var fileInStream= FileInputStream(it.imgUrl)
@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity() {
             playerSongTextView.text=it.title
             //playerSongTextView.startAnimation(animMove)
             //thumbnailPlayer.setImageBitmap(it)
-        }
+        }*/
 
 
         seekBarI.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
@@ -189,6 +189,16 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                val title=mediaItem?.mediaMetadata?.title
+                val uri=mediaItem?.mediaMetadata?.artworkUri
+                var bmp: Bitmap
+                var fileInStream= FileInputStream(uri.toString())
+                fileInStream.use {
+                    bmp = BitmapFactory.decodeStream(it)
+                }
+                fileInStream.close()
+                thumbnailPlayer.setImageBitmap(bmp)
+                playerSongTextView.text=title
                 Log.d("DescarregarVideos","")
                 super.onMediaItemTransition(mediaItem, reason)
                 Log.d("DescarregarVideos","${mediaItem?.mediaMetadata}")

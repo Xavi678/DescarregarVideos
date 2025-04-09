@@ -24,7 +24,8 @@ import javax.inject.Inject
 class SavedVideosViewModel @Inject constructor(private val repository: VideoRepository, private val mediaPlayerRepository: MediaPlayerRepository) : ViewModel() {
     val allSavedVideos: LiveData<List<SavedVideo>> = repository.getAllVideos().asLiveData()
 
-    fun addItemMedia(mediaItem: MediaItem){
+    fun addItemMedia(savedVideo: SavedVideo){
+        val mediaItem=mediaPlayerRepository.SavedVideoToMediaItem(savedVideo)
         mediaPlayerRepository.addItemMedia(mediaItem)
     }
 

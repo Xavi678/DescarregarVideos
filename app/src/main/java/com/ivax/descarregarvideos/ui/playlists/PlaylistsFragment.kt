@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ivax.descarregarvideos.adapter.PlaylistAdapter
 import com.ivax.descarregarvideos.databinding.FragmentHomeBinding
 import com.ivax.descarregarvideos.databinding.FragmentPlaylistsBinding
+import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
 import com.ivax.descarregarvideos.ui.search.SearchFragment
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -25,8 +26,9 @@ class PlaylistsFragment : Fragment(){
     private val playlistsViewModel : PlaylistsViewModel by lazy {
         ViewModelProvider(this)[PlaylistsViewModel::class.java]
     }
-    private val playlistAdapter: PlaylistAdapter= PlaylistAdapter(playAll = fun (playlistId :Int){
-
+    private val playlistAdapter: PlaylistAdapter= PlaylistAdapter(playAll = fun (playlist : PlaylistWithSavedVideos){
+        playlistsViewModel.addPlaylist(playlist)
+        playlistsViewModel.setMediaVisibility(true)
     })
     override fun onCreateView(
         inflater: LayoutInflater,

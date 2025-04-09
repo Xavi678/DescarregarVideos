@@ -17,7 +17,7 @@ import com.ivax.descarregarvideos.classes.MainDiffCallBack
 import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
 import java.io.FileInputStream
 
-class PlaylistAdapter(private val playAll: (Int) -> Unit) : RecyclerView.Adapter<PlaylistAdapter.ViewHolder>() {
+class PlaylistAdapter(private val playAll: (PlaylistWithSavedVideos) -> Unit) : RecyclerView.Adapter<PlaylistAdapter.ViewHolder>() {
 
     private val items = ArrayList<PlaylistWithSavedVideos>()
     override fun onCreateViewHolder(
@@ -56,7 +56,7 @@ class PlaylistAdapter(private val playAll: (Int) -> Unit) : RecyclerView.Adapter
 
         }
         holder.playButton.setOnClickListener {
-            playAll(playlistWSavedVideos.playlist.playListId)
+            playAll(playlistWSavedVideos)
         }
     }
 
