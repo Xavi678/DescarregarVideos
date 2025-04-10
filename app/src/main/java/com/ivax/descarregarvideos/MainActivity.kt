@@ -31,6 +31,7 @@ import com.ivax.descarregarvideos.general.viewmodels.MediaViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.FileInputStream
 import android.view.animation.AnimationUtils
+import androidx.media3.common.Player.MediaItemTransitionReason
 
 
 @AndroidEntryPoint
@@ -188,7 +189,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            override fun onMediaItemTransition(mediaItem: MediaItem?,@MediaItemTransitionReason reason: Int) {
+                seekBarProgress=0
                 val title=mediaItem?.mediaMetadata?.title
                 val uri=mediaItem?.mediaMetadata?.artworkUri
                 var bmp: Bitmap
@@ -200,7 +202,8 @@ class MainActivity : AppCompatActivity() {
                 thumbnailPlayer.setImageBitmap(bmp)
                 playerSongTextView.text=title
                 Log.d("DescarregarVideos","")
-                super.onMediaItemTransition(mediaItem, reason)
+
+                //super.onMediaItemTransition(mediaItem, reason)
                 Log.d("DescarregarVideos","${mediaItem?.mediaMetadata}")
 
             }

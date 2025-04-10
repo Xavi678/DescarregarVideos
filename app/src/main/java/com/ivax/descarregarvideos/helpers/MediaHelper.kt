@@ -12,20 +12,22 @@ import com.ivax.descarregarvideos.entities.SavedVideo
 import javax.inject.Inject
 
 class MediaHelper @Inject constructor(private val appContext: Context) : IMediaHelper {
-    private val player = ExoPlayer.Builder(appContext).build()
+    private var player : ExoPlayer = ExoPlayer.Builder(appContext).build()
     private val actualVideo : MutableLiveData<SavedVideo> by lazy {
         MutableLiveData<SavedVideo>()
     }
     private val actualVisibility : MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
     }
+
     override fun play(){
         player.prepare()
         player.play()
     }
 
     override fun addMediaItem(mediaItem: MediaItem){
-        player.setMediaItem(mediaItem)
+        player.addMediaItem(mediaItem)
+        //player.setMediaItem(mediaItem)
     }
 
     override fun getMediaPlayer(): ExoPlayer {

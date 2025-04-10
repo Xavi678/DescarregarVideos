@@ -23,7 +23,7 @@ class MediaViewModel @Inject constructor(private val mediaPlayerRepository:Media
     }
 
     fun play(){
-        mediaPlayerRepository.play()
+        //mediaPlayerRepository.play()
     }
 
     fun getMediaPlayer() : ExoPlayer{
