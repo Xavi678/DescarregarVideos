@@ -55,6 +55,7 @@ class PlaylistAdapter(private val playAll: (PlaylistWithSavedVideos) -> Unit) : 
             holder.img.setImageBitmap(bmp)
 
         }
+        holder.playlistCount.text = playlistWSavedVideos.videos.count().toString()
         holder.playButton.setOnClickListener {
             playAll(playlistWSavedVideos)
         }
@@ -69,5 +70,6 @@ class PlaylistAdapter(private val playAll: (PlaylistWithSavedVideos) -> Unit) : 
         val tbxPlaylistTitle= itemView.findViewById<TextView>(R.id.tbxPlaylistTitle)
         val img=itemView.findViewById<ImageView>(R.id.imgPlaylistFirst)
         val playButton=itemView.findViewById<LinearLayout>(R.id.layoutImageButtonPlaylistPlayAll)
+        val playlistCount=itemView.findViewById<TextView>(R.id.tbxPlaylistCountVideos)
     }
 }

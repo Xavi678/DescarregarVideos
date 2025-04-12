@@ -12,7 +12,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="12dp"
         android:text="TextView"
-        app:layout_constraintStart_toEndOf="@+id/imgPlaylistFirst"
+        app:layout_constraintStart_toEndOf="@+id/playlistImageLayout"
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
@@ -27,7 +27,7 @@
         android:paddingTop="5dp"
         android:paddingEnd="5dp"
         android:paddingBottom="5dp"
-        app:layout_constraintStart_toEndOf="@+id/imgPlaylistFirst"
+        app:layout_constraintStart_toEndOf="@+id/playlistImageLayout"
         app:layout_constraintTop_toBottomOf="@+id/tbxPlaylistTitle">
 
         <ImageButton
@@ -52,14 +52,59 @@
 
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/imgPlaylistFirst"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/playlistImageLayout"
         android:layout_width="102dp"
         android:layout_height="102dp"
-        android:layout_marginStart="15dp"
+        android:layout_marginStart="5dp"
         android:layout_marginTop="5dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@tools:sample/avatars" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/imgPlaylistFirst"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:scaleType="centerInside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:srcCompat="@tools:sample/avatars" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="2dp"
+            android:layout_marginBottom="2dp"
+            android:background="@drawable/rounded_rect_black"
+            android:orientation="horizontal"
+
+            app:layout_constraintBottom_toBottomOf="@+id/imgPlaylistFirst"
+            app:layout_constraintEnd_toEndOf="@+id/imgPlaylistFirst">
+
+            <ImageView
+                android:id="@+id/playButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:adjustViewBounds="true"
+
+                android:background="@android:color/transparent"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/playlist" />
+
+            <TextView
+                android:id="@+id/tbxPlaylistCountVideos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="2dp"
+                android:paddingEnd="2dp"
+                android:text="2"
+
+                android:textColor="@color/white" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

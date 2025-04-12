@@ -32,6 +32,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.io.FileInputStream
 import android.view.animation.AnimationUtils
 import androidx.media3.common.Player.MediaItemTransitionReason
+import androidx.media3.exoplayer.ExoPlayer
 
 
 @AndroidEntryPoint
@@ -41,10 +42,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var tbxTimeDuration: TextView
     private lateinit var seekBarI: SeekBar
+    private lateinit var player: ExoPlayer
     //private var timer=Timer()
     private var seekBarProgress=0
     private var isTimerCancelled=false
     private var isSeeking=false
+    private lateinit var tbxTimeTotal: TextView
 
     val callbackTimer=fun (){
         if (!isSeeking) {
@@ -53,8 +56,11 @@ class MainActivity : AppCompatActivity() {
             }*/
             seekBarProgress += 1
             Handler(Looper.getMainLooper()).post {
-                tbxTimeDuration.text =
-                    MathExtensions.toTime(seekBarProgress)
+                if(seekBarProgress<=(player.duration/1000F).toInt()){
+                    tbxTimeDuration.text =
+                        MathExtensions.toTime(seekBarProgress)
+                }
+
                 seekBarI.progress = seekBarProgress
             }
         }
@@ -64,7 +70,6 @@ class MainActivity : AppCompatActivity() {
     private val mediaViewModel : MediaViewModel by lazy {
         ViewModelProvider(this).get(MediaViewModel::class.java)
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -72,7 +77,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.appBarMain.toolbar)
-        var player=mediaViewModel.getMediaPlayer()
+        player=mediaViewModel.getMediaPlayer()
 
         binding.appBarMain.playerView.player=player
         var playButton=binding.appBarMain.root.findViewById<ImageButton>(R.id.mediaPlayerPlayButton)
@@ -81,7 +86,7 @@ class MainActivity : AppCompatActivity() {
         tbxTimeDuration=binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeDuration)
         seekBarI=binding.appBarMain.root.findViewById<SeekBar>(R.id.seekBar)
         val animMove=AnimationUtils.loadAnimation(this,R.anim.move)
-        var tbxTimeTotal=binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeTotal)
+        tbxTimeTotal =binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeTotal)
 
         mediaViewModel.isMediaVisible.observe(this) {
 
@@ -148,15 +153,23 @@ class MainActivity : AppCompatActivity() {
 
         })
         player.addListener( object : Player.Listener {
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                tbxTimeTotal.text= MathExtensions.toTime ((player.duration/1000).toInt())
-                if(!isSeeking) {
+            override fun onPositionDiscontinuity(
+                oldPosition: Player.PositionInfo,
+                newPosition: Player.PositionInfo,
+                reason: Int
+            ) {
+                Log.d("DescarregarVideos","Old: ${oldPosition.positionMs}")
+                Log.d("DescarregarVideos","New: ${newPosition.positionMs}")
+                super.onPositionDiscontinuity(oldPosition, newPosition, reason)
+            }
 
-                    var total = player.duration / 1000
-                    seekBarI.min = 0
-                    seekBarI.max = total.toInt()
-                    var position = player.currentPosition / 1000
-                    Log.d("DescarregarVideos",(player.currentPosition / 1000).toString())
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+
+                if(!isSeeking) {
+                    setTotalDuration()
+
+                    var position = player.currentPosition / 1000f
+                    Log.d("DescarregarVideos",(player.currentPosition / 1000f).toString())
                     seekBarProgress = position.toInt()
                     seekBarI.progress = seekBarProgress
 
@@ -191,6 +204,9 @@ class MainActivity : AppCompatActivity() {
 
             override fun onMediaItemTransition(mediaItem: MediaItem?,@MediaItemTransitionReason reason: Int) {
                 seekBarProgress=0
+                if(player.duration!=Long.MIN_VALUE){
+                    setTotalDuration()
+                }
                 val title=mediaItem?.mediaMetadata?.title
                 val uri=mediaItem?.mediaMetadata?.artworkUri
                 var bmp: Bitmap
@@ -242,7 +258,12 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
     }
 
-
+    fun setTotalDuration(){
+        var total = player.duration / 1000f
+        seekBarI.min = 0
+        seekBarI.max = total.toInt()
+        tbxTimeTotal.text= MathExtensions.toTime ((player.duration/1000F).toInt())
+    }
 
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
