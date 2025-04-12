@@ -22,4 +22,7 @@ interface PlayListDao {
     fun getAllPlaylistsWithVideos() : Flow<List<PlaylistWithSavedVideos>>
     @Query("DELETE FROM playlist WHERE playListId=:playlistId")
     fun deletePlaylist(playlistId: Int)
+    @Transaction
+    @Query("SELECT * FROM Playlist WHERE playListId=:playlistId LIMIT 1")
+    fun firstWithSavedVideos(playlistId: Int): PlaylistWithSavedVideos
 }

@@ -23,4 +23,9 @@
         tools:layout="@layout/fragment_playlists">
 
     </fragment>
+    <fragment
+        android:id="@+id/nav_edit_playlist"
+        android:name="com.ivax.descarregarvideos.ui.edit.playlist.EditPlaylistFragment"
+        android:label="@string/menu_edit_playlist"
+        tools:layout="@layout/fragment_edit_playlist" />
 </navigation>

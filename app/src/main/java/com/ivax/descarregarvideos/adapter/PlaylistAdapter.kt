@@ -2,6 +2,7 @@ package com.ivax.descarregarvideos.adapter
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +10,8 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.ivax.descarregarvideos.R
@@ -59,6 +62,12 @@ class PlaylistAdapter(private val playAll: (PlaylistWithSavedVideos) -> Unit) : 
         holder.playButton.setOnClickListener {
             playAll(playlistWSavedVideos)
         }
+        holder.playlistConstraint.setOnClickListener {
+            val navController=it.findNavController()
+            val bundle=Bundle()
+            bundle.putInt("playlistId",playlistWSavedVideos.playlist.playListId)
+            navController.navigate(R.id.nav_edit_playlist,bundle)
+        }
     }
 
     override fun getItemCount(): Int {
@@ -71,5 +80,6 @@ class PlaylistAdapter(private val playAll: (PlaylistWithSavedVideos) -> Unit) : 
         val img=itemView.findViewById<ImageView>(R.id.imgPlaylistFirst)
         val playButton=itemView.findViewById<LinearLayout>(R.id.layoutImageButtonPlaylistPlayAll)
         val playlistCount=itemView.findViewById<TextView>(R.id.tbxPlaylistCountVideos)
+        val playlistConstraint=itemView.findViewById<ConstraintLayout>(R.id.layoutPlaylist)
     }
 }

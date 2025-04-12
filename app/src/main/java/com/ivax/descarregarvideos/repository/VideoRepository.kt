@@ -54,4 +54,8 @@ class VideoRepository @Inject constructor(private val videoDao: VideoDao,
     fun deletePlaylist(playlistId: Int) {
         playListDao.deletePlaylist(playlistId)
     }
+
+    fun firstPlaylistWithSavedVideos(playlistId: Int): PlaylistWithSavedVideos {
+       return playListDao.firstWithSavedVideos(playlistId)
+    }
 }
