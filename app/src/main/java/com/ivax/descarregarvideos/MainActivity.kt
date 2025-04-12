@@ -43,20 +43,23 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tbxTimeDuration: TextView
     private lateinit var seekBarI: SeekBar
     private lateinit var player: ExoPlayer
+    private lateinit var btnSkipBackward: ImageButton
+    private lateinit var btnSkipForward: ImageButton
+
     //private var timer=Timer()
-    private var seekBarProgress=0
-    private var isTimerCancelled=false
-    private var isSeeking=false
+    private var seekBarProgress = 0
+    private var isTimerCancelled = false
+    private var isSeeking = false
     private lateinit var tbxTimeTotal: TextView
 
-    val callbackTimer=fun (){
+    val callbackTimer = fun() {
         if (!isSeeking) {
             /*if (isTimerCancelled) {
                 this.cancel()
             }*/
             seekBarProgress += 1
             Handler(Looper.getMainLooper()).post {
-                if(seekBarProgress<=(player.duration/1000F).toInt()){
+                if (seekBarProgress <= (player.duration / 1000F).toInt()) {
                     tbxTimeDuration.text =
                         MathExtensions.toTime(seekBarProgress)
                 }
@@ -65,11 +68,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    private var timer=CustomTimer(callbackTimer)
+    private var timer = CustomTimer(callbackTimer)
 
-    private val mediaViewModel : MediaViewModel by lazy {
+    private val mediaViewModel: MediaViewModel by lazy {
         ViewModelProvider(this).get(MediaViewModel::class.java)
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -77,20 +81,32 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.appBarMain.toolbar)
-        player=mediaViewModel.getMediaPlayer()
+        player = mediaViewModel.getMediaPlayer()
 
-        binding.appBarMain.playerView.player=player
-        var playButton=binding.appBarMain.root.findViewById<ImageButton>(R.id.mediaPlayerPlayButton)
-        var thumbnailPlayer=binding.appBarMain.root.findViewById<ImageView>(R.id.mediaPlayerThumbnail)
-        var playerSongTextView=binding.appBarMain.root.findViewById<TextView>(R.id.playerSongTextView)
-        tbxTimeDuration=binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeDuration)
-        seekBarI=binding.appBarMain.root.findViewById<SeekBar>(R.id.seekBar)
-        val animMove=AnimationUtils.loadAnimation(this,R.anim.move)
-        tbxTimeTotal =binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeTotal)
+        binding.appBarMain.playerView.player = player
+        var playButton =
+            binding.appBarMain.root.findViewById<ImageButton>(R.id.mediaPlayerPlayButton)
+        var thumbnailPlayer =
+            binding.appBarMain.root.findViewById<ImageView>(R.id.mediaPlayerThumbnail)
+        var playerSongTextView =
+            binding.appBarMain.root.findViewById<TextView>(R.id.playerSongTextView)
+        btnSkipBackward = binding.appBarMain.root.findViewById<ImageButton>(R.id.skipBackward)
+        btnSkipForward = binding.appBarMain.root.findViewById<ImageButton>(R.id.skipBForward)
+        tbxTimeDuration = binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeDuration)
+        seekBarI = binding.appBarMain.root.findViewById<SeekBar>(R.id.seekBar)
+        val animMove = AnimationUtils.loadAnimation(this, R.anim.move)
+        tbxTimeTotal = binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeTotal)
 
         mediaViewModel.isMediaVisible.observe(this) {
 
-            binding.appBarMain.mediaPlayer.visibility=if(it) View.VISIBLE else View.INVISIBLE
+            binding.appBarMain.mediaPlayer.visibility = if (it) View.VISIBLE else View.INVISIBLE
+        }
+        btnSkipBackward.setOnClickListener {
+            player.seekToPreviousMediaItem()
+        }
+
+        btnSkipForward.setOnClickListener {
+            player.seekToNextMediaItem()
         }
         //binding.appBarMain.mediaPlayer.visibility=View.VISIBLE
         /*mediaViewModel.currentMedia.observe(this) {
@@ -108,68 +124,74 @@ class MainActivity : AppCompatActivity() {
         }*/
 
 
-        seekBarI.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
+        seekBarI.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(
                 seekBar: SeekBar?,
                 progress: Int,
                 fromUser: Boolean
             ) {
-                if(fromUser){
+                if (fromUser) {
                     try {
                         timer.cancel()
-                    }catch (e: Exception){
-                        Log.d("DescarregarVideos",e.message.toString())
+                    } catch (e: Exception) {
+                        Log.d("DescarregarVideos", e.message.toString())
                     }
-                    var seekTo=(progress*1000).toLong()
-                    Log.d("DescarregarVideos",seekTo.toString())
-                    seekBarProgress=progress
+                    var seekTo = (progress * 1000).toLong()
+                    Log.d("DescarregarVideos", seekTo.toString())
+                    seekBarProgress = progress
                     player.seekTo(seekTo)
                     tbxTimeDuration.text = MathExtensions.toTime(progress)
-                    playButton.setImageDrawable(ResourcesCompat.getDrawable(this@MainActivity.resources,R.drawable.pause_button_white,null) )
+                    playButton.setImageDrawable(
+                        ResourcesCompat.getDrawable(
+                            this@MainActivity.resources,
+                            R.drawable.pause_button_white,
+                            null
+                        )
+                    )
                     try {
 
 
+                        timer.schedule()
 
-                            timer.schedule()
-
-                    }catch (e: Exception){
-                        Log.d("DescarregarVideos",e.message.toString())
+                    } catch (e: Exception) {
+                        Log.d("DescarregarVideos", e.message.toString())
                     }
                 }
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                isSeeking=true
-                isTimerCancelled=true
+                isSeeking = true
+                isTimerCancelled = true
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                isSeeking=false
-                isTimerCancelled=false
+                isSeeking = false
+                isTimerCancelled = false
                 player.prepare()
                 player.play()
 
             }
 
         })
-        player.addListener( object : Player.Listener {
+        player.addListener(object : Player.Listener {
             override fun onPositionDiscontinuity(
                 oldPosition: Player.PositionInfo,
                 newPosition: Player.PositionInfo,
                 reason: Int
             ) {
-                Log.d("DescarregarVideos","Old: ${oldPosition.positionMs}")
-                Log.d("DescarregarVideos","New: ${newPosition.positionMs}")
+                Log.d("DescarregarVideos", "Old: ${oldPosition.positionMs}")
+                Log.d("DescarregarVideos", "New: ${newPosition.positionMs}")
                 super.onPositionDiscontinuity(oldPosition, newPosition, reason)
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-
-                if(!isSeeking) {
+                hasPreviousMedia()
+                hasNextMedia()
+                if (!isSeeking) {
                     setTotalDuration()
 
                     var position = player.currentPosition / 1000f
-                    Log.d("DescarregarVideos",(player.currentPosition / 1000f).toString())
+                    Log.d("DescarregarVideos", (player.currentPosition / 1000f).toString())
                     seekBarProgress = position.toInt()
                     seekBarI.progress = seekBarProgress
 
@@ -180,8 +202,8 @@ class MainActivity : AppCompatActivity() {
                         try {
                             //timerTask= TimerTask()
                             timer.schedule()
-                        }catch (e: Exception){
-                            e.message.let {  Log.d("DescarregarVideo", it.toString())}
+                        } catch (e: Exception) {
+                            e.message.let { Log.d("DescarregarVideo", it.toString()) }
 
                         }
 
@@ -190,8 +212,8 @@ class MainActivity : AppCompatActivity() {
                         try {
                             //timer.cancel()
                             timer.cancel()
-                        }catch (e: Exception){
-                            Log.d("DescarregarVideos",e.message.toString())
+                        } catch (e: Exception) {
+                            Log.d("DescarregarVideos", e.message.toString())
                         }
                         isTimerCancelled = true
                         // Not playing because playback is paused, ended, suppressed, or the player
@@ -202,42 +224,59 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onMediaItemTransition(mediaItem: MediaItem?,@MediaItemTransitionReason reason: Int) {
-                seekBarProgress=0
-                if(player.duration!=Long.MIN_VALUE){
+            override fun onMediaItemTransition(
+                mediaItem: MediaItem?,
+                @MediaItemTransitionReason reason: Int
+            ) {
+                hasPreviousMedia()
+                hasNextMedia()
+                seekBarProgress = 0
+                if (player.duration != Long.MIN_VALUE) {
                     setTotalDuration()
                 }
-                val title=mediaItem?.mediaMetadata?.title
-                val uri=mediaItem?.mediaMetadata?.artworkUri
+                val title = mediaItem?.mediaMetadata?.title
+                val uri = mediaItem?.mediaMetadata?.artworkUri
                 var bmp: Bitmap
-                var fileInStream= FileInputStream(uri.toString())
+                var fileInStream = FileInputStream(uri.toString())
                 fileInStream.use {
                     bmp = BitmapFactory.decodeStream(it)
                 }
                 fileInStream.close()
                 thumbnailPlayer.setImageBitmap(bmp)
-                playerSongTextView.text=title
-                Log.d("DescarregarVideos","")
+                playerSongTextView.text = title
+                Log.d("DescarregarVideos", "")
 
                 //super.onMediaItemTransition(mediaItem, reason)
-                Log.d("DescarregarVideos","${mediaItem?.mediaMetadata}")
+                Log.d("DescarregarVideos", "${mediaItem?.mediaMetadata}")
 
             }
 
 
         })
-        playButton.setOnClickListener { view->
-            var playPause=(view as ImageButton)
-            if(player.isPlaying){
+        playButton.setOnClickListener { view ->
+            var playPause = (view as ImageButton)
+            if (player.isPlaying) {
                 //playPause.context.resources
                 player.stop()
-                playPause.setImageDrawable(ResourcesCompat.getDrawable(view.context.resources,R.drawable.play_button_round,null) )
-            }else{
+                playPause.setImageDrawable(
+                    ResourcesCompat.getDrawable(
+                        view.context.resources,
+                        R.drawable.play_button_round,
+                        null
+                    )
+                )
+            } else {
                 player.prepare()
                 player.play()
-                playPause.setImageDrawable(ResourcesCompat.getDrawable(view.context.resources,R.drawable.pause_button_white,null) )
+                playPause.setImageDrawable(
+                    ResourcesCompat.getDrawable(
+                        view.context.resources,
+                        R.drawable.pause_button_white,
+                        null
+                    )
+                )
             }
-            Log.d("DescarregarVideos","")
+            Log.d("DescarregarVideos", "")
         }
 
         /*binding.appBarMain.mediaPlayerPlayButton.setOnClickListener {
@@ -251,18 +290,28 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.nav_search,
-                R.id.nav_saved_videos,R.id.nav_playlists
+                R.id.nav_saved_videos, R.id.nav_playlists
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
     }
 
-    fun setTotalDuration(){
+    private fun hasNextMedia() {
+        btnSkipForward.visibility = if (player.hasNextMediaItem()) View.VISIBLE
+        else View.INVISIBLE
+    }
+
+    private fun hasPreviousMedia() {
+        btnSkipBackward.visibility = if (player.hasPreviousMediaItem()) View.VISIBLE
+        else View.INVISIBLE
+    }
+
+    fun setTotalDuration() {
         var total = player.duration / 1000f
         seekBarI.min = 0
         seekBarI.max = total.toInt()
-        tbxTimeTotal.text= MathExtensions.toTime ((player.duration/1000F).toInt())
+        tbxTimeTotal.text = MathExtensions.toTime((player.duration / 1000F).toInt())
     }
 
 
