@@ -8,7 +8,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.ivax.descarregarvideos.R
+import com.ivax.descarregarvideos.adapter.EditPlaylistSavedVideosAdapter
 import com.ivax.descarregarvideos.databinding.FragmentEditPlaylistBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -22,6 +24,7 @@ class EditPlaylistFragment : Fragment() {
     private val editPlaylistViewModel : EditPlaylistViewModel by lazy {
         ViewModelProvider(this)[EditPlaylistViewModel::class.java]
     }
+    private val adapter : EditPlaylistSavedVideosAdapter = EditPlaylistSavedVideosAdapter()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -35,6 +38,7 @@ class EditPlaylistFragment : Fragment() {
             editPlaylistViewModel.playlistWithSavedVideos.collectLatest {
                 if (it!=null){
                     binding.tbxEditPlaylistTitle.text=it.playlist.name
+                    adapter.addItems(it.videos)
                 }
             }
         }
@@ -44,5 +48,10 @@ class EditPlaylistFragment : Fragment() {
             navController.navigate(R.id.nav_playlists)
         }*/
         return root
+    }
+
+    fun setupUI(){
+        binding.recylcerViewEDitPlaylistVideos.layoutManager= LinearLayoutManager(this@EditPlaylistFragment.context)
+        binding.recylcerViewEDitPlaylistVideos.adapter=adapter
     }
 }
