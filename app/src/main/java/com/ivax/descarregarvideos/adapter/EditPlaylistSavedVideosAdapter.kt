@@ -1,14 +1,17 @@
 package com.ivax.descarregarvideos.adapter
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.adapter.VideoAdapter.ViewHolder
@@ -16,6 +19,7 @@ import com.ivax.descarregarvideos.classes.MainDiffCallBack
 import com.ivax.descarregarvideos.classes.VideoItem
 import com.ivax.descarregarvideos.entities.SavedVideo
 import java.io.FileInputStream
+import java.util.Collections
 
 class EditPlaylistSavedVideosAdapter :
     RecyclerView.Adapter<EditPlaylistSavedVideosAdapter.ViewHolder>() {
@@ -36,6 +40,7 @@ class EditPlaylistSavedVideosAdapter :
         diffResult.dispatchUpdatesTo(this)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onBindViewHolder(
         holder: ViewHolder,
         position: Int
@@ -54,19 +59,41 @@ class EditPlaylistSavedVideosAdapter :
 
         }
 
+
         holder.apply {
             videoDurationEdit.text=currentItem.duration
             title.text=currentItem.title
+            gripButton.setOnTouchListener(object : View.OnTouchListener {
+                override fun onTouch(
+                    v: View?,
+                    event: MotionEvent?
+                ): Boolean {
+                    if(event?.action==MotionEvent.ACTION_DOWN){
+                        callback(holder)
+                    }
+                    return false
+                }
+
+            })
         }
+    }
+    fun onRowMoved(fromPosition: Int,toPosition : Int){
+        Collections.swap(items,fromPosition,toPosition)
+        notifyItemMoved(fromPosition, toPosition);
     }
 
     override fun getItemCount(): Int {
         return items.size
+    }
+    private lateinit var callback : (EditPlaylistSavedVideosAdapter.ViewHolder) -> Unit
+    fun setCallbackDrag(callback: (EditPlaylistSavedVideosAdapter.ViewHolder) -> Unit) {
+        this.callback=callback
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val videoDurationEdit = itemView.findViewById<TextView>(R.id.videoDurationEdit)
         val thumbnail=itemView.findViewById<ImageView>(R.id.imageViewEditPlaylist)
         val title=itemView.findViewById<TextView>(R.id.tbxSavedVideoEditDesc)
+        val gripButton=itemView.findViewById<ImageView>(R.id.btnGrip)
     }
 }
