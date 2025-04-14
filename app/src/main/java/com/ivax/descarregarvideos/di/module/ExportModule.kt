@@ -32,7 +32,7 @@ object ExportModule {
         @ApplicationContext app: Context
     ) = Room.databaseBuilder(
         app, AppDatabase::class.java, "DescarregarVideosDB"
-    ).addMigrations(MIGRATION_5_6).build()
+    ).addMigrations(MIGRATION_5_6).addMigrations(MIGRATION_9_10).build()
     @Singleton
     @Provides
     fun provideVideoDao(db: AppDatabase) = db.videoDao()
@@ -53,6 +53,15 @@ object ExportModule {
             database.execSQL("CREATE TABLE playlist(" +
                     "playListId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
                     "name TEXT)")
+        }
+    }
+
+    val MIGRATION_9_10 = object: Migration (9, 10) {
+        override fun migrate (database: SupportSQLiteDatabase) {
+            database.execSQL("DELETE FROM PlaylistSavedVideoCrossRef")
+            /*database.execSQL("CREATE TABLE playlist(" +
+                    "playListId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
+                    "name TEXT)")*/
         }
     }
 }

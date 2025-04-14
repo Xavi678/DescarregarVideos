@@ -17,6 +17,12 @@ import javax.inject.Inject
 class ChoosePlaylistViewModel @Inject constructor(private val videoRepository: VideoRepository): ViewModel() {
     fun insertSavedVideoToPlaylist(playlistSavedVideoCrossRef: PlaylistSavedVideoCrossRef) {
         viewModelScope.launch(Dispatchers.IO) {
+            val listPlaylistSavedVideoCrossRef=videoRepository.getPlaylistSavedVideoCrossRefbyPlaylistId(playlistSavedVideoCrossRef.playListId)
+            val last= listPlaylistSavedVideoCrossRef.maxByOrNull {
+                it.position
+            }
+            val position: Int= last?.position ?: 0
+            playlistSavedVideoCrossRef.position=position
             videoRepository.addPlaylistSavedVideo(playlistSavedVideoCrossRef)
         }
     }

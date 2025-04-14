@@ -13,6 +13,7 @@ data class PlaylistWithSavedVideos(
         parentColumn = "playListId",
         entityColumn = "videoId",
         associateBy = Junction(PlaylistSavedVideoCrossRef::class)
+
     )
     val videos: List<SavedVideo>
 )

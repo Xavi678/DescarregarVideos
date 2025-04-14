@@ -61,7 +61,8 @@ class ChoosePlaylistDialogFragment : DialogFragment() {
             if(checkedItems.isNotEmpty()){
 
                 for (checkedItem in checkedItems){
-                    var playlistSavedVideoCrossRef=PlaylistSavedVideoCrossRef(videoId = videoId, playListId = checkedItem.playListId)
+                    var playlistSavedVideoCrossRef=PlaylistSavedVideoCrossRef(videoId = videoId,
+                        playListId = checkedItem.playListId)
                     choosePlaylistViewModel.insertSavedVideoToPlaylist(playlistSavedVideoCrossRef)
                 }
             }

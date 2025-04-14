@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ivax.descarregarvideos.adapter.PlaylistAdapter
 import com.ivax.descarregarvideos.databinding.FragmentHomeBinding
 import com.ivax.descarregarvideos.databinding.FragmentPlaylistsBinding
+import com.ivax.descarregarvideos.dialog_fragments.edit.playlist.menu.EditPlaylistMenuFragment
 import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
 import com.ivax.descarregarvideos.ui.search.SearchFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -40,6 +41,14 @@ class PlaylistsFragment : Fragment(){
         val root: View = binding.root
         playlistsViewModel.playlists.observe(viewLifecycleOwner) {
             playlistAdapter.addItems(it)
+        }
+        playlistAdapter.setListener { playlistId ->
+
+            val editPlaylistMenuFragment=EditPlaylistMenuFragment()
+            var bundle= Bundle()
+            bundle.putInt("playlistId",playlistId)
+            editPlaylistMenuFragment.arguments=bundle
+            editPlaylistMenuFragment.show(requireActivity().supportFragmentManager,"DescarregarVideos")
         }
         setupUI()
         return root

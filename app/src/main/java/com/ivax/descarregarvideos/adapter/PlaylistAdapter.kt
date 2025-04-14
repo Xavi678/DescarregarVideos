@@ -3,6 +3,7 @@ package com.ivax.descarregarvideos.adapter
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,11 +18,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.adapter.ChoosePlaylistListAdapter.ViewHolder
 import com.ivax.descarregarvideos.classes.MainDiffCallBack
+import com.ivax.descarregarvideos.dialog_fragments.edit.playlist.menu.EditPlaylistMenuFragment
 import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
 import java.io.FileInputStream
 
 class PlaylistAdapter(private val playAll: (PlaylistWithSavedVideos) -> Unit) : RecyclerView.Adapter<PlaylistAdapter.ViewHolder>() {
+    private var listener: ((playlistId: Int) -> Unit)? = null
 
+    fun setListener(listener: ((playlistId: Int) -> Unit)?) {
+        this.listener = listener
+    }
     private val items = ArrayList<PlaylistWithSavedVideos>()
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -68,6 +74,13 @@ class PlaylistAdapter(private val playAll: (PlaylistWithSavedVideos) -> Unit) : 
             bundle.putInt("playlistId",playlistWSavedVideos.playlist.playListId)
             navController.navigate(R.id.nav_edit_playlist,bundle)
         }
+        holder.savedVideoMenu.setOnClickListener {
+
+            listener?.invoke(playlistWSavedVideos.playlist.playListId)
+
+
+            Log.d("DescarregarVideos","1")
+        }
     }
 
     override fun getItemCount(): Int {
@@ -81,5 +94,6 @@ class PlaylistAdapter(private val playAll: (PlaylistWithSavedVideos) -> Unit) : 
         val playButton=itemView.findViewById<LinearLayout>(R.id.layoutImageButtonPlaylistPlayAll)
         val playlistCount=itemView.findViewById<TextView>(R.id.tbxPlaylistCountVideos)
         val playlistConstraint=itemView.findViewById<ConstraintLayout>(R.id.layoutPlaylist)
+        val savedVideoMenu=itemView.findViewById<ImageButton>(R.id.imageButtonPlaylistOptions)
     }
 }

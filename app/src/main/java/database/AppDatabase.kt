@@ -20,11 +20,13 @@ import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
     AutoMigration(from = 2,to = 3)
 ]
 * */
-@Database(entities = [SavedVideo::class, Playlist::class, PlaylistSavedVideoCrossRef::class],exportSchema = true, version = 7,autoMigrations = [
+@Database(entities = [SavedVideo::class, Playlist::class, PlaylistSavedVideoCrossRef::class],exportSchema = true, version = 10,autoMigrations = [
     AutoMigration(from = 2,to = 3),
     AutoMigration(from = 3,to = 4),
     AutoMigration(from = 4,to = 5),
-    AutoMigration(from = 6,to = 7)
+    AutoMigration(from = 6,to = 7),
+    AutoMigration(from = 7,to = 8),
+    AutoMigration(from = 8,to = 9)
 ])
 abstract class AppDatabase : RoomDatabase() {
     abstract fun videoDao(): VideoDao
