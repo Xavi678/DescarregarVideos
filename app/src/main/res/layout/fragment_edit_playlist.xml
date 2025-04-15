@@ -19,12 +19,13 @@
         android:textColor="@color/black">
 
     </TextView>
+
     <LinearLayout
         android:id="@+id/layoutImageButtonEditPlaylistPlayAll"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="12dp"
         android:layout_marginTop="13dp"
         android:background="@drawable/rounded_rect"
         android:orientation="horizontal"
@@ -40,19 +41,19 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"
             android:background="@android:color/transparent"
+            android:duplicateParentState="true"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/play_button"
-            android:duplicateParentState="true"/>
+            app:srcCompat="@drawable/play_button" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="2dp"
+            android:duplicateParentState="true"
             android:text="Reproduir"
             android:textColor="@color/white"
-            android:textSize="11sp"
-            android:duplicateParentState="true">
+            android:textSize="11sp">
 
         </TextView>
 

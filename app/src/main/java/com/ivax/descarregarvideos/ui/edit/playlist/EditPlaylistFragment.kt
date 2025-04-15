@@ -36,12 +36,12 @@ class EditPlaylistFragment : Fragment() {
         _binding=FragmentEditPlaylistBinding.inflate(inflater,container,false)
         val root: View = binding.root
         val playlistId=requireArguments().getInt("playlistId")
-        var playlistWithSavedVideos=editPlaylistViewModel.getPlaylist(playlistId)
+        editPlaylistViewModel.getPlaylist(playlistId)
         lifecycleScope.launch {
-            editPlaylistViewModel.playlistWithSavedVideos.collectLatest {
+            editPlaylistViewModel.playlistIdWithPositions.collectLatest {
                 if (it!=null){
-                    binding.tbxEditPlaylistTitle.text=it.playlist.name
-                    adapter.addItems(it.videos)
+                    //binding.tbxEditPlaylistTitle.text=it.
+                    adapter.addItems(it)
                 }
             }
         }
@@ -74,7 +74,10 @@ class EditPlaylistFragment : Fragment() {
                 viewHolder: RecyclerView.ViewHolder,
                 target: RecyclerView.ViewHolder
             ): Boolean {
-                adapter.onRowMoved(viewHolder.bindingAdapterPosition,target.bindingAdapterPosition)
+                val (from,to)=adapter.onRowMoved(viewHolder.bindingAdapterPosition,target.bindingAdapterPosition)
+
+                editPlaylistViewModel.UpdatePlaylistSavedVideoCrossRef(from)
+                editPlaylistViewModel.UpdatePlaylistSavedVideoCrossRef(to)
                 return true
             }
 

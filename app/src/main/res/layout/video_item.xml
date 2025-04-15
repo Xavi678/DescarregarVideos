@@ -17,16 +17,16 @@
         app:layout_constraintTop_toTopOf="parent" android:visibility="invisible" />
 
 
-
     <TextView
         android:id="@+id/tbxVideoDesc"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:maxWidth="270dp"
         android:layout_marginTop="16dp"
+        android:layout_marginEnd="10dp"
         android:text="TextView"
         android:textColor="@color/black"
+        app:layout_constraintEnd_toStartOf="@+id/savedVideoButtonMenuOptions"
         app:layout_constraintStart_toEndOf="@id/relativeImg"
         app:layout_constraintTop_toTopOf="parent" />
 

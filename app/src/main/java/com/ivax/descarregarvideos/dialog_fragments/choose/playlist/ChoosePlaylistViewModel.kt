@@ -21,7 +21,7 @@ class ChoosePlaylistViewModel @Inject constructor(private val videoRepository: V
             val last= listPlaylistSavedVideoCrossRef.maxByOrNull {
                 it.position
             }
-            val position: Int= last?.position ?: 0
+            val position: Int= (last?.position?.plus(1)) ?: 0
             playlistSavedVideoCrossRef.position=position
             videoRepository.addPlaylistSavedVideo(playlistSavedVideoCrossRef)
         }

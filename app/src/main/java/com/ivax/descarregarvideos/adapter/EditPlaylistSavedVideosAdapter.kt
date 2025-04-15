@@ -17,13 +17,14 @@ import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.adapter.VideoAdapter.ViewHolder
 import com.ivax.descarregarvideos.classes.MainDiffCallBack
 import com.ivax.descarregarvideos.classes.VideoItem
+import com.ivax.descarregarvideos.classes.VideosWithPositionFoo
 import com.ivax.descarregarvideos.entities.SavedVideo
 import java.io.FileInputStream
 import java.util.Collections
 
 class EditPlaylistSavedVideosAdapter :
     RecyclerView.Adapter<EditPlaylistSavedVideosAdapter.ViewHolder>() {
-    private val items = ArrayList<SavedVideo>()
+    private val items = ArrayList<VideosWithPositionFoo>()
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
@@ -33,10 +34,11 @@ class EditPlaylistSavedVideosAdapter :
         return ViewHolder(itemView)
     }
 
-    fun addItems(items: List<SavedVideo>) {
+    fun addItems(items: List<VideosWithPositionFoo>) {
         val diffResult = DiffUtil.calculateDiff(MainDiffCallBack(this.items, items))
         this.items.clear()
         this.items.addAll(items)
+        this.items.sortBy { it.position }
         diffResult.dispatchUpdatesTo(this)
     }
 
@@ -77,9 +79,15 @@ class EditPlaylistSavedVideosAdapter :
             })
         }
     }
-    fun onRowMoved(fromPosition: Int,toPosition : Int){
+    fun onRowMoved(fromPosition: Int,toPosition : Int): Pair<VideosWithPositionFoo,VideosWithPositionFoo> {
+        var from=items[fromPosition]
+        var to=items[toPosition]
         Collections.swap(items,fromPosition,toPosition)
         notifyItemMoved(fromPosition, toPosition);
+        from.position=toPosition
+        to.position=fromPosition
+
+        return Pair<VideosWithPositionFoo, VideosWithPositionFoo>(from,to)
     }
 
     override fun getItemCount(): Int {

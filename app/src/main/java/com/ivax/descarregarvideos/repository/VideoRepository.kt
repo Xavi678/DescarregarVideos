@@ -1,5 +1,7 @@
 package com.ivax.descarregarvideos.repository
 
+import android.util.Log
+import com.ivax.descarregarvideos.classes.VideosWithPositionFoo
 import com.ivax.descarregarvideos.dao.PlayListDao
 import com.ivax.descarregarvideos.dao.PlaylistSavedVideoCrossRefDao
 import com.ivax.descarregarvideos.dao.VideoDao
@@ -43,7 +45,9 @@ class VideoRepository @Inject constructor(private val videoDao: VideoDao,
             playlistSavedVideoCrossRefDao.insert(playlistSavedVideoCrossRef)
         }
     }
-
+    fun getByPlaylistIdWithPositions(playlistId: Int) : List<VideosWithPositionFoo> {
+        return playlistSavedVideoCrossRefDao.getByPlaylistIdWithPositions(playlistId)
+    }
     fun playlistSavedVideoCrossRefExists(playlistSavedVideoCrossRef: PlaylistSavedVideoCrossRef): Boolean {
 
         return playlistSavedVideoCrossRefDao.first(playlistSavedVideoCrossRef.playListId,playlistSavedVideoCrossRef.videoId)!=null
@@ -56,10 +60,20 @@ class VideoRepository @Inject constructor(private val videoDao: VideoDao,
     fun deletePlaylist(playlistId: Int) {
         playListDao.deletePlaylist(playlistId)
         playlistSavedVideoCrossRefDao.deletePlaylist(playlistId)
-        playlistSavedVideoCrossRefDao.deleteAll()
+        //val res=playlistSavedVideoCrossRefDao.deleteAll()
     }
 
     fun firstPlaylistWithSavedVideos(playlistId: Int): PlaylistWithSavedVideos {
        return playListDao.firstWithSavedVideos(playlistId)
+    }
+
+    fun UpdatePlaylistSavedVideoCrossRef(videosWithPositionFoo: PlaylistSavedVideoCrossRef) {
+        Log.d("DescarregarVideos","Video Id: ${videosWithPositionFoo.videoId} Position: ${videosWithPositionFoo.position}")
+        playlistSavedVideoCrossRefDao.updatePlaylistSavedVideoCrossRef(videosWithPositionFoo)
+    }
+
+    fun getPlaylistSavedVideoCrossRefByFoo(videosWithPositionFoo: VideosWithPositionFoo): PlaylistSavedVideoCrossRef? {
+
+       return playlistSavedVideoCrossRefDao.first(videosWithPositionFoo.playListId,videosWithPositionFoo.videoId)
     }
 }
