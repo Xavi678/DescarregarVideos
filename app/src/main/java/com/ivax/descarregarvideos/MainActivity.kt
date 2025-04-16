@@ -31,8 +31,12 @@ import com.ivax.descarregarvideos.general.viewmodels.MediaViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.FileInputStream
 import android.view.animation.AnimationUtils
+import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.Player.MediaItemTransitionReason
 import androidx.media3.exoplayer.ExoPlayer
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
@@ -122,8 +126,31 @@ class MainActivity : AppCompatActivity() {
             //playerSongTextView.startAnimation(animMove)
             //thumbnailPlayer.setImageBitmap(it)
         }*/
+        lifecycleScope.launch {
+            mediaViewModel.title.collectLatest {
+                Log.d("DescarregarVideos","Visibilitat Player: ${binding.appBarMain.playerView.visibility}")
 
+                playerSongTextView.text = it
+            }
+        }
+        lifecycleScope.launch {
+            mediaViewModel.thumbnail.collectLatest {
+                if(it!=null) {
+                    thumbnailPlayer.setImageBitmap(it)
+                }
+            }
+        }
+        lifecycleScope.launch {
+            mediaViewModel.playlistHasPrevious.collectLatest {
+                hasPreviousMedia(it)
+            }
+        }
 
+        lifecycleScope.launch {
+            mediaViewModel.playlistHasNext.collectLatest {
+                hasNextMedia(it)
+            }
+        }
         seekBarI.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(
                 seekBar: SeekBar?,
@@ -185,8 +212,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-                hasPreviousMedia()
-                hasNextMedia()
+                hasNextAndPreviousMedia()
                 if (!isSeeking) {
                     setTotalDuration()
 
@@ -228,8 +254,7 @@ class MainActivity : AppCompatActivity() {
                 mediaItem: MediaItem?,
                 @MediaItemTransitionReason reason: Int
             ) {
-                hasPreviousMedia()
-                hasNextMedia()
+                hasNextAndPreviousMedia()
                 seekBarProgress = 0
                 if (player.duration != Long.MIN_VALUE) {
                     setTotalDuration()
@@ -242,8 +267,13 @@ class MainActivity : AppCompatActivity() {
                     bmp = BitmapFactory.decodeStream(it)
                 }
                 fileInStream.close()
-                thumbnailPlayer.setImageBitmap(bmp)
-                playerSongTextView.text = title
+                mediaViewModel.thumbnail.update {
+                    bmp
+                }
+                mediaViewModel.title.update {
+                    title.toString()
+                }
+                //playerSongTextView.text =
                 Log.d("DescarregarVideos", "")
 
                 //super.onMediaItemTransition(mediaItem, reason)
@@ -297,13 +327,22 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
     }
 
-    private fun hasNextMedia() {
-        btnSkipForward.visibility = if (player.hasNextMediaItem()) View.VISIBLE
+    private fun hasNextAndPreviousMedia() {
+        mediaViewModel.playlistHasPrevious.update {
+            player.hasPreviousMediaItem()
+        }
+        mediaViewModel.playlistHasNext.update {
+            player.hasNextMediaItem()
+        }
+    }
+
+    private fun hasNextMedia(it : Boolean) {
+        btnSkipForward.visibility = if (it) View.VISIBLE
         else View.INVISIBLE
     }
 
-    private fun hasPreviousMedia() {
-        btnSkipBackward.visibility = if (player.hasPreviousMediaItem()) View.VISIBLE
+    private fun hasPreviousMedia(it : Boolean) {
+        btnSkipBackward.visibility = if (it) View.VISIBLE
         else View.INVISIBLE
     }
 

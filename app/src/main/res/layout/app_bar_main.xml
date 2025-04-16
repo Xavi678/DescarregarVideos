@@ -48,12 +48,14 @@
             android:id="@+id/player_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:show_buffering="when_playing"
-            app:show_shuffle_button="true" app:controller_layout_id="@layout/custom_player_controls"
+
+            app:controller_layout_id="@layout/custom_player_controls"
             app:show_timeout="0"
             android:elevation="2dp"
             android:background="@android:color/transparent"
             app:shutter_background_color="@color/white"
+            app:hide_on_touch="false"
+
             />
 
         <!--<androidx.media3.ui.PlayerControlView
