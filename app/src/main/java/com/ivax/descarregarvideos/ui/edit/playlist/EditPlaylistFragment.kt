@@ -44,6 +44,12 @@ class EditPlaylistFragment : Fragment() {
                     adapter.addItems(it)
                 }
             }
+
+        }
+        lifecycleScope.launch {
+            editPlaylistViewModel.playlist.collectLatest {
+                binding.tbxEditPlaylistTitle.text=it?.name
+            }
         }
 
 /*        binding.imageButtonEditPlaylistGoBack.setOnClickListener {

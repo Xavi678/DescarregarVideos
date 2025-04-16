@@ -20,9 +20,10 @@ class MediaPlayerRepository @Inject constructor(private val mediaHelper: IMediaH
     fun addItemMedia(mediaItem: MediaItem){
         mediaHelper.addMediaItem(mediaItem)
     }
-    /*fun play(){
+    fun play(){
         mediaHelper.play()
-    }*/
+    }
+
     fun getMediaPlayer(): ExoPlayer {
         return mediaHelper.getMediaPlayer()
     }

@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivax.descarregarvideos.classes.VideosWithPositionFoo
+import com.ivax.descarregarvideos.entities.Playlist
 import com.ivax.descarregarvideos.entities.PlaylistSavedVideoCrossRef
 import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
 import com.ivax.descarregarvideos.repository.VideoRepository
@@ -20,6 +21,9 @@ class EditPlaylistViewModel @Inject constructor(private val videoRepository: Vid
     /*private val _playlistWithSavedVideos: MutableStateFlow<List<PlaylistWithSavedVideos>?> by lazy {
         MutableStateFlow<List<PlaylistWithSavedVideos>?>(null)
     }*/
+    private val _playlist: MutableStateFlow<Playlist?> by lazy {
+        MutableStateFlow(null)
+    }
     private val _playlistIdWithPositions: MutableStateFlow<List<VideosWithPositionFoo>?> by lazy {
         MutableStateFlow<List<VideosWithPositionFoo>?>(null)
     }
@@ -29,14 +33,23 @@ class EditPlaylistViewModel @Inject constructor(private val videoRepository: Vid
             _playlistIdWithPositions.update {
                 videoRepository.getByPlaylistIdWithPositions(playlistId)
             }
+
+            _playlist.update {
+                videoRepository.firstPlaylist(playlistId)
+            }
+
+
         }
 
     }
 
     fun UpdatePlaylistSavedVideoCrossRef(videosWithPositionFoo: VideosWithPositionFoo) {
         viewModelScope.launch(Dispatchers.IO) {
-            val playlistSavedVideoCrossRef: PlaylistSavedVideoCrossRef? =videoRepository.getPlaylistSavedVideoCrossRefByFoo(videosWithPositionFoo)
-            if(playlistSavedVideoCrossRef!=null) {
+            val playlistSavedVideoCrossRef: PlaylistSavedVideoCrossRef? =
+                videoRepository.getPlaylistSavedVideoCrossRefByFoo(videosWithPositionFoo)
+
+            if (playlistSavedVideoCrossRef != null) {
+                playlistSavedVideoCrossRef.position = videosWithPositionFoo.position
                 videoRepository.UpdatePlaylistSavedVideoCrossRef(playlistSavedVideoCrossRef)
             }
         }
@@ -44,4 +57,5 @@ class EditPlaylistViewModel @Inject constructor(private val videoRepository: Vid
 
     //val playlistWithSavedVideos get() = _playlistWithSavedVideos
     val playlistIdWithPositions get() = _playlistIdWithPositions
+    val playlist get() = _playlist
 }

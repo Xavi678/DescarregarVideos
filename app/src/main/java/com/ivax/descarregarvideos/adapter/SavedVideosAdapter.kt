@@ -48,6 +48,7 @@ class SavedVideosAdapter(private val playMedia: (SavedVideo) -> Unit,private val
         fileInStream.close()
         holder.imgThumbnail.setImageBitmap(bmp)
         holder.tbxTitle.text=item.title
+        holder.duration.text=item.duration
         holder.buttonPlay.setOnClickListener { view->
             if(item.videoUrl!=null) {
                 playMedia(item)
@@ -68,5 +69,6 @@ class SavedVideosAdapter(private val playMedia: (SavedVideo) -> Unit,private val
         val tbxTitle: TextView =itemView.findViewById<TextView>(R.id.tbxSavedVideoDesc)
         val buttonPlay: ImageButton = itemView.findViewById<ImageButton>(R.id.playButton)
         val buttonOptions: ImageButton=itemView.findViewById<ImageButton>(R.id.savedVideoButtonMenuOptions)
+        val duration: TextView=itemView.findViewById<TextView>(R.id.videoDuration)
     }
 }

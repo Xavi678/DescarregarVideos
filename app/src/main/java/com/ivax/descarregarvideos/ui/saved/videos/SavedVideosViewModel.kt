@@ -30,7 +30,7 @@ class SavedVideosViewModel @Inject constructor(private val repository: VideoRepo
     }
 
     fun play(){
-        //mediaPlayerRepository.play()
+        mediaPlayerRepository.play()
     }
 
     /*fun setThumbnail(bitmap: Bitmap){

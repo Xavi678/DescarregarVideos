@@ -34,7 +34,6 @@ class SavedVideosFragment : Fragment() {
         savedVideoAdapter= SavedVideosAdapter(playMedia= fun(savedVideo: SavedVideo){
             savedVideosViewModel.addItemMedia(savedVideo)
             savedVideosViewModel.setSavedVideo(savedVideo)
-            //savedVideosViewModel.setThumbnail(bitMap)
             savedVideosViewModel.play()
             savedVideosViewModel.setMediaVisibility(true)
         }, openMenu = fun(videoId: String){
