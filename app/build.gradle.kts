@@ -78,6 +78,7 @@ dependencies {
     implementation(libs.android.exoplayer)
     implementation(libs.android.exoplayer.dash)
     implementation(libs.android.exoplayer.ui)
+    implementation(libs.android.exoplayer.session)
     ksp(libs.dagger.compiler)
     ksp(libs.android.room.ksp)
     testImplementation(libs.junit)

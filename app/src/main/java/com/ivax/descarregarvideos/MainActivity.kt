@@ -1,5 +1,6 @@
 package com.ivax.descarregarvideos
 
+import android.content.ComponentName
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -34,6 +35,11 @@ import android.view.animation.AnimationUtils
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.Player.MediaItemTransitionReason
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
+import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.MoreExecutors
+import com.ivax.descarregarvideos.services.PlaybackService
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -46,10 +52,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var tbxTimeDuration: TextView
     private lateinit var seekBarI: SeekBar
-    private lateinit var player: ExoPlayer
+    private lateinit var player: MediaController
     private lateinit var btnSkipBackward: ImageButton
     private lateinit var btnSkipForward: ImageButton
-
+    private lateinit var controllerFuture : ListenableFuture<MediaController>
     //private var timer=Timer()
     private var seekBarProgress = 0
     private var isTimerCancelled = false
@@ -78,6 +84,115 @@ class MainActivity : AppCompatActivity() {
         ViewModelProvider(this).get(MediaViewModel::class.java)
     }
 
+    override fun onStart() {
+        val sessionToken =
+            SessionToken(this, ComponentName(this, PlaybackService::class.java))
+        controllerFuture =
+            MediaController.Builder(this, sessionToken).buildAsync()
+        controllerFuture.addListener({
+            try{
+                val mediaController=controllerFuture.get()
+                mediaViewModel.setMediaController(mediaController)
+                player = mediaViewModel.getMediaPlayer()
+                binding.appBarMain.playerView.player = player
+                player.addListener(object : Player.Listener {
+                    override fun onPositionDiscontinuity(
+                        oldPosition: Player.PositionInfo,
+                        newPosition: Player.PositionInfo,
+                        reason: Int
+                    ) {
+                        Log.d("DescarregarVideos", "Old: ${oldPosition.positionMs}")
+                        Log.d("DescarregarVideos", "New: ${newPosition.positionMs}")
+                        super.onPositionDiscontinuity(oldPosition, newPosition, reason)
+                    }
+
+                    override fun onIsPlayingChanged(isPlaying: Boolean) {
+                        hasNextAndPreviousMedia()
+                        if (!isSeeking) {
+                            setTotalDuration()
+
+                            var position = player.currentPosition / 1000f
+                            Log.d("DescarregarVideos", (player.currentPosition / 1000f).toString())
+                            seekBarProgress = position.toInt()
+                            seekBarI.progress = seekBarProgress
+
+                            tbxTimeDuration.text = MathExtensions.toTime(seekBarProgress)
+                            //val fixedRateTimer = fixedRateTimer(
+                            if (isPlaying) {
+                                isTimerCancelled = false
+                                try {
+                                    //timerTask= TimerTask()
+                                    timer.schedule()
+                                } catch (e: Exception) {
+                                    e.message.let { Log.d("DescarregarVideo", it.toString()) }
+
+                                }
+
+                                // Active playback.
+                            } else {
+                                try {
+                                    //timer.cancel()
+                                    timer.cancel()
+                                } catch (e: Exception) {
+                                    Log.d("DescarregarVideos", e.message.toString())
+                                }
+                                isTimerCancelled = true
+                                // Not playing because playback is paused, ended, suppressed, or the player
+                                // is buffering, stopped or failed. Check player.playWhenReady,
+                                // player.playbackState, player.playbackSuppressionReason and
+                                // player.playerError for details.
+                            }
+                        }
+                    }
+
+                    override fun onMediaItemTransition(
+                        mediaItem: MediaItem?,
+                        @MediaItemTransitionReason reason: Int
+                    ) {
+                        hasNextAndPreviousMedia()
+                        seekBarProgress = 0
+                        if (player.duration != Long.MIN_VALUE) {
+                            setTotalDuration()
+                        }
+                        val title = mediaItem?.mediaMetadata?.title
+                        val uri = mediaItem?.mediaMetadata?.artworkUri
+                        var bmp: Bitmap
+                        var fileInStream = FileInputStream(uri.toString())
+                        fileInStream.use {
+                            bmp = BitmapFactory.decodeStream(it)
+                        }
+                        fileInStream.close()
+                        mediaViewModel.thumbnail.update {
+                            bmp
+                        }
+                        mediaViewModel.title.update {
+                            title.toString()
+                        }
+                        //playerSongTextView.text =
+                        Log.d("DescarregarVideos", "")
+
+                        //super.onMediaItemTransition(mediaItem, reason)
+                        Log.d("DescarregarVideos", "${mediaItem?.mediaMetadata}")
+
+                    }
+
+
+                })
+        }catch (e: Exception){
+            Log.d("DescarregarVideos",e.message.toString())
+        }
+            // MediaController is available here with controllerFuture.get()
+        }, MoreExecutors.directExecutor())
+
+
+        super.onStart()
+    }
+
+    override fun onStop() {
+
+        MediaController.releaseFuture(controllerFuture)
+        super.onStop()
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -85,9 +200,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.appBarMain.toolbar)
-        player = mediaViewModel.getMediaPlayer()
 
-        binding.appBarMain.playerView.player = player
+
+
         var playButton =
             binding.appBarMain.root.findViewById<ImageButton>(R.id.mediaPlayerPlayButton)
         var thumbnailPlayer =
@@ -98,7 +213,6 @@ class MainActivity : AppCompatActivity() {
         btnSkipForward = binding.appBarMain.root.findViewById<ImageButton>(R.id.skipBForward)
         tbxTimeDuration = binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeDuration)
         seekBarI = binding.appBarMain.root.findViewById<SeekBar>(R.id.seekBar)
-        val animMove = AnimationUtils.loadAnimation(this, R.anim.move)
         tbxTimeTotal = binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeTotal)
 
         mediaViewModel.isMediaVisible.observe(this) {
@@ -131,6 +245,7 @@ class MainActivity : AppCompatActivity() {
                 Log.d("DescarregarVideos","Visibilitat Player: ${binding.appBarMain.playerView.visibility}")
 
                 playerSongTextView.text = it
+                playerSongTextView.isSelected=true
             }
         }
         lifecycleScope.launch {
@@ -200,89 +315,7 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
-        player.addListener(object : Player.Listener {
-            override fun onPositionDiscontinuity(
-                oldPosition: Player.PositionInfo,
-                newPosition: Player.PositionInfo,
-                reason: Int
-            ) {
-                Log.d("DescarregarVideos", "Old: ${oldPosition.positionMs}")
-                Log.d("DescarregarVideos", "New: ${newPosition.positionMs}")
-                super.onPositionDiscontinuity(oldPosition, newPosition, reason)
-            }
 
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                hasNextAndPreviousMedia()
-                if (!isSeeking) {
-                    setTotalDuration()
-
-                    var position = player.currentPosition / 1000f
-                    Log.d("DescarregarVideos", (player.currentPosition / 1000f).toString())
-                    seekBarProgress = position.toInt()
-                    seekBarI.progress = seekBarProgress
-
-                    tbxTimeDuration.text = MathExtensions.toTime(seekBarProgress)
-                    //val fixedRateTimer = fixedRateTimer(
-                    if (isPlaying) {
-                        isTimerCancelled = false
-                        try {
-                            //timerTask= TimerTask()
-                            timer.schedule()
-                        } catch (e: Exception) {
-                            e.message.let { Log.d("DescarregarVideo", it.toString()) }
-
-                        }
-
-                        // Active playback.
-                    } else {
-                        try {
-                            //timer.cancel()
-                            timer.cancel()
-                        } catch (e: Exception) {
-                            Log.d("DescarregarVideos", e.message.toString())
-                        }
-                        isTimerCancelled = true
-                        // Not playing because playback is paused, ended, suppressed, or the player
-                        // is buffering, stopped or failed. Check player.playWhenReady,
-                        // player.playbackState, player.playbackSuppressionReason and
-                        // player.playerError for details.
-                    }
-                }
-            }
-
-            override fun onMediaItemTransition(
-                mediaItem: MediaItem?,
-                @MediaItemTransitionReason reason: Int
-            ) {
-                hasNextAndPreviousMedia()
-                seekBarProgress = 0
-                if (player.duration != Long.MIN_VALUE) {
-                    setTotalDuration()
-                }
-                val title = mediaItem?.mediaMetadata?.title
-                val uri = mediaItem?.mediaMetadata?.artworkUri
-                var bmp: Bitmap
-                var fileInStream = FileInputStream(uri.toString())
-                fileInStream.use {
-                    bmp = BitmapFactory.decodeStream(it)
-                }
-                fileInStream.close()
-                mediaViewModel.thumbnail.update {
-                    bmp
-                }
-                mediaViewModel.title.update {
-                    title.toString()
-                }
-                //playerSongTextView.text =
-                Log.d("DescarregarVideos", "")
-
-                //super.onMediaItemTransition(mediaItem, reason)
-                Log.d("DescarregarVideos", "${mediaItem?.mediaMetadata}")
-
-            }
-
-
-        })
         playButton.setOnClickListener { view ->
             var playPause = (view as ImageButton)
             if (player.isPlaying) {

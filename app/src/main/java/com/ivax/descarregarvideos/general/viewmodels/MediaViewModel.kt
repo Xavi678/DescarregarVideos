@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaController
 import com.ivax.descarregarvideos.entities.SavedVideo
 import com.ivax.descarregarvideos.repository.MediaPlayerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,6 +20,10 @@ class MediaViewModel @Inject constructor(private val mediaPlayerRepository:Media
 
     //val currentThumbnail=mediaPlayerRepository.getCurrentThumbnail()
     val isMediaVisible=mediaPlayerRepository.getCurrentMediaVisibility()
+
+    fun setMediaController(mediaController: MediaController){
+        mediaPlayerRepository.setMediaController(mediaController)
+    }
 
     val currentMedia=mediaPlayerRepository.getCurrentMedia()
     fun addItemMedia(mediaItem: MediaItem){
@@ -37,7 +42,7 @@ class MediaViewModel @Inject constructor(private val mediaPlayerRepository:Media
         MutableStateFlow(null)
     }
 
-    fun getMediaPlayer() : ExoPlayer{
+    fun getMediaPlayer() : MediaController{
 
        return mediaPlayerRepository.getMediaPlayer()
     }

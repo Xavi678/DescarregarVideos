@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.ivax.descarregarvideos.dao.VideoDao
-import com.ivax.descarregarvideos.entities.PlaylistSavedVideoCrossRef
 import com.ivax.descarregarvideos.helpers.CustomFileWriter
 import com.ivax.descarregarvideos.helpers.FileWriter
+import com.ivax.descarregarvideos.helpers.ICustomMediaController
 import com.ivax.descarregarvideos.helpers.IMediaHelper
+import com.ivax.descarregarvideos.helpers.CustomMediaController
 import com.ivax.descarregarvideos.helpers.MediaHelper
 import dagger.Module
 import dagger.Provides
@@ -27,6 +27,10 @@ object ExportModule {
         return CustomFileWriter(context)
     }
     @Singleton
+    @Provides
+    fun provideMediaController() : ICustomMediaController{
+        return CustomMediaController()
+    }
     @Provides
     fun provideUserDatabase(
         @ApplicationContext app: Context

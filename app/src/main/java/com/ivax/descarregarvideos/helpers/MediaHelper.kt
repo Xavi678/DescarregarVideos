@@ -8,11 +8,17 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaController
 import com.ivax.descarregarvideos.entities.SavedVideo
 import javax.inject.Inject
 
 class MediaHelper @Inject constructor(private val appContext: Context) : IMediaHelper {
-    private var player : ExoPlayer = ExoPlayer.Builder(appContext).build()
+
+    private lateinit var mediaController : MediaController
+    //private var player : ExoPlayer = mediaController
+    override fun setMediaController(mediaController :MediaController){
+        this.mediaController=mediaController
+    }
     private val actualVideo : MutableLiveData<SavedVideo> by lazy {
         MutableLiveData<SavedVideo>()
     }
@@ -21,17 +27,17 @@ class MediaHelper @Inject constructor(private val appContext: Context) : IMediaH
     }
 
     override fun play(){
-        player.prepare()
-        player.play()
+        mediaController.prepare()
+        mediaController.play()
     }
 
     override fun addMediaItem(mediaItem: MediaItem){
-        player.addMediaItem(mediaItem)
+        mediaController.addMediaItem(mediaItem)
         //player.setMediaItem(mediaItem)
     }
 
-    override fun getMediaPlayer(): ExoPlayer {
-        return player
+    override fun getMediaPlayer(): MediaController {
+        return mediaController
     }
 
     /*override fun setThumbnail(bitmap: Bitmap)  {
