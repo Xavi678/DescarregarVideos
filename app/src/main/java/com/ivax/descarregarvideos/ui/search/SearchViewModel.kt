@@ -10,11 +10,9 @@ import com.ivax.descarregarvideos.classes.VideoItem
 import com.ivax.descarregarvideos.entities.SavedVideo
 import com.ivax.descarregarvideos.repository.FileRepository
 import com.ivax.descarregarvideos.repository.VideoRepository
+import com.ivax.descarregarvideos.repository.YoutubeRepository
 import com.ivax.descarregarvideos.responses.PlayerResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
-import domain.DownloadStreamUseCase
-import domain.GetVideoDataUseCase
-import domain.SearchVideosUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +21,9 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 @HiltViewModel
 class SearchViewModel @Inject constructor(private val fileRepository: FileRepository,
-                                          private val videoRepository: VideoRepository) : ViewModel() {
+                                          private val videoRepository: VideoRepository,
+                                          private val youtubeRepository: YoutubeRepository)
+    : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
         value = "This is slideshow Fragment"
@@ -32,9 +32,9 @@ class SearchViewModel @Inject constructor(private val fileRepository: FileReposi
     public val isLoading = MutableStateFlow<Boolean>(false)
     public val videoDownloadedData = MutableStateFlow<VideoDownloadedData?>(null)
 
-    private val useCase = SearchVideosUseCase()
-    private val getVideoUseCase = GetVideoDataUseCase()
-    private val downloadStreamUseCase = DownloadStreamUseCase()
+    //private val useCase = SearchVideosUseCase()
+    //private val getVideoUseCase = GetVideoDataUseCase()
+    //private val downloadStreamUseCase = DownloadStreamUseCase()
 
 
     /*fun insertVideo(video: SavedVideo){
@@ -49,7 +49,8 @@ class SearchViewModel @Inject constructor(private val fileRepository: FileReposi
         viewModelScope.launch {
             try {
                 isLoading.value = true
-                val result = useCase(searchQuery)
+
+                val result = youtubeRepository.Search(searchQuery)
                 searchModel.value = result
             } catch (e: Exception) {
 
@@ -61,12 +62,13 @@ class SearchViewModel @Inject constructor(private val fileRepository: FileReposi
 
     fun downloadVideoResponse(savedVideo: SavedVideo, finished: () -> Unit) {
         this.viewModelScope.launch {
-            var playerResponse: PlayerResponse = getVideoUseCase(savedVideo.videoId)
+
+            var playerResponse: PlayerResponse = youtubeRepository.GetVideoData(savedVideo.videoId)
             var listFormats = playerResponse.streamingData.adaptiveFormats
             var found=listFormats.firstOrNull{ it.mimeType.contains("audio") }
             if(found!=null) {
                 withContext(Dispatchers.IO) {
-                    var bytes=downloadStreamUseCase("${found.url}&range=0-9898989")
+                    var bytes=youtubeRepository.DownloadVideoStream("${found.url}&range=0-9898989")
                     var videoUrl=fileRepository.saveFile(savedVideo.videoId,bytes)
                     savedVideo.videoUrl=videoUrl
                     videoRepository.insetVideo(savedVideo)
@@ -78,18 +80,6 @@ class SearchViewModel @Inject constructor(private val fileRepository: FileReposi
 
                 Log.d("DescarregarVide", savedVideo.videoId)
         }
-    }
-
-    fun downloadVideoStream(videoId: String,url: String?) {
-        this.viewModelScope.launch {
-            if (url != null) {
-                var resultArray=downloadStreamUseCase(url)
-                val vid=VideoDownloadedData(resultArray,videoId)
-                videoDownloadedData.value =vid
-                // =file
-            }
-        }
-
     }
 
     val text: LiveData<String> = _text

@@ -8,8 +8,6 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaController
 import com.ivax.descarregarvideos.entities.SavedVideo
-import com.ivax.descarregarvideos.helpers.CustomMediaController
-import com.ivax.descarregarvideos.helpers.ICustomMediaController
 import com.ivax.descarregarvideos.helpers.IMediaHelper
 import javax.inject.Inject
 import javax.inject.Singleton

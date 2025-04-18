@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var tbxTimeDuration: TextView
-    private lateinit var seekBarI: SeekBar
+    private var seekBarI: SeekBar? =null
     private lateinit var player: MediaController
     private lateinit var btnSkipBackward: ImageButton
     private lateinit var btnSkipForward: ImageButton
@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity() {
                         MathExtensions.toTime(seekBarProgress)
                 }
 
-                seekBarI.progress = seekBarProgress
+                seekBarI!!.progress = seekBarProgress
             }
         }
     }
@@ -84,6 +84,16 @@ class MainActivity : AppCompatActivity() {
         ViewModelProvider(this).get(MediaViewModel::class.java)
     }
 
+    override fun onResume() {
+        if(seekBarI!=null) {
+            try {
+                seekBarI?.progress = (player.currentPosition / 1000F).toInt()
+            } catch (e: Exception) {
+                Log.d("DescarregarVideos", e.message.toString())
+            }
+        }
+        super.onResume()
+    }
     override fun onStart() {
         val sessionToken =
             SessionToken(this, ComponentName(this, PlaybackService::class.java))
@@ -114,7 +124,7 @@ class MainActivity : AppCompatActivity() {
                             var position = player.currentPosition / 1000f
                             Log.d("DescarregarVideos", (player.currentPosition / 1000f).toString())
                             seekBarProgress = position.toInt()
-                            seekBarI.progress = seekBarProgress
+                            seekBarI!!.progress = seekBarProgress
 
                             tbxTimeDuration.text = MathExtensions.toTime(seekBarProgress)
                             //val fixedRateTimer = fixedRateTimer(
@@ -266,7 +276,7 @@ class MainActivity : AppCompatActivity() {
                 hasNextMedia(it)
             }
         }
-        seekBarI.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        seekBarI!!.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(
                 seekBar: SeekBar?,
                 progress: Int,
@@ -381,8 +391,8 @@ class MainActivity : AppCompatActivity() {
 
     fun setTotalDuration() {
         var total = player.duration / 1000f
-        seekBarI.min = 0
-        seekBarI.max = total.toInt()
+        seekBarI!!.min = 0
+        seekBarI!!.max = total.toInt()
         tbxTimeTotal.text = MathExtensions.toTime((player.duration / 1000F).toInt())
     }
 
