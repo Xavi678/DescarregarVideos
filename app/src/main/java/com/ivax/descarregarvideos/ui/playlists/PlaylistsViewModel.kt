@@ -28,6 +28,7 @@ class PlaylistsViewModel @Inject constructor(private val videoRepository: VideoR
         mediaPlayerRepository.addPlaylist(mediaItems)
     }
     fun setMediaVisibility(visibility: Boolean){
+
         mediaPlayerRepository.getCurrentMediaVisibility().postValue(visibility)
     }
 }

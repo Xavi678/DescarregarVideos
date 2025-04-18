@@ -38,6 +38,9 @@ class MediaViewModel @Inject constructor(private val mediaPlayerRepository:Media
     private val _title : MutableStateFlow<String?> by lazy{
         MutableStateFlow(null)
     }
+    private val _playlistName : MutableStateFlow<String?> by lazy{
+        MutableStateFlow(null)
+    }
     private val _thumbnail : MutableStateFlow<Bitmap?> by lazy{
         MutableStateFlow(null)
     }
@@ -50,5 +53,6 @@ class MediaViewModel @Inject constructor(private val mediaPlayerRepository:Media
     val playlistHasNext get() =_playlistHasNext
     val title get()= _title
     val thumbnail get()=_thumbnail
+    val playlistName get()=_playlistName
 
 }
