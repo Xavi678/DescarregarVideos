@@ -4,11 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.databinding.FragmentSavedVideoMenuBinding
 import com.ivax.descarregarvideos.dialog_fragments.choose.playlist.ChoosePlaylistDialogFragment
+import com.ivax.descarregarvideos.dialog_fragments.del.video.DeleteVideoDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -39,18 +41,29 @@ class SavedVideosMenuFragment : BottomSheetDialogFragment() {
 
             OpenChoosePlaylistDialog()
         }
+        binding.layoutDeleteAudio.setOnClickListener { view ->
+            OpenDeleteVideoDialog()
+        }
         return root
     }
 
-    private fun OpenChoosePlaylistDialog() {
-        var choosePlaylistDialogFragment = ChoosePlaylistDialogFragment()
-        val bundle=Bundle()
+    private fun OpenDeleteVideoDialog() {
+       val deleteVideoDialogFragment= DeleteVideoDialogFragment()
+        openDialog(deleteVideoDialogFragment)
+    }
+    private fun openDialog(dialogFragment: DialogFragment){
+        val bundle= Bundle()
         bundle.putString("videoId",videoId)
-        choosePlaylistDialogFragment.arguments=bundle
-        choosePlaylistDialogFragment.show(
+        dialogFragment.arguments=bundle
+        dialogFragment.show(
             requireActivity().supportFragmentManager,
             "DescarregarVideos"
         )
+    }
+
+    private fun OpenChoosePlaylistDialog() {
+        val choosePlaylistDialogFragment = ChoosePlaylistDialogFragment()
+        openDialog(choosePlaylistDialogFragment)
     }
     override fun onDestroyView() {
         super.onDestroyView()

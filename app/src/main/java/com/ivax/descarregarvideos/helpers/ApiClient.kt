@@ -2,8 +2,10 @@ package com.ivax.descarregarvideos.helpers
 
 import android.graphics.BitmapFactory
 import android.util.Log
+import com.ivax.descarregarvideos.classes.SearchResponseFoo
 import com.ivax.descarregarvideos.classes.VideoItem
 import com.ivax.descarregarvideos.requests.PlayerRequest
+import com.ivax.descarregarvideos.requests.SearchContext
 import com.ivax.descarregarvideos.requests.SearchRequest
 import com.ivax.descarregarvideos.responses.PlayerResponse
 import com.ivax.descarregarvideos.responses.SearchResponse
@@ -11,6 +13,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.post
 import io.ktor.client.request.prepareGet
 import io.ktor.client.request.setBody
@@ -39,13 +42,20 @@ class ApiClient : IApiClient {
                 explicitNulls = false
             })
         }
+        engine {
+            requestTimeout=0
+        }
     }
 
-    override suspend fun Search(searchQuery: String): ArrayList<VideoItem> {
-        var searchRequest = SearchRequest(query = searchQuery)
+    override suspend fun Search(searchQuery: String,continuationToken: String?): SearchResponseFoo{
+       val searchContext= SearchContext()
+        var nextToken : String? =null
+        searchContext.continuation=continuationToken
+        var searchRequest = SearchRequest(query = searchQuery, context = searchContext)
         var rsp = httpClient.post("https://www.youtube.com/youtubei/v1/search") {
             contentType(ContentType.Application.Json)
             setBody(searchRequest)
+
             headers {
                 append(
                     HttpHeaders.UserAgent,
@@ -54,9 +64,16 @@ class ApiClient : IApiClient {
             }
         }
         var videoList = ArrayList<VideoItem>()
+        //var body=rsp.bodyAsText()
+        //Log.d("DescarregarVideos",body)
         val searchResponse: SearchResponse = rsp.body()
         for (content in searchResponse.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents) {
             val itemSectionR = content.itemSectionRenderer
+
+            if(content.continuationItemRenderer?.continuationEndpoint?.continuationCommand?.token!=null) {
+                nextToken =
+                    content.continuationItemRenderer.continuationEndpoint.continuationCommand.token
+            }
             if (itemSectionR != null) {
                 for (sectionRContent in itemSectionR.contents) {
                     if (sectionRContent.videoRenderer != null) {
@@ -91,7 +108,8 @@ class ApiClient : IApiClient {
                 }
             }
         }
-        return videoList
+        val foo=SearchResponseFoo(videoList,nextToken)
+        return foo
     }
 
     override suspend fun GetVideoData(videoId: String): PlayerResponse {

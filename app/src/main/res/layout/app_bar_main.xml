@@ -33,12 +33,12 @@
         app:borderWidth="0dp"
 
         app:srcCompat="@drawable/playlist_solar"
-        app:tint="@color/white"/>
+        app:tint="@color/white" android:visibility="gone"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/mediaPlayer"
         android:layout_width="match_parent"
-        android:layout_height="180dp"
+        android:layout_height="210dp"
         android:layout_gravity="bottom"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"

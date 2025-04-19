@@ -76,4 +76,9 @@ class VideoRepository @Inject constructor(private val videoDao: VideoDao,
 
        return playlistSavedVideoCrossRefDao.first(videosWithPositionFoo.playListId,videosWithPositionFoo.videoId)
     }
+
+    fun deleteVideo(videoId: String) {
+        videoDao.delete(videoId)
+        playlistSavedVideoCrossRefDao.deleteVideo(videoId = videoId)
+    }
 }

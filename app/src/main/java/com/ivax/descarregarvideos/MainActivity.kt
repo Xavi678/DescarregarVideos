@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnSkipForward: ImageButton
     private lateinit var btnMinimizePlayer: ImageButton
     private lateinit var controllerFuture : ListenableFuture<MediaController>
-    private lateinit var playlistLayout: LinearLayout
+    private  var playlistLayout: LinearLayout?=null
     private lateinit var tbxPlaylistName: TextView
     //private var timer=Timer()
     private var seekBarProgress = 0
@@ -279,13 +279,14 @@ class MainActivity : AppCompatActivity() {
         }
         lifecycleScope.launch {
             mediaViewModel.playlistName.collectLatest {
+
                 if(playlistLayout!=null) {
                     if (it != null) {
-                        playlistLayout.visibility = View.VISIBLE
+                        playlistLayout!!.visibility = View.VISIBLE
                         tbxPlaylistName.text = it
                     } else {
 
-                        playlistLayout.visibility = View.GONE
+                        playlistLayout!!.visibility = View.GONE
                     }
                 }
             }

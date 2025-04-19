@@ -27,6 +27,8 @@ interface VideoDao {
 
     @Query("UPDATE savedvideo SET playListId=:playListId WHERE videoId=:videoId")
     fun addVideoToPlaylist(playListId: Int,videoId: String)
+    @Query("DELETE FROM savedvideo WHERE videoId=:videoId")
+    fun delete(videoId: String)
 
     /*@Delete
     fun delete(user: User)*/

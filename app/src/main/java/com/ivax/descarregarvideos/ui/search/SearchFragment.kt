@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ivax.descarregarvideos.adapter.VideoAdapter
 import com.ivax.descarregarvideos.databinding.FragmentSearchBinding
 import com.ivax.descarregarvideos.entities.SavedVideo
@@ -30,6 +31,7 @@ import kotlinx.coroutines.flow.collectLatest
 class SearchFragment : Fragment() {
 
     private var _binding: FragmentSearchBinding? = null
+    private var nextToken : String?=null
 
     private lateinit var adapter: VideoAdapter
 
@@ -67,8 +69,13 @@ class SearchFragment : Fragment() {
                     try {
 
                         searchViewModel.SearchVideos(searchQuery)
-                        searchViewModel.searchModel.collect {
-                            adapter.addItems(it)
+                        searchViewModel.searchModel.collectLatest {
+                            if(it!=null){
+                                adapter.addItems(it.videos)
+                                nextToken=it.nextToken
+
+                            }
+
                         }
                     } catch (e: Exception) {
                         e.message.toString().let {
@@ -89,6 +96,39 @@ class SearchFragment : Fragment() {
     private fun setupUi(){
         binding.recylcerViewVideo.layoutManager =
             LinearLayoutManager(this@SearchFragment.context)
+        binding.recylcerViewVideo.addOnScrollListener(object : RecyclerView.OnScrollListener(){
+            var currentPos=0
+            private var loading = true
+            private var previousTotalItems = 0
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+            }
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                currentPos=currentPos+dy
+                val linearLayout=recyclerView.layoutManager as LinearLayoutManager
+                val visibleItemCount = linearLayout.childCount
+                val totalItemCount = linearLayout.itemCount
+                val firstVisibleItemPosition = linearLayout.findFirstVisibleItemPosition()
+
+                if (loading && totalItemCount > previousTotalItems) {
+                    loading = false
+                    previousTotalItems = totalItemCount
+                }
+
+                if (loading && totalItemCount > previousTotalItems) {
+                    loading = false
+                    previousTotalItems = totalItemCount
+                }
+                Log.d("DescarregarVideos","Current Pos: ${currentPos}")
+                Log.d("DescarregarVideos","${recyclerView.scrollY} ${recyclerView.height} ${recyclerView.y} ${dx} ${dy}")
+                val visibleThreshold = 5
+                if (!loading && (totalItemCount - visibleItemCount <= firstVisibleItemPosition + visibleThreshold)) {
+                    searchViewModel.SearchVideos(binding.tbxView.text.toString(),nextToken)
+                    loading = true
+                }
+            }
+        })
         binding.recylcerViewVideo.adapter = adapter
     }
 

@@ -61,7 +61,7 @@
             android:background="@android:color/transparent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/remove" />
+            app:srcCompat="@drawable/remove_trash_big" />
 
         <TextView
             android:id="@+id/tbxRemoveVideo"

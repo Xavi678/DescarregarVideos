@@ -6,26 +6,49 @@
     android:layout_height="match_parent"
     tools:context=".ui.search.SearchFragment"
     android:id="@+id/search_layout">
-    <Button
-        android:id="@+id/btnSearch"
-        android:layout_width="51dp"
-        android:layout_height="37dp"
-        android:layout_marginTop="25dp"
-        android:layout_marginEnd="57dp"
-        app:icon="@drawable/ic_menu_search"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/tbxView"
-        android:layout_width="257dp"
-        android:layout_height="41dp"
-        android:layout_marginStart="28dp"
-        android:layout_marginTop="24dp"
-        android:ems="10"
-        android:inputType="text"
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="12dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/recylcerViewVideo"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+
+        <EditText
+            android:id="@+id/tbxView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/border_line"
+            android:ems="10"
+            android:inputType="text"
+            android:paddingStart="8dp"
+            android:textCursorDrawable="@drawable/cursor_color"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:paddingEnd="8dp"
+
+
+            />
+
+        <Button
+            android:id="@+id/btnSearch"
+            android:layout_width="51dp"
+            android:layout_height="37dp"
+            android:background="@drawable/search_button"
+            android:paddingStart="12dp"
+            android:textColor="@color/white"
+            app:backgroundTint="@color/cardview_dark_background"
+            app:icon="@drawable/ic_menu_search"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </LinearLayout>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recylcerViewVideo"
@@ -35,7 +58,9 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+
+        />
 
     <ProgressBar
         android:id="@+id/search_video_progress_bar"

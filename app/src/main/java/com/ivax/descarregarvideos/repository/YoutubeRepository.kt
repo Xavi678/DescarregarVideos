@@ -2,6 +2,7 @@ package com.ivax.descarregarvideos.repository
 
 import android.graphics.BitmapFactory
 import android.util.Log
+import com.ivax.descarregarvideos.classes.SearchResponseFoo
 import com.ivax.descarregarvideos.classes.VideoItem
 import com.ivax.descarregarvideos.helpers.IApiClient
 import com.ivax.descarregarvideos.requests.PlayerRequest
@@ -36,8 +37,8 @@ import javax.inject.Inject
 class YoutubeRepository @Inject constructor(private val apiClient : IApiClient) {
 
 
-    suspend fun Search(searchQuery: String): ArrayList<VideoItem> {
-        return apiClient.Search(searchQuery)
+    suspend fun Search(searchQuery: String, token: String?=null): SearchResponseFoo{
+        return apiClient.Search(searchQuery,token)
     }
 
     suspend fun GetVideoData(videoId: String): PlayerResponse {
