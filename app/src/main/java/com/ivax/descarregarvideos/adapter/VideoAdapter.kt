@@ -20,7 +20,8 @@ import com.ivax.descarregarvideos.classes.VideoItem
 import com.ivax.descarregarvideos.entities.SavedVideo
 import java.io.File
 
-class VideoAdapter(private val itemClickListener: (saveVideo: SavedVideo,finished: ()->Unit) -> Unit) :
+class VideoAdapter(private val itemClickListener: (saveVideo: SavedVideo,finished: ()->Unit) -> Unit,
+                   private val hasVideo : (videoId: String) -> Boolean) :
     RecyclerView.Adapter<VideoAdapter.ViewHolder>() {
 
 
@@ -48,6 +49,10 @@ class VideoAdapter(private val itemClickListener: (saveVideo: SavedVideo,finishe
 
             val item = items[position];
 
+            if(hasVideo(item.videoId)){
+                holder.downloadButton.isEnabled=false
+                holder.downloadButton.setImageDrawable(ResourcesCompat.getDrawable(holder.itemView.context.resources,R.drawable.finished_downloading,null))
+            }
             holder.downloadButton.setOnClickListener { view ->
 
                 val imgPath="${item.videoId}_thumbnail.bmp"

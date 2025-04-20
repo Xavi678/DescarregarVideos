@@ -10,6 +10,7 @@ import com.ivax.descarregarvideos.entities.PlaylistSavedVideoCrossRef
 import com.ivax.descarregarvideos.entities.SavedVideo
 import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -80,5 +81,12 @@ class VideoRepository @Inject constructor(private val videoDao: VideoDao,
     fun deleteVideo(videoId: String) {
         videoDao.delete(videoId)
         playlistSavedVideoCrossRefDao.deleteVideo(videoId = videoId)
+    }
+
+    fun firstVideo(videoId: String) : SavedVideo? {
+       return videoDao.first(videoId)
+    }
+    fun videoExists(videoId: String) : Boolean {
+        return videoDao.first(videoId)!=null
     }
 }

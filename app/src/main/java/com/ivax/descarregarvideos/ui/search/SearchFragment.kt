@@ -53,7 +53,10 @@ class SearchFragment : Fragment() {
         adapter= VideoAdapter(itemClickListener = fun(saveVideo: SavedVideo, finished: ()->Unit) {
                 searchViewModel.downloadVideoResponse(saveVideo,finished)
 
-            })
+        }, hasVideo = fun(videoId: String) : Boolean{
+            searchViewModel.hasVideo(videoId)
+            return searchViewModel.videoExists.value
+        } )
         val root: View = binding.root
         binding.btnSearch.setOnClickListener { view ->
             var searchQuery = binding.tbxView.text.toString()

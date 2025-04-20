@@ -36,6 +36,9 @@ class SearchViewModel @Inject constructor(
     public val searchModel = MutableStateFlow<SearchResponseFoo?>(null)
     public val isLoading = MutableStateFlow<Boolean>(false)
     public val videoDownloadedData = MutableStateFlow<VideoDownloadedData?>(null)
+    val videoExists : MutableStateFlow<Boolean> by lazy {
+        MutableStateFlow<Boolean>(false)
+    }
     //private val useCase = SearchVideosUseCase()
     //private val getVideoUseCase = GetVideoDataUseCase()
     //private val downloadStreamUseCase = DownloadStreamUseCase()
@@ -49,6 +52,11 @@ class SearchViewModel @Inject constructor(
         }
 
     }*/
+    fun hasVideo(videoId : String)  {
+        viewModelScope.launch(Dispatchers.IO) {
+            videoExists.update { videoRepository.videoExists(videoId) }
+        }
+    }
     fun SearchVideos(searchQuery: String, nextToken: String?=null) {
         viewModelScope.launch {
             try {
@@ -66,13 +74,14 @@ class SearchViewModel @Inject constructor(
     }
 
     fun downloadVideoResponse(savedVideo: SavedVideo, finished: () -> Unit) {
-        this.viewModelScope.launch {
+        this.viewModelScope.launch(Dispatchers.IO) {
 
-            var playerResponse: PlayerResponse = youtubeRepository.GetVideoData(savedVideo.videoId)
-            var listFormats = playerResponse.streamingData.adaptiveFormats
-            var found = listFormats.firstOrNull { it.mimeType.contains("audio") }
-            if (found != null) {
-                withContext(Dispatchers.IO) {
+                var playerResponse: PlayerResponse =
+                    youtubeRepository.GetVideoData(savedVideo.videoId)
+                var listFormats = playerResponse.streamingData.adaptiveFormats
+                var found = listFormats.firstOrNull { it.mimeType.contains("audio") }
+                if (found != null) {
+
                     var bytes =
                         youtubeRepository.DownloadVideoStream("${found.url}&range=0-9898989")
                     var videoUrl = fileRepository.saveFile(savedVideo.videoId, bytes)
@@ -80,11 +89,14 @@ class SearchViewModel @Inject constructor(
                     videoRepository.insetVideo(savedVideo)
                     finished()
 
-                }
-            }
-            //videoInfo.value=vi
 
-            Log.d("DescarregarVide", savedVideo.videoId)
+                }
+                //videoInfo.value=vi
+
+                Log.d("DescarregarVide", savedVideo.videoId)
+            /*}else{
+
+            }*/
         }
     }
 

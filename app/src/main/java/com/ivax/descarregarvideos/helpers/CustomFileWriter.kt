@@ -7,7 +7,9 @@ import javax.inject.Inject
 
 class CustomFileWriter @Inject constructor(private val appContext: Context): FileWriter {
     override suspend fun write(fileNme: String,bytes: ByteArray) : String {
-        var videoUrl="${appContext.filesDir}/videos/${fileNme}.mp4"
+        val dir=File("${appContext.filesDir}/videos")
+        dir.mkdir()
+        var videoUrl="${dir}/${fileNme}.mp4"
         var file=File(videoUrl)
         file.mkdir()
         if(file.exists()){

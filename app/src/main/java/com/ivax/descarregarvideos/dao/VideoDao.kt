@@ -3,9 +3,11 @@ package com.ivax.descarregarvideos.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Upsert
 import com.ivax.descarregarvideos.entities.Playlist
 import com.ivax.descarregarvideos.entities.SavedVideo
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @Dao
 interface VideoDao {
@@ -22,13 +24,15 @@ interface VideoDao {
     @Query("SELECT * FROM savedvideo")
     fun getAll(): Flow<List<SavedVideo>>
 
-    @Insert
+    @Upsert
     fun insertAll(vararg savedVideo: SavedVideo)
 
     @Query("UPDATE savedvideo SET playListId=:playListId WHERE videoId=:videoId")
     fun addVideoToPlaylist(playListId: Int,videoId: String)
     @Query("DELETE FROM savedvideo WHERE videoId=:videoId")
     fun delete(videoId: String)
+    @Query("SELECT * FROM savedvideo WHERE videoId=:videoId LIMIT 1")
+    fun first(videoId: String): SavedVideo?
 
     /*@Delete
     fun delete(user: User)*/
