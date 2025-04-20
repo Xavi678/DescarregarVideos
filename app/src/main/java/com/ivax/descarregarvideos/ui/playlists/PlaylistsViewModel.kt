@@ -19,7 +19,7 @@ class PlaylistsViewModel @Inject constructor(private val videoRepository: VideoR
     fun addPlaylist(playlist: PlaylistWithSavedVideos) {
         var mediaItems = ArrayList<MediaItem>()
         playlist.videos.forEach {
-            val mediaItem=mediaPlayerRepository.SavedVideoToMediaItem(it)
+            val mediaItem=mediaPlayerRepository.SavedVideoToMediaItem(it,playlist.playlist.name)
 
             //val mediaItem = MediaItem.fromUri(it.videoUrl!!)
             //mediaItem.mediaId=

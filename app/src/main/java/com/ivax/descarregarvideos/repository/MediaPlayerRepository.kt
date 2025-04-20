@@ -49,9 +49,9 @@ class MediaPlayerRepository @Inject constructor(private val mediaHelper: IMediaH
         mediaHelper.play()
     }
 
-    fun SavedVideoToMediaItem(video: SavedVideo): MediaItem {
+    fun SavedVideoToMediaItem(video: SavedVideo,playlistName: String?=null): MediaItem {
         val uri=Uri.Builder().path(video.imgUrl).build()
-        val metaData=MediaMetadata.Builder().setArtworkUri(uri).setTitle(video.title).build()
+        val metaData=MediaMetadata.Builder().setArtworkUri(uri).setTitle(video.title).setAlbumTitle(playlistName).build()
         val mediaItem = MediaItem.Builder().setUri(video.videoUrl!!).setMediaMetadata(metaData).setMediaId(video.videoId).build()
         return mediaItem
     }

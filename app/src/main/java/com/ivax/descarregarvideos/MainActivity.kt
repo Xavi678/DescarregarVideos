@@ -33,6 +33,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.io.FileInputStream
 import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.Player.MediaItemTransitionReason
@@ -171,7 +172,7 @@ class MainActivity : AppCompatActivity() {
                         }
                         val title = mediaItem?.mediaMetadata?.title
                         val uri = mediaItem?.mediaMetadata?.artworkUri
-                       val playlistName= mediaItem?.mediaMetadata?.albumTitle
+                        val playlistName= mediaItem?.mediaMetadata?.albumTitle
                         var bmp: Bitmap
                         var fileInStream = FileInputStream(uri.toString())
                         fileInStream.use {
@@ -214,7 +215,7 @@ class MainActivity : AppCompatActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        installSplashScreen()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -234,8 +235,8 @@ class MainActivity : AppCompatActivity() {
         seekBarI = binding.appBarMain.root.findViewById<SeekBar>(R.id.seekBar)
         tbxTimeTotal = binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeTotal)
         btnMinimizePlayer=binding.appBarMain.root.findViewById<ImageButton>(R.id.imageButtonMinimizePlayer)
-        tbxPlaylistName=binding.appBarMain.root.findViewById<TextView>(R.id.tbxPlayListName)
-        playlistLayout=binding.appBarMain.root.findViewById<LinearLayout>(R.id.layoutPlaylist)
+        tbxPlaylistName=binding.appBarMain.root.findViewById<TextView>(R.id.tbxCurrentPlaylist)
+        playlistLayout=binding.appBarMain.root.findViewById<LinearLayout>(R.id.layoutCurrentPlaylist)
         mediaViewModel.isMediaVisible.observe(this) {
 
             binding.appBarMain.mediaPlayer.visibility = if (it) View.VISIBLE else View.GONE
@@ -286,7 +287,7 @@ class MainActivity : AppCompatActivity() {
                         tbxPlaylistName.text = it
                     } else {
 
-                        playlistLayout!!.visibility = View.GONE
+                        playlistLayout!!.visibility = View.INVISIBLE
                     }
                 }
             }

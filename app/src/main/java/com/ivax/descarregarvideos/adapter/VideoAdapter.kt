@@ -20,12 +20,14 @@ import com.ivax.descarregarvideos.classes.VideoItem
 import com.ivax.descarregarvideos.entities.SavedVideo
 import java.io.File
 
-class VideoAdapter(private val itemClickListener: (saveVideo: SavedVideo,finished: ()->Unit) -> Unit,
-                   private val hasVideo : (videoId: String) -> Boolean) :
+class VideoAdapter(
+    private val itemClickListener: (saveVideo: SavedVideo, finished: () -> Unit) -> Unit
+) :
     RecyclerView.Adapter<VideoAdapter.ViewHolder>() {
 
 
-    private val items= ArrayList<VideoItem>()
+    private val items = ArrayList<VideoItem>()
+    private val currentVideos = ArrayList<SavedVideo>()
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
@@ -47,53 +49,85 @@ class VideoAdapter(private val itemClickListener: (saveVideo: SavedVideo,finishe
         position: Int
     ) {
 
-            val item = items[position];
+        val item = items[position];
 
-            if(hasVideo(item.videoId)){
-                holder.downloadButton.isEnabled=false
-                holder.downloadButton.setImageDrawable(ResourcesCompat.getDrawable(holder.itemView.context.resources,R.drawable.finished_downloading,null))
+
+        if (currentVideos.firstOrNull { it.videoId == item.videoId } != null) {
+            holder.downloadButton.isEnabled = false
+            holder.downloadButton.setImageDrawable(
+                ResourcesCompat.getDrawable(
+                    holder.itemView.context.resources,
+                    R.drawable.finished_downloading,
+                    null
+                )
+            )
+        }
+        holder.downloadButton.setOnClickListener { view ->
+
+            val imgPath = "${item.videoId}_thumbnail.bmp"
+            var dir = File("${holder.itemView.context.filesDir}/fotos")
+            var d = dir.mkdir()
+            var f = File("${dir}/${imgPath}")
+
+            if (f.exists()) {
+                f.delete()
             }
-            holder.downloadButton.setOnClickListener { view ->
-
-                val imgPath="${item.videoId}_thumbnail.bmp"
-                var dir=File("${holder.itemView.context.filesDir}/fotos")
-                var d=dir.mkdir()
-                var f=File("${dir}/${imgPath}")
-
-                if(f.exists()){
-                    f.delete()
-                }
-                f.createNewFile()
-                f.outputStream().use{
-                    item.imgUrl?.compress(Bitmap.CompressFormat.PNG,100,it)
-                }
-                var saveVideo=SavedVideo(item.videoId,item.title,"${dir}/${imgPath}",item.duration,item.viewCount)
-                (view as ImageButton).setImageDrawable(ResourcesCompat.getDrawable(holder.itemView.context.resources,R.drawable.downloading,null))
-                var callback=fun(){
-                    view.setImageDrawable(ResourcesCompat.getDrawable(holder.itemView.context.resources,R.drawable.finished_downloading,null))
-                    Handler(Looper.getMainLooper()).post {
-                        Toast.makeText(holder.itemView.context,"${item.title} Descarregat Correctament",
-                            Toast.LENGTH_LONG).show()
-                    }
-
-                }
-                itemClickListener(saveVideo,callback)
-
-                Log.d("DescarregarVideos", "Descarregar Video ${saveVideo.videoId}")
+            f.createNewFile()
+            f.outputStream().use {
+                item.imgUrl?.compress(Bitmap.CompressFormat.PNG, 100, it)
             }
+            var saveVideo = SavedVideo(
+                item.videoId,
+                item.title,
+                "${dir}/${imgPath}",
+                item.duration,
+                item.viewCount
+            )
+            (view as ImageButton).setImageDrawable(
+                ResourcesCompat.getDrawable(
+                    holder.itemView.context.resources,
+                    R.drawable.downloading,
+                    null
+                )
+            )
+            var callback = fun() {
+                view.setImageDrawable(
+                    ResourcesCompat.getDrawable(
+                        holder.itemView.context.resources,
+                        R.drawable.finished_downloading,
+                        null
+                    )
+                )
+                Handler(Looper.getMainLooper()).post {
+                    Toast.makeText(
+                        holder.itemView.context, "${item.title} Descarregat Correctament",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
 
-            holder.apply {
-                tbx.text = item.videoId
-                tbxDesc.text = item.title
-                thumbnail.setImageBitmap(item.imgUrl)
-                duration.text = item.duration
-                viewCount.text = item.viewCount
             }
+            itemClickListener(saveVideo, callback)
+
+            Log.d("DescarregarVideos", "Descarregar Video ${saveVideo.videoId}")
+        }
+
+        holder.apply {
+            tbx.text = item.videoId
+            tbxDesc.text = item.title
+            thumbnail.setImageBitmap(item.imgUrl)
+            duration.text = item.duration
+            viewCount.text = item.viewCount
+        }
     }
 
     override fun getItemCount(): Int {
 
         return items.size
+    }
+
+    fun addCurrentVideos(videos: List<SavedVideo>) {
+        this.currentVideos.clear()
+        this.currentVideos.addAll(videos)
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -102,7 +136,8 @@ class VideoAdapter(private val itemClickListener: (saveVideo: SavedVideo,finishe
         val thumbnail: ImageView = itemView.findViewById<ImageView>(R.id.imgVideoThumbnail)
         val duration: TextView = itemView.findViewById<TextView>(R.id.videoDuration)
         val viewCount: TextView = itemView.findViewById<TextView>(R.id.tbxViewCount)
-        val downloadButton: ImageButton = itemView.findViewById<ImageButton>(R.id.savedVideoButtonMenuOptions)
+        val downloadButton: ImageButton =
+            itemView.findViewById<ImageButton>(R.id.savedVideoButtonMenuOptions)
 
     }
 }

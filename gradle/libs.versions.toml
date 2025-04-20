@@ -20,6 +20,7 @@ composeVersion = "1.7.8"
 
 roomVersion = "2.6.1"
 exoplayerVersion="1.5.1"
+splashVersion="1.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,6 +48,7 @@ android-exoplayer = {group="androidx.media3", name="media3-exoplayer",version.re
 android-exoplayer-dash = {group="androidx.media3", name="media3-exoplayer-dash",version.ref="exoplayerVersion"}
 android-exoplayer-ui={group="androidx.media3", name="media3-ui",version.ref="exoplayerVersion"}
 android-exoplayer-session={group="androidx.media3", name="media3-session",version.ref="exoplayerVersion"}
+android-splash-screen={group="androidx.core", name="core-splashscreen", version.ref="splashVersion"}
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

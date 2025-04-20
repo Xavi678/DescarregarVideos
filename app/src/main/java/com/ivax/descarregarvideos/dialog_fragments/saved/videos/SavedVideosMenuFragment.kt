@@ -59,6 +59,7 @@ class SavedVideosMenuFragment : BottomSheetDialogFragment() {
             requireActivity().supportFragmentManager,
             "DescarregarVideos"
         )
+        dismiss()
     }
 
     private fun OpenChoosePlaylistDialog() {
