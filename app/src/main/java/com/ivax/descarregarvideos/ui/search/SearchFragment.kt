@@ -58,8 +58,8 @@ class SearchFragment : Fragment() {
             adapter.addCurrentVideos(it)
         }
         val root: View = binding.root
-        binding.btnSearch.setOnClickListener { view ->
-            var searchQuery = binding.tbxView.text.toString()
+        binding.layoutSearchSearch.btnSearch.setOnClickListener { view ->
+            var searchQuery = binding.layoutSearchSearch.tbxView.text.toString()
 
             lifecycleScope.launch {
                 searchViewModel.isLoading.collectLatest {
@@ -127,7 +127,7 @@ class SearchFragment : Fragment() {
                 Log.d("DescarregarVideos","${recyclerView.scrollY} ${recyclerView.height} ${recyclerView.y} ${dx} ${dy}")
                 val visibleThreshold = 5
                 if (!loading && (totalItemCount - visibleItemCount <= firstVisibleItemPosition + visibleThreshold)) {
-                    searchViewModel.SearchVideos(binding.tbxView.text.toString(),nextToken)
+                    searchViewModel.SearchVideos(binding.layoutSearchSearch.tbxView.text.toString(),nextToken)
                     loading = true
                 }
             }

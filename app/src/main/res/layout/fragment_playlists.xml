@@ -6,6 +6,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".ui.playlists.PlaylistsFragment">
 
+    <include
+        android:id="@+id/layoutPlaylistsSearch"
+        layout="@layout/search_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+    </include>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewPlaylists"
         android:layout_width="0dp"

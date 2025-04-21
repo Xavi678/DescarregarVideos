@@ -48,9 +48,8 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/mediaPlayerThumbnail"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <SeekBar
-        android:id="@+id/seekBar"
+    <androidx.media3.ui.DefaultTimeBar
+        android:id="@+id/exo_progress"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
@@ -62,10 +61,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/mediaPlayerPlayButton"
-        app:layout_constraintWidth="match_constraint" />
+        app:layout_constraintWidth="match_constraint"
+
+        >
+
+    </androidx.media3.ui.DefaultTimeBar>
 
     <TextView
-        android:id="@+id/tbxTimeDuration"
+        android:id="@+id/exo_position"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
@@ -73,7 +76,7 @@
         android:layout_marginBottom="12dp"
         android:text="1:22"
         android:textColor="@color/white"
-        app:layout_constraintBottom_toTopOf="@+id/seekBar"
+        app:layout_constraintBottom_toTopOf="@+id/exo_progress"
         app:layout_constraintEnd_toStartOf="@+id/tbxSeparator" />
 
     <ImageButton
@@ -108,18 +111,18 @@
         android:layout_marginBottom="12dp"
         android:text="/"
         android:textColor="@color/white"
-        app:layout_constraintBottom_toTopOf="@+id/seekBar"
-        app:layout_constraintEnd_toStartOf="@+id/tbxTimeTotal" />
+        app:layout_constraintBottom_toTopOf="@+id/exo_progress"
+        app:layout_constraintEnd_toStartOf="@+id/exo_duration" />
 
     <TextView
-        android:id="@+id/tbxTimeTotal"
+        android:id="@+id/exo_duration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="26dp"
         android:layout_marginBottom="12dp"
         android:text="3:66"
         android:textColor="@color/white"
-        app:layout_constraintBottom_toTopOf="@+id/seekBar"
+        app:layout_constraintBottom_toTopOf="@+id/exo_progress"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <ImageButton
