@@ -47,6 +47,9 @@ class SavedVideosFragment : Fragment() {
         savedVideosViewModel.allSavedVideos.observe(viewLifecycleOwner) {
             savedVideoAdapter.addItems(it)
         }
+        binding.layoutSavedVideoSearch.btnSearch.setOnClickListener {
+            savedVideoAdapter.addItems( savedVideosViewModel.filterSavedVideos(binding.layoutSavedVideoSearch.tbxView.text.toString()))
+        }
         setupUI()
         return root
     }

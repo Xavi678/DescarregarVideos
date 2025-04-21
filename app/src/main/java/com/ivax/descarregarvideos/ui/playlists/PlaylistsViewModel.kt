@@ -31,4 +31,11 @@ class PlaylistsViewModel @Inject constructor(private val videoRepository: VideoR
 
         mediaPlayerRepository.getCurrentMediaVisibility().postValue(visibility)
     }
+
+    fun filterPlaylist(playlistName: String): List<PlaylistWithSavedVideos> {
+        if(playlistName==""){
+            return  playlists.value!!
+        }
+       return playlists.value!!.filter { it.playlist.name!!.lowercase().contains( playlistName.lowercase()) }
+    }
 }

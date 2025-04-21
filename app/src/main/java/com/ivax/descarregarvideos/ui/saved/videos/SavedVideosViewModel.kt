@@ -40,4 +40,11 @@ class SavedVideosViewModel @Inject constructor(private val repository: VideoRepo
     fun setMediaVisibility(visibility: Boolean){
         mediaPlayerRepository.getCurrentMediaVisibility().postValue(visibility)
     }
+
+    fun filterSavedVideos(savedVideoName: String): List<SavedVideo> {
+        if(savedVideoName==""){
+            return  allSavedVideos.value!!
+        }
+        return allSavedVideos.value!!.filter { it.title.lowercase().contains(savedVideoName.lowercase()) }
+    }
 }

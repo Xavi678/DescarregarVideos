@@ -1,10 +1,13 @@
 package com.ivax.descarregarvideos.dialog_fragments.choose.playlist
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentResultListener
+import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ivax.descarregarvideos.adapter.ChoosePlaylistListAdapter
@@ -37,6 +40,12 @@ class ChoosePlaylistDialogFragment : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        setFragmentResultListener("requestKey") { key, bundle ->
+            {
+                val result = bundle.getString("resultKey")
+                Log.d("DescarregarVideos",result.toString())
+            }
+        }
         _binding=DialogChoosePlaylistBinding.inflate(inflater,container,false)
         videoId= requireArguments().getString("videoId").toString()
         val root: View =binding.root
@@ -49,9 +58,11 @@ class ChoosePlaylistDialogFragment : DialogFragment() {
         binding.layoutCreatePlaylist.setOnClickListener { view ->
             val newPlaylistDialogFragment=NewPlaylistDialogFragment()
             val bundle=Bundle()
+
             bundle.putString("videoId",videoId)
             newPlaylistDialogFragment.arguments=bundle
-            newPlaylistDialogFragment.show(requireActivity().supportFragmentManager,"DescarregarVideos")
+
+            newPlaylistDialogFragment.show(parentFragmentManager,"DescarregarVideos")
         }
         binding.btnChoosePlaylistCancel.setOnClickListener {
             close()

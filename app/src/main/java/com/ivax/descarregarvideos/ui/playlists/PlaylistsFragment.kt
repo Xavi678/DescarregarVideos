@@ -42,6 +42,12 @@ class PlaylistsFragment : Fragment(){
         playlistsViewModel.playlists.observe(viewLifecycleOwner) {
             playlistAdapter.addItems(it)
         }
+        binding.layoutPlaylistsSearch.btnSearch.setOnClickListener {
+            val text=binding.layoutPlaylistsSearch.tbxView.text.toString()
+
+            playlistAdapter.addItems(playlistsViewModel.filterPlaylist(text))
+
+        }
         playlistAdapter.setListener { playlistId ->
 
             val editPlaylistMenuFragment=EditPlaylistMenuFragment()

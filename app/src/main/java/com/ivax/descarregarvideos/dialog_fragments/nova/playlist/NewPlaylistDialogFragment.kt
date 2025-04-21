@@ -4,7 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.ViewModelProvider
 import com.ivax.descarregarvideos.databinding.DialogNewPlaylistBinding
 import com.ivax.descarregarvideos.entities.Playlist
@@ -29,6 +31,9 @@ class NewPlaylistDialogFragment : DialogFragment() {
         binding.btnNewPlaylistOk.setOnClickListener { view ->
             var playlist = Playlist(name = binding.tbxPlayListName.text.toString())
             newPlaylistViewModel.insertPlaylist(playlist)
+            val result = "some string"
+            setFragmentResult("requestKey", bundleOf("resultKey" to result))
+            dismiss()
             /*newPlaylistViewModel.insertedId.observe(this) {
                 if (it != null) {
                     var playlistCrossRef=PlaylistSavedVideoCrossRef(playListId = it, videoId = videoId)

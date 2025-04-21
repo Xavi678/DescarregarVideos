@@ -26,7 +26,8 @@
         android:clickable="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/choosePlaylistRecyclerView">
+        app:layout_constraintTop_toBottomOf="@+id/choosePlaylistRecyclerView"
+        >
 
         <ImageButton
             android:id="@+id/imageButtonCreatePlaylist"
@@ -37,7 +38,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/add_dotted"
-            android:duplicateParentState="true"/>
+            android:clickable="false"
+
+            />
 
         <TextView
             android:id="@+id/tbxCreatePlaylist"
@@ -49,7 +52,8 @@
             android:textColor="@color/white"
             app:layout_constraintStart_toEndOf="@+id/imageButtonCreatePlaylist"
             app:layout_constraintTop_toTopOf="parent"
-            android:duplicateParentState="true">
+            android:clickable="false"
+            >
 
 
         </TextView>
