@@ -44,10 +44,12 @@ class EditPlaylistFragment : Fragment() {
 
         }
         binding.playlistControls.shuffle.setOnClickListener {
-            editPlaylistViewModel.shuffle(playlistId)
+            editPlaylistViewModel.shuffle()
+            editPlaylistViewModel.isMediaVisible.postValue(true)
         }
         binding.playlistControls.playAll.setOnClickListener {
-            editPlaylistViewModel.playAll(playlistId)
+            editPlaylistViewModel.playAll()
+            editPlaylistViewModel.isMediaVisible.postValue(true)
         }
         lifecycleScope.launch {
             editPlaylistViewModel.playlist.collectLatest {

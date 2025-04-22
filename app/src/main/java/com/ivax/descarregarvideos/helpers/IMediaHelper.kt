@@ -18,4 +18,7 @@ interface IMediaHelper {
     fun setSavedVideo(video: com.ivax.descarregarvideos.entities.SavedVideo)
     fun getCurrentMediaVisibility() : MutableLiveData<Boolean>
     fun setMediaController(mediaController :MediaController)
+    fun addMediaItemList(mediaItem: List<MediaItem>)
+    fun setShuffle()
+    fun clear()
 }

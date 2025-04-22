@@ -65,6 +65,7 @@ class MediaPlayerRepository @Inject constructor(private val mediaHelper: IMediaH
     }
 
     fun addPlaylist(videos: List<VideosWithPositionFoo>) {
+        mediaHelper.clear()
         videos.forEach {
             mediaHelper.addMediaItem(SavedVideoToMediaItem(it))
         }
@@ -72,6 +73,12 @@ class MediaPlayerRepository @Inject constructor(private val mediaHelper: IMediaH
     }
 
     fun addPlaylistShuffle(videos: List<VideosWithPositionFoo>) {
+        mediaHelper.clear()
+        videos.forEach {
+            mediaHelper.addMediaItem(SavedVideoToMediaItem(it))
+        }
 
+        mediaHelper.setShuffle()
+        mediaHelper.play()
     }
 }
