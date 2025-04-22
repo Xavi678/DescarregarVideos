@@ -12,52 +12,22 @@
         android:id="@+id/tbxEditPlaylistTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="10dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:textColor="@color/black">
+        android:textColor="@color/black"
+        android:text="Prova">
 
     </TextView>
 
-    <LinearLayout
-        android:id="@+id/layoutImageButtonEditPlaylistPlayAll"
-        android:layout_width="wrap_content"
+    <include android:id="@+id/playlistControls" layout="@layout/layout_playlist_controls"
         android:layout_height="wrap_content"
-
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="13dp"
-        android:background="@drawable/rounded_rect"
-        android:orientation="horizontal"
-        android:paddingTop="5dp"
-        android:paddingEnd="5dp"
-        android:paddingBottom="5dp"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="10dp"
         app:layout_constraintTop_toBottomOf="@+id/tbxEditPlaylistTitle">
 
-        <ImageButton
-            android:id="@+id/imageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="6dp"
-            android:background="@android:color/transparent"
-            android:duplicateParentState="true"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/play_button" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="2dp"
-            android:duplicateParentState="true"
-            android:text="Reproduir"
-            android:textColor="@color/white"
-            android:textSize="11sp">
-
-        </TextView>
-
-    </LinearLayout>
+    </include>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recylcerViewEDitPlaylistVideos"
@@ -67,7 +37,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layoutImageButtonEditPlaylistPlayAll">
+        app:layout_constraintTop_toBottomOf="@+id/playlistControls">
 
     </androidx.recyclerview.widget.RecyclerView>
 

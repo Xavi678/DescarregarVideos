@@ -19,43 +19,17 @@
         app:layout_constraintStart_toEndOf="@+id/playlistImageLayout"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/layoutImageButtonPlaylistPlayAll"
+    <include
+        android:id="@+id/playlistControls"
+        layout="@layout/layout_playlist_controls"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="13dp"
-        android:background="@drawable/rounded_rect"
-        android:orientation="horizontal"
-        android:paddingTop="5dp"
-        android:paddingEnd="5dp"
-        android:paddingBottom="5dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="10dp"
         app:layout_constraintStart_toEndOf="@+id/playlistImageLayout"
         app:layout_constraintTop_toBottomOf="@+id/tbxPlaylistTitle">
 
-        <ImageButton
-            android:id="@+id/imageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="6dp"
-            android:background="@android:color/transparent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/play_button"
-            android:clickable="false"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="2dp"
-            android:text="Reproduir"
-            android:textColor="@color/white"
-            android:textSize="11sp">
-
-        </TextView>
-
-    </LinearLayout>
+    </include>
 
     <ImageButton
         android:id="@+id/imageButtonPlaylistOptions"

@@ -22,7 +22,7 @@ import com.ivax.descarregarvideos.dialog_fragments.edit.playlist.menu.EditPlayli
 import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
 import java.io.FileInputStream
 
-class PlaylistAdapter(private val playAll: (PlaylistWithSavedVideos) -> Unit) : RecyclerView.Adapter<PlaylistAdapter.ViewHolder>() {
+class PlaylistAdapter(private val playAll: (PlaylistWithSavedVideos) -> Unit,private val shuffle: (PlaylistWithSavedVideos) -> Unit) : RecyclerView.Adapter<PlaylistAdapter.ViewHolder>() {
     private var listener: ((playlistId: Int) -> Unit)? = null
 
     fun setListener(listener: ((playlistId: Int) -> Unit)?) {
@@ -74,6 +74,9 @@ class PlaylistAdapter(private val playAll: (PlaylistWithSavedVideos) -> Unit) : 
             bundle.putInt("playlistId",playlistWSavedVideos.playlist.playListId)
             navController.navigate(R.id.nav_edit_playlist,bundle)
         }
+        holder.shuffleButton.setOnClickListener {
+            shuffle(playlistWSavedVideos)
+        }
         holder.savedVideoMenu.setOnClickListener {
 
             listener?.invoke(playlistWSavedVideos.playlist.playListId)
@@ -91,7 +94,8 @@ class PlaylistAdapter(private val playAll: (PlaylistWithSavedVideos) -> Unit) : 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tbxPlaylistTitle= itemView.findViewById<TextView>(R.id.tbxPlaylistTitle)
         val img=itemView.findViewById<ImageView>(R.id.imgPlaylistFirst)
-        val playButton=itemView.findViewById<LinearLayout>(R.id.layoutImageButtonPlaylistPlayAll)
+        val playButton=itemView.findViewById<LinearLayout>(R.id.playAll)
+        val shuffleButton=itemView.findViewById<LinearLayout>(R.id.shuffle)
         val playlistCount=itemView.findViewById<TextView>(R.id.tbxPlaylistCountVideos)
         val playlistConstraint=itemView.findViewById<ConstraintLayout>(R.id.layoutPlaylist)
         val savedVideoMenu=itemView.findViewById<ImageButton>(R.id.imageButtonPlaylistOptions)

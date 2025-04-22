@@ -10,7 +10,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ivax.descarregarvideos.adapter.PlaylistAdapter
-import com.ivax.descarregarvideos.databinding.FragmentHomeBinding
 import com.ivax.descarregarvideos.databinding.FragmentPlaylistsBinding
 import com.ivax.descarregarvideos.dialog_fragments.edit.playlist.menu.EditPlaylistMenuFragment
 import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
@@ -29,6 +28,9 @@ class PlaylistsFragment : Fragment(){
     }
     private val playlistAdapter: PlaylistAdapter= PlaylistAdapter(playAll = fun (playlist : PlaylistWithSavedVideos){
         playlistsViewModel.addPlaylist(playlist)
+        playlistsViewModel.setMediaVisibility(true)
+    }, shuffle = fun(playlist : PlaylistWithSavedVideos){
+        playlistsViewModel.addPlaylistShuffle(playlist)
         playlistsViewModel.setMediaVisibility(true)
     })
     override fun onCreateView(

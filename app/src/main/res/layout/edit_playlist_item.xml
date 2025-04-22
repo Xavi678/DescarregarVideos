@@ -6,16 +6,18 @@
     android:layout_height="wrap_content"
     android:paddingBottom="5dp"
     >
+
     <TextView
         android:id="@+id/tbxSavedVideoEditDesc"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="110dp"
+        android:layout_marginEnd="10dp"
         android:maxWidth="270dp"
         android:text="TextView"
         android:textColor="@color/black"
+        app:layout_constraintEnd_toStartOf="@+id/btnGrip"
         app:layout_constraintStart_toEndOf="@id/relativeImgSavedVideoEdit"
         app:layout_constraintTop_toTopOf="parent" />
 

@@ -7,7 +7,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@drawable/rounded_rect"
     android:elevation="2dp"
-    android:backgroundTint="@color/cardview_dark_background">
+    android:backgroundTint="@color/cardview_dark_background"
+    >
 
     <ImageButton
         android:id="@+id/mediaPlayerPlayButton"

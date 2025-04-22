@@ -7,6 +7,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaController
+import com.ivax.descarregarvideos.classes.VideosWithPositionFoo
 import com.ivax.descarregarvideos.entities.SavedVideo
 import com.ivax.descarregarvideos.helpers.IMediaHelper
 import javax.inject.Inject
@@ -54,5 +55,23 @@ class MediaPlayerRepository @Inject constructor(private val mediaHelper: IMediaH
         val metaData=MediaMetadata.Builder().setArtworkUri(uri).setTitle(video.title).setAlbumTitle(playlistName).build()
         val mediaItem = MediaItem.Builder().setUri(video.videoUrl!!).setMediaMetadata(metaData).setMediaId(video.videoId).build()
         return mediaItem
+    }
+
+    fun SavedVideoToMediaItem(video: VideosWithPositionFoo,playlistName: String?=null): MediaItem {
+        val uri=Uri.Builder().path(video.imgUrl).build()
+        val metaData=MediaMetadata.Builder().setArtworkUri(uri).setTitle(video.title).setAlbumTitle(playlistName).build()
+        val mediaItem = MediaItem.Builder().setUri(video.videoUrl!!).setMediaMetadata(metaData).setMediaId(video.videoId).build()
+        return mediaItem
+    }
+
+    fun addPlaylist(videos: List<VideosWithPositionFoo>) {
+        videos.forEach {
+            mediaHelper.addMediaItem(SavedVideoToMediaItem(it))
+        }
+        mediaHelper.play()
+    }
+
+    fun addPlaylistShuffle(videos: List<VideosWithPositionFoo>) {
+
     }
 }

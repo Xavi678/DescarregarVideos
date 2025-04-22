@@ -60,6 +60,11 @@
             app:shutter_background_color="@color/white"
             app:hide_on_touch="false"
 
+            app:surface_type="texture_view"
+            app:auto_show="true"
+            app:resize_mode="fill"
+            android:clickable="false"
+
             />
 
         <!--<androidx.media3.ui.PlayerControlView

@@ -40,12 +40,11 @@ class ChoosePlaylistDialogFragment : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        setFragmentResultListener("requestKey") { key, bundle ->
+        childFragmentManager.setFragmentResultListener("requestKey",viewLifecycleOwner) { key, bundle ->
             {
                 val result = bundle.getString("resultKey")
                 Log.d("DescarregarVideos",result.toString())
-            }
-        }
+            } }
         _binding=DialogChoosePlaylistBinding.inflate(inflater,container,false)
         videoId= requireArguments().getString("videoId").toString()
         val root: View =binding.root
@@ -62,7 +61,7 @@ class ChoosePlaylistDialogFragment : DialogFragment() {
             bundle.putString("videoId",videoId)
             newPlaylistDialogFragment.arguments=bundle
 
-            newPlaylistDialogFragment.show(parentFragmentManager,"DescarregarVideos")
+            newPlaylistDialogFragment.show( childFragmentManager,"DescarregarVideos")
         }
         binding.btnChoosePlaylistCancel.setOnClickListener {
             close()

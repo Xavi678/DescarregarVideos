@@ -38,4 +38,8 @@ class PlaylistsViewModel @Inject constructor(private val videoRepository: VideoR
         }
        return playlists.value!!.filter { it.playlist.name!!.lowercase().contains( playlistName.lowercase()) }
     }
+
+    fun addPlaylistShuffle(videos: PlaylistWithSavedVideos) {
+
+    }
 }
