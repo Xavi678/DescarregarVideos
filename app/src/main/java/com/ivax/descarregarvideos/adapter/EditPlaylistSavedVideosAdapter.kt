@@ -82,6 +82,7 @@ class EditPlaylistSavedVideosAdapter :
     fun onRowMoved(fromPosition: Int,toPosition : Int): Pair<VideosWithPositionFoo,VideosWithPositionFoo> {
         var from=items[fromPosition]
         var to=items[toPosition]
+
         Collections.swap(items,fromPosition,toPosition)
         notifyItemMoved(fromPosition, toPosition);
         from.position=toPosition

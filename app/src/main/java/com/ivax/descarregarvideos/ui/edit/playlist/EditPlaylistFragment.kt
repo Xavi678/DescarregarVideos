@@ -1,9 +1,11 @@
 package com.ivax.descarregarvideos.ui.edit.playlist
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.ColorInt
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -85,6 +87,8 @@ class EditPlaylistFragment : Fragment() {
                 viewHolder: RecyclerView.ViewHolder,
                 target: RecyclerView.ViewHolder
             ): Boolean {
+
+
                 val (from,to)=adapter.onRowMoved(viewHolder.bindingAdapterPosition,target.bindingAdapterPosition)
 
                 editPlaylistViewModel.UpdatePlaylistSavedVideoCrossRef(from)
@@ -92,6 +96,18 @@ class EditPlaylistFragment : Fragment() {
                 return true
             }
 
+            override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+                viewHolder?.itemView?.setBackgroundColor(Color.LTGRAY )
+                super.onSelectedChanged(viewHolder, actionState)
+            }
+
+            override fun clearView(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder
+            ) {
+                viewHolder.itemView.setBackgroundColor(Color.TRANSPARENT )
+                super.clearView(recyclerView, viewHolder)
+            }
             override fun onSwiped(
                 viewHolder: RecyclerView.ViewHolder,
                 direction: Int

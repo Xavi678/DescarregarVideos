@@ -27,10 +27,10 @@ class PlaylistsFragment : Fragment(){
         ViewModelProvider(this)[PlaylistsViewModel::class.java]
     }
     private val playlistAdapter: PlaylistAdapter= PlaylistAdapter(playAll = fun (playlist : PlaylistWithSavedVideos){
-        playlistsViewModel.addPlaylist(playlist)
+        playlistsViewModel.playAll(playlist.playlist.playListId)
         playlistsViewModel.setMediaVisibility(true)
     }, shuffle = fun(playlist : PlaylistWithSavedVideos){
-        playlistsViewModel.addPlaylistShuffle(playlist)
+        playlistsViewModel.shuffle(playlist.playlist.playListId)
         playlistsViewModel.setMediaVisibility(true)
     })
     override fun onCreateView(

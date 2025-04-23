@@ -38,7 +38,15 @@ class PlaylistsViewModel @Inject constructor(private val videoRepository: VideoR
         }
        return playlists.value!!.filter { it.playlist.name!!.lowercase().contains( playlistName.lowercase()) }
     }
+    fun shuffle(playlistId : Int) {
+        var playlistShuffle= videoRepository.getByPlaylistIdWithPositions(playlistId)
+        mediaPlayerRepository.addPlaylistShuffle(playlistShuffle)
 
+    }
+    fun playAll(playlistId : Int) {
+        var playlistsWithPos=videoRepository.getByPlaylistIdWithPositions(playlistId).sortedBy { it.position }
+        mediaPlayerRepository.addPlaylist(playlistsWithPos)
+    }
     fun addPlaylistShuffle(videos: PlaylistWithSavedVideos) {
 
     }

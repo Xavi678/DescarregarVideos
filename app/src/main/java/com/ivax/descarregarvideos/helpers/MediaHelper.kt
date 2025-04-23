@@ -31,9 +31,9 @@ class MediaHelper @Inject constructor(private val appContext: Context) : IMediaH
         mediaController.play()
     }
     override fun clear(){
-
-            mediaController.stop()
-
+        if(mediaController.mediaItemCount>0){
+            mediaController.clearMediaItems()
+        }
     }
     override fun setShuffle(){
         mediaController.shuffleModeEnabled=true

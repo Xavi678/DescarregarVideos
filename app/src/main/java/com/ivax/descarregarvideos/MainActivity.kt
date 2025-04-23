@@ -109,37 +109,39 @@ class MainActivity : AppCompatActivity() {
                     }
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
                         hasNextAndPreviousMedia()
+                        super.onIsPlayingChanged(isPlaying)
                     }
 
                     override fun onMediaItemTransition(
                         mediaItem: MediaItem?,
                         @MediaItemTransitionReason reason: Int
                     ) {
-                        hasNextAndPreviousMedia()
-                        val title = mediaItem?.mediaMetadata?.title
-                        val uri = mediaItem?.mediaMetadata?.artworkUri
-                        val playlistName= mediaItem?.mediaMetadata?.albumTitle
-                        var bmp: Bitmap
-                        var fileInStream = FileInputStream(uri.toString())
-                        fileInStream.use {
-                            bmp = BitmapFactory.decodeStream(it)
-                        }
-                        fileInStream.close()
-                        mediaViewModel.playlistName.update{
-                            playlistName?.toString()
-                        }
-                        mediaViewModel.thumbnail.update {
-                            bmp
-                        }
-                        mediaViewModel.title.update {
-                            title.toString()
-                        }
-                        //playerSongTextView.text =
-                        Log.d("DescarregarVideos", "")
+                        if(mediaItem!=null) {
+                            hasNextAndPreviousMedia()
+                            val title = mediaItem.mediaMetadata.title
+                            val uri = mediaItem.mediaMetadata.artworkUri
+                            val playlistName = mediaItem.mediaMetadata.albumTitle
+                            var bmp: Bitmap
+                            var fileInStream = FileInputStream(uri.toString())
+                            fileInStream.use {
+                                bmp = BitmapFactory.decodeStream(it)
+                            }
+                            fileInStream.close()
+                            mediaViewModel.playlistName.update {
+                                playlistName?.toString()
+                            }
+                            mediaViewModel.thumbnail.update {
+                                bmp
+                            }
+                            mediaViewModel.title.update {
+                                title.toString()
+                            }
+                            //playerSongTextView.text =
+                            Log.d("DescarregarVideos", "")
 
-                        //super.onMediaItemTransition(mediaItem, reason)
-                        Log.d("DescarregarVideos", "${mediaItem?.mediaMetadata}")
-
+                            //super.onMediaItemTransition(mediaItem, reason)
+                            Log.d("DescarregarVideos", "${mediaItem.mediaMetadata}")
+                        }
                     }
 
 
