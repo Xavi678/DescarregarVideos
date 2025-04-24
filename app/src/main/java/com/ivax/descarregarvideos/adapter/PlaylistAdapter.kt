@@ -16,19 +16,21 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.ivax.descarregarvideos.R
-import com.ivax.descarregarvideos.adapter.ChoosePlaylistListAdapter.ViewHolder
 import com.ivax.descarregarvideos.classes.MainDiffCallBack
-import com.ivax.descarregarvideos.dialog_fragments.edit.playlist.menu.EditPlaylistMenuFragment
+import com.ivax.descarregarvideos.classes.PlaylistWithOrderedVideosFoo
 import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
 import java.io.FileInputStream
 
-class PlaylistAdapter(private val playAll: (PlaylistWithSavedVideos) -> Unit,private val shuffle: (PlaylistWithSavedVideos) -> Unit) : RecyclerView.Adapter<PlaylistAdapter.ViewHolder>() {
+class PlaylistAdapter(private val playAll: (PlaylistWithOrderedVideosFoo) -> Unit,
+                      private val shuffle: (PlaylistWithOrderedVideosFoo) -> Unit,
+                        private val firstVideo: (Int)-> Unit
+) : RecyclerView.Adapter<PlaylistAdapter.ViewHolder>() {
     private var listener: ((playlistId: Int) -> Unit)? = null
 
     fun setListener(listener: ((playlistId: Int) -> Unit)?) {
         this.listener = listener
     }
-    private val items = ArrayList<PlaylistWithSavedVideos>()
+    private val items = ArrayList<PlaylistWithOrderedVideosFoo>()
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
@@ -38,7 +40,7 @@ class PlaylistAdapter(private val playAll: (PlaylistWithSavedVideos) -> Unit,pri
         return ViewHolder(itemView)
     }
 
-    fun addItems(items: List<PlaylistWithSavedVideos>) {
+    fun addItems(items: ArrayList<PlaylistWithOrderedVideosFoo>) {
         val diffResult = DiffUtil.calculateDiff(MainDiffCallBack(this.items, items))
         this.items.clear()
         this.items.addAll(items)
@@ -49,10 +51,10 @@ class PlaylistAdapter(private val playAll: (PlaylistWithSavedVideos) -> Unit,pri
         holder: ViewHolder,
         position: Int
     ) {
-        val playlistWSavedVideos: PlaylistWithSavedVideos = items[position]
+        val playlistWSavedVideos: PlaylistWithOrderedVideosFoo = items[position]
         holder.tbxPlaylistTitle.text=playlistWSavedVideos.playlist.name
-
-       val firstVideo= playlistWSavedVideos.videos.firstOrNull()
+        firstVideo(playlistWSavedVideos.playlist.playListId)
+       val firstVideo= playlistWSavedVideos.orderedVideos.minByOrNull { it.position }
         if(firstVideo?.imgUrl!=null){
 
             var bmp: Bitmap
@@ -64,7 +66,7 @@ class PlaylistAdapter(private val playAll: (PlaylistWithSavedVideos) -> Unit,pri
             holder.img.setImageBitmap(bmp)
 
         }
-        holder.playlistCount.text = playlistWSavedVideos.videos.count().toString()
+        holder.playlistCount.text = playlistWSavedVideos.orderedVideos.count().toString()
         holder.playButton.setOnClickListener {
             playAll(playlistWSavedVideos)
         }

@@ -58,12 +58,18 @@ class VideoRepository @Inject constructor(private val videoDao: VideoDao,
         return playListDao.getAllPlaylistsWithVideos()
     }
 
+    fun getAllPlaylistsWithVideosPos() : Flow<List<PlaylistSavedVideoCrossRef>> {
+        return playlistSavedVideoCrossRefDao.getAll()
+    }
+    fun getAllVideosWithPositionFoo() : Flow<List<VideosWithPositionFoo>>{
+        return  playlistSavedVideoCrossRefDao.getAllVideosWithPositionFoo()
+    }
+
     fun deletePlaylist(playlistId: Int) {
         playListDao.deletePlaylist(playlistId)
         playlistSavedVideoCrossRefDao.deletePlaylist(playlistId)
         //val res=playlistSavedVideoCrossRefDao.deleteAll()
     }
-
     fun firstPlaylistWithSavedVideos(playlistId: Int): PlaylistWithSavedVideos {
        return playListDao.firstWithSavedVideos(playlistId)
     }
@@ -88,5 +94,10 @@ class VideoRepository @Inject constructor(private val videoDao: VideoDao,
     }
     fun videoExists(videoId: String) : Boolean {
         return videoDao.first(videoId)!=null
+    }
+
+    fun getFirstVideo(playlistId: Int): SavedVideo? {
+       return videoDao.getFirstByPlaylist(playlistId)
+
     }
 }
