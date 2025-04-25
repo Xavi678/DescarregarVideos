@@ -5,14 +5,11 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.Menu
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.SeekBar
 import android.widget.TextView
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
@@ -26,22 +23,17 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import com.ivax.descarregarvideos.classes.MathExtensions
 import com.ivax.descarregarvideos.databinding.ActivityMainBinding
 import com.ivax.descarregarvideos.general.viewmodels.MediaViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.FileInputStream
-import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.Player.MediaItemTransitionReason
 import androidx.media3.common.Timeline
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
-import androidx.media3.ui.DefaultTimeBar
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.ivax.descarregarvideos.services.PlaybackService
@@ -59,6 +51,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnSkipBackward: ImageButton
     private lateinit var btnSkipForward: ImageButton
     private lateinit var btnMinimizePlayer: ImageButton
+    private lateinit var btnDestroyPlayer: ImageButton
     private lateinit var controllerFuture : ListenableFuture<MediaController>
     private  var playlistLayout: LinearLayout?=null
     private lateinit var tbxPlaylistName: TextView
@@ -69,6 +62,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
+
         super.onResume()
     }
 
@@ -86,6 +80,15 @@ class MainActivity : AppCompatActivity() {
                 mediaViewModel.setMediaController(mediaController)
                 player = mediaViewModel.getMediaPlayer()
                 binding.appBarMain.playerView.player = player
+                player.repeatMode = Player.REPEAT_MODE_ALL
+                if(player.isPlaying){
+                    val mediaItem=player.currentMediaItem
+                    if(mediaItem!=null){
+                        mediaViewModel.isMediaPlayerMaximized.postValue(true)
+                        setMetadata(mediaItem)
+                    }
+
+                }
                 //val defaultTimeBar=binding.appBarMain.root.findViewById<DefaultTimeBar>(R.id.defaultTimeBar)
                 //defaultTimeBar.
                 player.addListener(object : Player.Listener {
@@ -117,30 +120,8 @@ class MainActivity : AppCompatActivity() {
                         @MediaItemTransitionReason reason: Int
                     ) {
                         if(mediaItem!=null) {
-                            hasNextAndPreviousMedia()
-                            val title = mediaItem.mediaMetadata.title
-                            val uri = mediaItem.mediaMetadata.artworkUri
-                            val playlistName = mediaItem.mediaMetadata.albumTitle
-                            var bmp: Bitmap
-                            var fileInStream = FileInputStream(uri.toString())
-                            fileInStream.use {
-                                bmp = BitmapFactory.decodeStream(it)
-                            }
-                            fileInStream.close()
-                            mediaViewModel.playlistName.update {
-                                playlistName?.toString()
-                            }
-                            mediaViewModel.thumbnail.update {
-                                bmp
-                            }
-                            mediaViewModel.title.update {
-                                title.toString()
-                            }
-                            //playerSongTextView.text =
-                            Log.d("DescarregarVideos", "")
+                            setMetadata(mediaItem)
 
-                            //super.onMediaItemTransition(mediaItem, reason)
-                            Log.d("DescarregarVideos", "${mediaItem.mediaMetadata}")
                         }
                     }
 
@@ -154,6 +135,28 @@ class MainActivity : AppCompatActivity() {
 
 
         super.onStart()
+    }
+
+    private fun setMetadata(mediaItem: MediaItem) {
+        hasNextAndPreviousMedia()
+        val title = mediaItem.mediaMetadata.title
+        val uri = mediaItem.mediaMetadata.artworkUri
+        val playlistName = mediaItem.mediaMetadata.albumTitle
+        var bmp: Bitmap
+        var fileInStream = FileInputStream(uri.toString())
+        fileInStream.use {
+            bmp = BitmapFactory.decodeStream(it)
+        }
+        fileInStream.close()
+        mediaViewModel.playlistName.update {
+            playlistName?.toString()
+        }
+        mediaViewModel.thumbnail.update {
+            bmp
+        }
+        mediaViewModel.title.update {
+            title.toString()
+        }
     }
 
     override fun onStop() {
@@ -183,13 +186,23 @@ class MainActivity : AppCompatActivity() {
         //seekBarI = binding.appBarMain.root.findViewById<SeekBar>(R.id.seekBar)
         //tbxTimeTotal = binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeTotal)
         btnMinimizePlayer=binding.appBarMain.root.findViewById<ImageButton>(R.id.imageButtonMinimizePlayer)
+        btnDestroyPlayer=binding.appBarMain.root.findViewById<ImageButton>(R.id.imageButtonDestroyPlayer)
         tbxPlaylistName=binding.appBarMain.root.findViewById<TextView>(R.id.tbxCurrentPlaylist)
         playlistLayout=binding.appBarMain.root.findViewById<LinearLayout>(R.id.layoutCurrentPlaylist)
-        mediaViewModel.isMediaVisible.observe(this) {
+        mediaViewModel.isMediaPlayerMaximized.observe(this) {
 
             binding.appBarMain.mediaPlayer.visibility = if (it) View.VISIBLE else View.GONE
             binding.appBarMain.fab.visibility= if(it) View.GONE else View.VISIBLE
         }
+        lifecycleScope.launch {
+            mediaViewModel.isMediaPlayerVisible.collectLatest {
+                if(!it) {
+                    binding.appBarMain.fab.visibility = View.GONE
+                    binding.appBarMain.mediaPlayer.visibility = View.GONE
+                }
+            }
+        }
+
         btnSkipBackward.setOnClickListener {
             player.seekToPreviousMediaItem()
         }
@@ -252,7 +265,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
         btnMinimizePlayer.setOnClickListener {
-            mediaViewModel.isMediaVisible.postValue(false)
+            mediaViewModel.isMediaPlayerMaximized.postValue(false)
+        }
+        btnDestroyPlayer.setOnClickListener {
+            player.stop()
+            player.clearMediaItems()
+            player.release()
+            mediaViewModel.isMediaPlayerVisible.update{
+                false
+            }
+
         }
         /*seekBarI!!.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(
@@ -319,7 +341,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.appBarMain.fab.setOnClickListener {
 
-            mediaViewModel.isMediaVisible.postValue(true)
+            mediaViewModel.isMediaPlayerMaximized.postValue(true)
         }
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView

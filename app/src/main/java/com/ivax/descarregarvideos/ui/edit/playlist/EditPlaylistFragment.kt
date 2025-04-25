@@ -39,7 +39,6 @@ class EditPlaylistFragment : Fragment() {
         lifecycleScope.launch {
             editPlaylistViewModel.playlistIdWithPositions.collectLatest {
                 if (it!=null){
-                    //binding.tbxEditPlaylistTitle.text=it.
                     adapter.addItems(it)
                 }
             }

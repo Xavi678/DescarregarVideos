@@ -60,7 +60,7 @@ class PlaylistsViewModel @Inject constructor(private val videoRepository: VideoR
     }
     fun setMediaVisibility(visibility: Boolean){
 
-        mediaPlayerRepository.getCurrentMediaVisibility().postValue(visibility)
+        mediaPlayerRepository.isMediaPlayerMaximized().postValue(visibility)
     }
 
     fun filterPlaylist(playlistName: String): List<PlaylistWithSavedVideos> {
@@ -71,12 +71,12 @@ class PlaylistsViewModel @Inject constructor(private val videoRepository: VideoR
        return playlists.value!!.filter { it.playlist.name!!.lowercase().contains( playlistName.lowercase()) }*/
     }
     fun shuffle(playlist: PlaylistWithOrderedVideosFoo) {
-        mediaPlayerRepository.addPlaylistShuffle(playlist)
+        mediaPlayerRepository.addPlaylistShuffle(playlist,playlist.playlist.name)
 
 
     }
     fun playAll(playlist: PlaylistWithOrderedVideosFoo) {
-        mediaPlayerRepository.addPlaylist(playlist)
+        mediaPlayerRepository.addPlaylist(playlist,playlist.playlist.name)
     }
 
     fun getFirstVideo(playlistId: kotlin.Int) {

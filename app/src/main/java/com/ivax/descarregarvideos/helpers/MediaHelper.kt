@@ -1,15 +1,11 @@
 package com.ivax.descarregarvideos.helpers
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.media.MediaPlayer
-import android.media.browse.MediaBrowser
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.media3.common.MediaItem
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaController
 import com.ivax.descarregarvideos.entities.SavedVideo
+import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 
 class MediaHelper @Inject constructor(private val appContext: Context) : IMediaHelper {
@@ -22,9 +18,14 @@ class MediaHelper @Inject constructor(private val appContext: Context) : IMediaH
     private val actualVideo : MutableLiveData<SavedVideo> by lazy {
         MutableLiveData<SavedVideo>()
     }
-    private val actualVisibility : MutableLiveData<Boolean> by lazy {
+    private val isMaximized : MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
     }
+
+    private val isMediaPlayerVisible : MutableStateFlow<Boolean> by lazy {
+        MutableStateFlow<Boolean>(false)
+    }
+
 
     override fun play(){
         mediaController.prepare()
@@ -63,8 +64,12 @@ class MediaHelper @Inject constructor(private val appContext: Context) : IMediaH
         actualVideo.postValue(video)
     }
 
-    override fun getCurrentMediaVisibility(): MutableLiveData<Boolean> {
-        return actualVisibility
+    override fun isMediaPlayerMaximized(): MutableLiveData<Boolean> {
+        return isMaximized
+    }
+
+    override fun getMediaPlayerVisibility() : MutableStateFlow<Boolean>{
+        return isMediaPlayerVisible
     }
 
     override  fun getCurrentMedia(): MutableLiveData<SavedVideo> {

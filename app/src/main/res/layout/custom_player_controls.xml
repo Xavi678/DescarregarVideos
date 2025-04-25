@@ -135,6 +135,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/caret_down" />
+    <ImageButton
+        android:id="@+id/imageButtonDestroyPlayer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:background="@android:color/transparent"
+        app:layout_constraintEnd_toStartOf="@+id/imageButtonMinimizePlayer"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/remove_trash_big" />
     <LinearLayout
         android:id="@+id/layoutCurrentPlaylist"
         android:layout_width="wrap_content"

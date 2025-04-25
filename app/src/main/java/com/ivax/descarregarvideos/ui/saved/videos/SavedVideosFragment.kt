@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
-import androidx.media3.common.MediaItem
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ivax.descarregarvideos.adapter.SavedVideosAdapter
 import com.ivax.descarregarvideos.databinding.FragmentSavedVideosBinding
@@ -32,7 +31,7 @@ class SavedVideosFragment : Fragment() {
         _binding = FragmentSavedVideosBinding.inflate(inflater, container, false)
         val root: View = binding.root
         savedVideoAdapter= SavedVideosAdapter(playMedia= fun(savedVideo: SavedVideo){
-            savedVideosViewModel.addItemMedia(savedVideo)
+            savedVideosViewModel.addSingleItemMedia(savedVideo)
             savedVideosViewModel.setSavedVideo(savedVideo)
             savedVideosViewModel.play()
             savedVideosViewModel.setMediaVisibility(true)

@@ -18,7 +18,7 @@ import javax.inject.Inject
 class EditPlaylistViewModel @Inject constructor(private val videoRepository: VideoRepository,
 private val mediaPlayerRepository: MediaPlayerRepository) :
     ViewModel() {
-    val isMediaVisible=mediaPlayerRepository.getCurrentMediaVisibility()
+    val isMediaVisible=mediaPlayerRepository.isMediaPlayerMaximized()
     /*private val _playlistWithSavedVideos: MutableStateFlow<List<PlaylistWithSavedVideos>?> by lazy {
         MutableStateFlow<List<PlaylistWithSavedVideos>?>(null)
     }*/
@@ -59,14 +59,14 @@ private val mediaPlayerRepository: MediaPlayerRepository) :
     fun shuffle() {
        var playlistShuffle= _playlistIdWithPositions.value
         if(playlistShuffle!=null){
-            mediaPlayerRepository.addPlaylistShuffle(playlistShuffle)
+            mediaPlayerRepository.addPlaylistShuffle(playlistShuffle,playlist.value?.name)
         }
 
     }
     fun playAll() {
         val playlistPos=_playlistIdWithPositions.value?.sortedBy { it.position }
         if(playlistPos!=null){
-            mediaPlayerRepository.addPlaylist(playlistPos)
+            mediaPlayerRepository.addPlaylist(playlistPos,playlist.value?.name)
         }
     }
 

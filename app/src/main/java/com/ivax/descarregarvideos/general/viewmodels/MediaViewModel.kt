@@ -2,14 +2,9 @@ package com.ivax.descarregarvideos.general.viewmodels
 
 
 import android.graphics.Bitmap
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.media3.common.MediaItem
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaController
-import com.ivax.descarregarvideos.entities.SavedVideo
 import com.ivax.descarregarvideos.repository.MediaPlayerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,8 +14,8 @@ import javax.inject.Inject
 class MediaViewModel @Inject constructor(private val mediaPlayerRepository:MediaPlayerRepository) : ViewModel() {
 
     //val currentThumbnail=mediaPlayerRepository.getCurrentThumbnail()
-    val isMediaVisible=mediaPlayerRepository.getCurrentMediaVisibility()
-
+    val isMediaPlayerMaximized=mediaPlayerRepository.isMediaPlayerMaximized()
+    val isMediaPlayerVisible = mediaPlayerRepository.getMediaPlayerVisibility()
     fun setMediaController(mediaController: MediaController){
         mediaPlayerRepository.setMediaController(mediaController)
     }
