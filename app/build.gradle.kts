@@ -45,6 +45,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        compose=true
     }
     packaging{
         resources.excludes.addAll(
@@ -82,7 +83,11 @@ dependencies {
     implementation(libs.android.splash.screen)
     implementation(libs.android.compose.ui)
     implementation(libs.android.compose.ui.tooling.preview)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui.android)
     debugImplementation(libs.android.compose.ui.tooling)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    implementation(libs.android.compose.material3)
     implementation(libs.android.activity.compose)
     implementation(libs.android.lifecycle.viewmodel.compose)
     implementation(libs.android.livedata.compose)

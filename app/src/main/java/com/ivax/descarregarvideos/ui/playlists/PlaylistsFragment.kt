@@ -49,7 +49,6 @@ class PlaylistsFragment : Fragment(){
                 playlistAdapter.addItems(it)
             }
         }
-
         binding.layoutPlaylistsSearch.btnSearch.setOnClickListener {
             val text=binding.layoutPlaylistsSearch.tbxView.text.toString()
 
