@@ -22,6 +22,9 @@ roomVersion = "2.6.1"
 exoplayerVersion="1.5.1"
 splashVersion="1.0.0"
 
+activityComposeVersion="1.10.0"
+lifecycleViewModelComposeVersion="2.8.5"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -49,6 +52,13 @@ android-exoplayer-dash = {group="androidx.media3", name="media3-exoplayer-dash",
 android-exoplayer-ui={group="androidx.media3", name="media3-ui",version.ref="exoplayerVersion"}
 android-exoplayer-session={group="androidx.media3", name="media3-session",version.ref="exoplayerVersion"}
 android-splash-screen={group="androidx.core", name="core-splashscreen", version.ref="splashVersion"}
+android-compose-ui={group="androidx.compose.ui",name="ui"}
+android-compose-ui-tooling-preview={group="androidx.compose.ui",name="ui-tooling-preview"}
+android-compose-ui-tooling={group="androidx.compose.ui",name="ui-tooling"}
+android-activity-compose={group="androidx.activity", name="activity-compose", version.ref="activityComposeVersion"}
+android-lifecycle-viewmodel-compose={group="androidx.lifecycle",name="lifecycle-viewmodel-compose", version.ref="lifecycleViewModelComposeVersion"}
+android-livedata-compose={group="androidx.compose.runtime",name="runtime-livedata"}
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
