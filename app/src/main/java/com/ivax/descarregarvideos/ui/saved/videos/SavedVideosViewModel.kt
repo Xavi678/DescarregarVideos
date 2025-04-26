@@ -7,12 +7,16 @@ import com.ivax.descarregarvideos.entities.SavedVideo
 import com.ivax.descarregarvideos.repository.MediaPlayerRepository
 import com.ivax.descarregarvideos.repository.VideoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class SavedVideosViewModel @Inject constructor(private val repository: VideoRepository, private val mediaPlayerRepository: MediaPlayerRepository) : ViewModel() {
     val allSavedVideos: LiveData<List<SavedVideo>> = repository.getAllVideos().asLiveData()
 
+    private val _isBottomSheetVisible= MutableStateFlow<Boolean>(false)
     fun addSingleItemMedia(savedVideo: SavedVideo){
         mediaPlayerRepository.clear()
         val mediaItem=mediaPlayerRepository.SavedVideoToMediaItem(savedVideo)
@@ -36,5 +40,10 @@ class SavedVideosViewModel @Inject constructor(private val repository: VideoRepo
             return  allSavedVideos.value!!
         }
         return allSavedVideos.value!!.filter { it.title.lowercase().contains(savedVideoName.lowercase()) }
+    }
+    val isBottomSheetVisible : StateFlow<Boolean> = _isBottomSheetVisible.asStateFlow()
+
+    fun setBottomSheetVisibility(state: Boolean){
+        _isBottomSheetVisible.value=state
     }
 }

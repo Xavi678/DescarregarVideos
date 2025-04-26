@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,12 +21,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -76,6 +83,7 @@ class SavedVideosFragment : Fragment() {
         })
         binding.composeViewPlaylists.setContent {
             AllVideos()
+            ShowBottomDialog()
         }
         savedVideosViewModel.allSavedVideos.observe(viewLifecycleOwner) {
             //savedVideoAdapter.addItems(it)
@@ -109,7 +117,8 @@ class SavedVideosFragment : Fragment() {
         }
     }
     @Composable
-    fun ListItem(data: SavedVideo, modifier: Modifier = Modifier) {
+    fun ListItem(data: SavedVideo, modifier: Modifier = Modifier,savedVideosViewModel : SavedVideosViewModel = viewModel()) {
+
         var bmp : Bitmap
         var fileInStream= FileInputStream(data.imgUrl)
         fileInStream.use {
@@ -125,16 +134,38 @@ class SavedVideosFragment : Fragment() {
                     contentDescription = null,
                 )
                 Image(painter=painterResource(id=R.drawable.play_button_rect_mod), contentDescription = null,
-                    modifier = Modifier.align(alignment = androidx.compose.ui.Alignment.Center))
+                    modifier = Modifier.align(alignment = Alignment.Center).clickable(enabled = true, onClick = {
+                        savedVideosViewModel.addSingleItemMedia(data)
+                        savedVideosViewModel.setSavedVideo(data)
+                        savedVideosViewModel.play()
+                        savedVideosViewModel.setMediaVisibility(true)
+                    }))
                 Text(text = data.duration, color = Color.White, modifier = Modifier.
-                align(alignment = androidx.compose.ui.Alignment.BottomStart)
+                align(alignment = Alignment.BottomStart)
                     .background(Color.Black))
             }
 
 
             Text(text = data.title, modifier = Modifier.fillMaxSize().padding(8.dp).weight(1f))
+            Image(painter = painterResource(id=R.drawable.three_dots), contentDescription = null,
+                modifier= Modifier.clickable(enabled = true, onClick = {
+                    savedVideosViewModel.setBottomSheetVisibility(true)
+                }))
 
         }
         HorizontalDivider(Modifier.padding(4.dp))
+    }
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun ShowBottomDialog(savedVideosViewModel : SavedVideosViewModel = viewModel()){
+        if(savedVideosViewModel.isBottomSheetVisible.collectAsState().value){
+            ModalBottomSheet(onDismissRequest = {
+                savedVideosViewModel.setBottomSheetVisibility(false)
+            }
+            ) {
+                Text(text = "Delete Audio")
+            }
+        }
+
     }
 }
