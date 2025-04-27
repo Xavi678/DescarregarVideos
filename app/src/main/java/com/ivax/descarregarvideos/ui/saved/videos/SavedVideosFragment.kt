@@ -192,11 +192,15 @@ class SavedVideosFragment : Fragment() {
                 )
             }
 
-
-            Text(text = data.title, modifier = Modifier
+            Column(modifier = Modifier
                 .fillMaxSize()
                 .padding(8.dp)
-                .weight(1f))
+                .weight(1f)) {
+                Text(
+                    text = data.title
+                )
+                Text(text = data.downloadDate.toString())
+            }
             Image(
                 painter = painterResource(id = R.drawable.three_dots), contentDescription = null,
                 modifier = Modifier

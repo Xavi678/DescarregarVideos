@@ -5,6 +5,7 @@ import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.ivax.descarregarvideos.dao.PlayListDao
@@ -13,6 +14,7 @@ import com.ivax.descarregarvideos.dao.VideoDao
 import com.ivax.descarregarvideos.entities.Playlist
 import com.ivax.descarregarvideos.entities.PlaylistSavedVideoCrossRef
 import com.ivax.descarregarvideos.entities.SavedVideo
+import com.ivax.descarregarvideos.entities.converters.DateTimeConverter
 import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
 
 /*
@@ -20,14 +22,16 @@ import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
     AutoMigration(from = 2,to = 3)
 ]
 * */
-@Database(entities = [SavedVideo::class, Playlist::class, PlaylistSavedVideoCrossRef::class],exportSchema = true, version = 10,autoMigrations = [
+@Database(entities = [SavedVideo::class, Playlist::class, PlaylistSavedVideoCrossRef::class],exportSchema = true, version = 11,autoMigrations = [
     AutoMigration(from = 2,to = 3),
     AutoMigration(from = 3,to = 4),
     AutoMigration(from = 4,to = 5),
     AutoMigration(from = 6,to = 7),
     AutoMigration(from = 7,to = 8),
-    AutoMigration(from = 8,to = 9)
+    AutoMigration(from = 8,to = 9),
+    AutoMigration(from = 10,to = 11)
 ])
+@TypeConverters(DateTimeConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun videoDao(): VideoDao
     abstract fun playlistDao(): PlayListDao
