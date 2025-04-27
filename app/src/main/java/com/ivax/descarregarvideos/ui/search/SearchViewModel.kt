@@ -18,6 +18,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -33,7 +34,7 @@ class SearchViewModel @Inject constructor(
     private val _text = MutableLiveData<String>().apply {
         value = "This is slideshow Fragment"
     }
-    private val _currentVideos=videoRepository.getAllVideos().asLiveData()
+    private val _currentVideos= MutableStateFlow( videoRepository.getAllVideos())
     public val searchModel = MutableStateFlow<SearchResponseFoo?>(null)
     public val isLoading = MutableStateFlow<Boolean>(false)
     public val videoDownloadedData = MutableStateFlow<VideoDownloadedData?>(null)
@@ -102,7 +103,7 @@ class SearchViewModel @Inject constructor(
     }
 
     val text: LiveData<String> = _text
-    val currentVideos : LiveData<List<SavedVideo>> =_currentVideos
+    val currentVideos : StateFlow<List<SavedVideo>> =_currentVideos
     /*companion object {
 
         val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {

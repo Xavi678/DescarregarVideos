@@ -22,7 +22,10 @@ interface VideoDao {
     fun findByName(first: String, last: String): User*/
 
     @Query("SELECT * FROM savedvideo")
-    fun getAll(): Flow<List<SavedVideo>>
+    fun getAll(): List<SavedVideo>
+
+    @Query("SELECT * FROM savedvideo WHERE title LIKE '%' || :filter || '%'")
+    fun getAll(filter: String): List<SavedVideo>
 
     @Upsert
     fun insertAll(vararg savedVideo: SavedVideo)

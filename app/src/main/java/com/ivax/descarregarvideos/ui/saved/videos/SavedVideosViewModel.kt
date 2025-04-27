@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import com.ivax.descarregarvideos.classes.PlaylistWithOrderedVideosFoo
 import com.ivax.descarregarvideos.entities.SavedVideo
 import com.ivax.descarregarvideos.repository.MediaPlayerRepository
 import com.ivax.descarregarvideos.repository.VideoRepository
@@ -12,12 +13,28 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 @HiltViewModel
 class SavedVideosViewModel @Inject constructor(private val repository: VideoRepository, private val mediaPlayerRepository: MediaPlayerRepository) : ViewModel() {
-    val allSavedVideos: LiveData<List<SavedVideo>> = repository.getAllVideos().asLiveData()
+
+
+    val _allSavedVideos : MutableStateFlow<List<SavedVideo>> by lazy {
+        MutableStateFlow<List<SavedVideo>>(ArrayList<SavedVideo>())
+    }
+
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            _allSavedVideos.update { repository.getAllVideos() }
+        }
+    }
+
+
+    var allSavedVideos: StateFlow<List<SavedVideo>> = _allSavedVideos
+            //val allSavedVideos: LiveData<List<SavedVideo>> = _allSavedVideos.asLiveData()
 
     private val _isBottomSheetVisible= MutableStateFlow<Boolean>(false)
     private val _bottomSheetParameter= MutableStateFlow<String?>(null)
@@ -40,11 +57,21 @@ class SavedVideosViewModel @Inject constructor(private val repository: VideoRepo
         mediaPlayerRepository.isMediaPlayerMaximized().postValue(visibility)
     }
 
-    fun filterSavedVideos(savedVideoName: String): List<SavedVideo> {
-        if(savedVideoName==""){
-            return  allSavedVideos.value!!
-        }
-        return allSavedVideos.value!!.filter { it.title.lowercase().contains(savedVideoName.lowercase()) }
+    fun filterSavedVideos(savedVideoName: String){
+            viewModelScope.launch(Dispatchers.IO) {
+                if (savedVideoName != "") {
+                    _allSavedVideos.update {
+                        repository.getAllVideos(savedVideoName)
+                    }
+                }else{
+                    _allSavedVideos.update {
+                        repository.getAllVideos()
+                    }
+                }
+            }
+
+               // _allSavedVideosState.value = _allSavedVideos.filter { it.title.contains(savedVideoName,ignoreCase = true) }
+
     }
     fun deleteVideo(videoId: String){
         viewModelScope.launch(Dispatchers.IO) {

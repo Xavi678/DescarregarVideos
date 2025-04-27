@@ -54,8 +54,10 @@ class SearchFragment : Fragment() {
                 searchViewModel.downloadVideoResponse(saveVideo,finished)
 
         })
-        searchViewModel.currentVideos.observe(viewLifecycleOwner) {
-            adapter.addCurrentVideos(it)
+        lifecycleScope.launch {
+            searchViewModel.currentVideos.collectLatest {
+                adapter.addCurrentVideos(it)
+            }
         }
         val root: View = binding.root
         binding.layoutSearchSearch.btnSearch.setOnClickListener { view ->

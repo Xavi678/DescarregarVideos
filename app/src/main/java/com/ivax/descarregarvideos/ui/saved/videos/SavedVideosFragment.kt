@@ -14,10 +14,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.width
@@ -56,6 +59,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.colorspace.Rgb
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -106,9 +110,6 @@ class SavedVideosFragment : Fragment() {
             }
             ShowBottomDialog()
         }
-        savedVideosViewModel.allSavedVideos.observe(viewLifecycleOwner) {
-            //savedVideoAdapter.addItems(it)
-        }
         /*binding.layoutSavedVideoSearch.btnSearch.setOnClickListener {
             savedVideoAdapter.addItems( savedVideosViewModel.filterSavedVideos(binding.layoutSavedVideoSearch.tbxView.text.toString()))
         }*/
@@ -129,44 +130,65 @@ class SavedVideosFragment : Fragment() {
     fun AllVideos(
         savedVideosViewModel : SavedVideosViewModel = viewModel()
     ){
-        val savedVideos=savedVideosViewModel.allSavedVideos.observeAsState(listOf<SavedVideo>())
-
+        val savedVideos by savedVideosViewModel.allSavedVideos.collectAsStateWithLifecycle(listOf<SavedVideo>())
             LazyColumn(Modifier.fillMaxSize()) {
-                items(savedVideos.value) {
+                items(savedVideos) {
                     ListItem(it)
                 }
         }
     }
+    @Preview
     @Composable
     fun SearchContent(savedVideosViewModel : SavedVideosViewModel = viewModel()){
         var text by remember  { mutableStateOf("") }
-        Row(modifier = Modifier.padding(8.dp)) {
-
-            OutlinedTextField(value = text, onValueChange = {
-                text=it
-            }, placeholder = {
-             Text(text = "Search...")
-            }, trailingIcon = {
-                if(text.count()>0) {
+        Row(modifier = Modifier.height(intrinsicSize = IntrinsicSize.Max).padding(8.dp)) {
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = {
+                        text = it
+                    },
+                    placeholder = {
+                        Text(text = "Search...")
+                    },
+                    trailingIcon = {
+                        if (text.count() > 0) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = "Clear Icon",
+                                Modifier.clickable(
+                                    enabled = true,
+                                    onClick = {
+                                        text = ""
+                                    },
+                                    indication = ripple(),
+                                    interactionSource = remember { MutableInteractionSource() })
+                            )
+                        }
+                    },
+                    modifier = Modifier.border(
+                        4.dp,
+                        Color(29, 27, 32, 255),
+                        shape = RoundedCornerShape(12.dp, 0.dp, 0.dp, 12.dp)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                Button(
+                    onClick = {
+                        savedVideosViewModel.filterSavedVideos(text)
+                    }, shape = RoundedCornerShape(0.dp, 12.dp, 12.dp, 0.dp), colors =
+                        ButtonColors(
+                            Color(29, 27, 32, 255),
+                            Color(29, 27, 32, 255),
+                            Color.LightGray,
+                            Color.LightGray
+                        ),
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     Icon(
-                        imageVector = Icons.Default.Clear, contentDescription = "Clear Icon",
-                        Modifier.clickable(
-                            enabled = true,
-                            onClick = {
-                                text = ""
-                            },
-                            indication = ripple(),
-                            interactionSource = remember { MutableInteractionSource() })
+                        painter = painterResource(id = R.drawable.ic_menu_search),
+                        contentDescription = "Search Icon", tint = Color.White
                     )
                 }
-            }, modifier = Modifier.border(4.dp,Color.DarkGray,shape =  RoundedCornerShape(12.dp)), shape =  RoundedCornerShape(12.dp))
-            Button(onClick = {
-                savedVideosViewModel.filterSavedVideos(text)
-            }, shape = RectangleShape, colors =
-                ButtonColors(Color(29,27,32,255),Color(29,27,32,255),Color.LightGray,Color.LightGray)) {
-                Image(painter = painterResource(id=R.drawable.ic_menu_search),
-                    contentDescription = "Search Icon")
-            }
         }
     }
     @Composable

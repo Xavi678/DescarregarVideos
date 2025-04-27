@@ -11,6 +11,7 @@ import com.ivax.descarregarvideos.entities.SavedVideo
 import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.transform
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,8 +23,11 @@ class VideoRepository @Inject constructor(private val videoDao: VideoDao,
         videoDao.insertAll(video)
     }
 
-    fun getAllVideos(): Flow<List<SavedVideo>> {
+    fun getAllVideos(): List<SavedVideo> {
        return videoDao.getAll()
+    }
+    fun getAllVideos(filter: String): List<SavedVideo> {
+        return videoDao.getAll(filter)
     }
     fun getPlaylistSavedVideoCrossRefbyPlaylistId(playlistId: Int) : List<PlaylistSavedVideoCrossRef>{
         return playlistSavedVideoCrossRefDao.getByPlaylistId(playlistId)
