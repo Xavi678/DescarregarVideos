@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".ui.saved.videos.SavedVideosFragment">
 
-    <include
+    <!--<include
         android:id="@+id/layoutSavedVideoSearch"
         layout="@layout/search_layout"
         android:layout_width="wrap_content"
@@ -16,16 +16,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-    </include>
+    </include>-->
     <androidx.compose.ui.platform.ComposeView
         android:id="@+id/compose_view_playlists"
         android:layout_height="0dp"
         android:layout_width="0dp"
-        android:layout_marginTop="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layoutSavedVideoSearch"/>
+        app:layout_constraintTop_toTopOf="parent"/>
     <!--<androidx.recyclerview.widget.RecyclerView
         android:layout_height="0dp"
         android:layout_width="0dp"

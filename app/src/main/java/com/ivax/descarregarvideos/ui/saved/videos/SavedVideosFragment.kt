@@ -9,7 +9,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,25 +23,36 @@ import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.colorspace.Rgb
 import androidx.compose.ui.res.painterResource
@@ -87,15 +100,18 @@ class SavedVideosFragment : Fragment() {
 
         })
         binding.composeViewPlaylists.setContent {
-            AllVideos()
+            Column {
+                SearchContent()
+                AllVideos()
+            }
             ShowBottomDialog()
         }
         savedVideosViewModel.allSavedVideos.observe(viewLifecycleOwner) {
             //savedVideoAdapter.addItems(it)
         }
-        binding.layoutSavedVideoSearch.btnSearch.setOnClickListener {
+        /*binding.layoutSavedVideoSearch.btnSearch.setOnClickListener {
             savedVideoAdapter.addItems( savedVideosViewModel.filterSavedVideos(binding.layoutSavedVideoSearch.tbxView.text.toString()))
-        }
+        }*/
         setupUI()
         return root
     }
@@ -122,6 +138,38 @@ class SavedVideosFragment : Fragment() {
         }
     }
     @Composable
+    fun SearchContent(savedVideosViewModel : SavedVideosViewModel = viewModel()){
+        var text by remember  { mutableStateOf("") }
+        Row(modifier = Modifier.padding(8.dp)) {
+
+            OutlinedTextField(value = text, onValueChange = {
+                text=it
+            }, placeholder = {
+             Text(text = "Search...")
+            }, trailingIcon = {
+                if(text.count()>0) {
+                    Icon(
+                        imageVector = Icons.Default.Clear, contentDescription = "Clear Icon",
+                        Modifier.clickable(
+                            enabled = true,
+                            onClick = {
+                                text = ""
+                            },
+                            indication = ripple(),
+                            interactionSource = remember { MutableInteractionSource() })
+                    )
+                }
+            }, modifier = Modifier.border(4.dp,Color.DarkGray,shape =  RoundedCornerShape(12.dp)), shape =  RoundedCornerShape(12.dp))
+            Button(onClick = {
+                savedVideosViewModel.filterSavedVideos(text)
+            }, shape = RectangleShape, colors =
+                ButtonColors(Color(29,27,32,255),Color(29,27,32,255),Color.LightGray,Color.LightGray)) {
+                Image(painter = painterResource(id=R.drawable.ic_menu_search),
+                    contentDescription = "Search Icon")
+            }
+        }
+    }
+    @Composable
     fun ListItem(data: SavedVideo, modifier: Modifier = Modifier,savedVideosViewModel : SavedVideosViewModel = viewModel()) {
 
         var bmp : Bitmap
@@ -144,7 +192,7 @@ class SavedVideosFragment : Fragment() {
                         savedVideosViewModel.setSavedVideo(data)
                         savedVideosViewModel.play()
                         savedVideosViewModel.setMediaVisibility(true)
-                    }))
+                    }, indication = ripple(color = Color.Magenta), interactionSource = remember { MutableInteractionSource() }))
                 Text(text = data.duration, color = Color.White, modifier = Modifier.
                 align(alignment = Alignment.BottomStart)
                     .background(Color.Black))
@@ -153,13 +201,13 @@ class SavedVideosFragment : Fragment() {
 
             Text(text = data.title, modifier = Modifier.fillMaxSize().padding(8.dp).weight(1f))
             Image(painter = painterResource(id=R.drawable.three_dots), contentDescription = null,
-                modifier= Modifier.clickable(enabled = true, onClick = {
+                modifier= Modifier.align(alignment = Alignment.CenterVertically).clickable(enabled = true, onClick = {
                     savedVideosViewModel.setBottomSheetVisibility(true)
                     savedVideosViewModel.setBottomSheetVideoId(data.videoId)
-                }))
+                }, indication = ripple(), interactionSource = remember { MutableInteractionSource()}))
 
         }
-        HorizontalDivider(Modifier.padding(4.dp))
+        HorizontalDivider(Modifier.padding(4.dp), color = Color.LightGray)
     }
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -173,14 +221,17 @@ class SavedVideosFragment : Fragment() {
             ) {
                 Row(modifier = Modifier.fillMaxWidth().padding(8.dp).clickable(enabled = true, onClick = {
                     savedVideosViewModel.deleteVideo(videoId)
-                }).align(alignment = Alignment.CenterHorizontally)) {
+                    savedVideosViewModel.setBottomSheetVisibility(false)
+                }, indication = ripple(color = Color.Magenta), interactionSource = remember { MutableInteractionSource() }
+                ).align(alignment = Alignment.CenterHorizontally)) {
 
                         Image(
                             painter = painterResource(id = R.drawable.remove_trash),
                             contentDescription = null
                         )
 
-                    Text(text = "w222", color = Color.White)
+                    Text(text = "Delete Audio", color = Color.White,
+                        modifier = Modifier.align(alignment = Alignment.CenterVertically))
                 }
 
             }
