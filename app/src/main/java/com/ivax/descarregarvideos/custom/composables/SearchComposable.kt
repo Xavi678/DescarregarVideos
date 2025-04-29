@@ -5,7 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,7 +36,7 @@ fun SearchComposable(onClickInvoker : (text: String)->Unit) {
     var text by rememberSaveable { mutableStateOf("") }
     Row(modifier = Modifier
         .height(intrinsicSize = IntrinsicSize.Max)
-        .padding(8.dp)) {
+        .padding(8.dp).fillMaxWidth()) {
         OutlinedTextField(
             value = text,
             onValueChange = {
@@ -62,8 +64,8 @@ fun SearchComposable(onClickInvoker : (text: String)->Unit) {
                 4.dp,
                 Color(29, 27, 32, 255),
                 shape = RoundedCornerShape(12.dp, 0.dp, 0.dp, 12.dp)
-            ).fillMaxSize().weight(1f),
-            shape = RoundedCornerShape(12.dp)
+            ).weight(1f)
+            , shape = RoundedCornerShape(12.dp)
         )
         Button(
             onClick = {
@@ -75,7 +77,7 @@ fun SearchComposable(onClickInvoker : (text: String)->Unit) {
                     Color.LightGray,
                     Color.LightGray
                 ),
-            modifier = Modifier.fillMaxSize().weight(0.2f)
+            modifier = Modifier.fillMaxHeight()//.weight(0.5f)
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_menu_search),

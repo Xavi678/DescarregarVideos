@@ -14,4 +14,6 @@ data class SavedVideo(@PrimaryKey val videoId: String, val title: String, val im
                       var playListId: Int?=null,
                       @ColumnInfo(defaultValue = "2025-04-27T15:00:00" )
                       var downloadDate : LocalDateTime = LocalDateTime.now()) {
+
+    val downloadDateFormatted : String get()=downloadDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
 }

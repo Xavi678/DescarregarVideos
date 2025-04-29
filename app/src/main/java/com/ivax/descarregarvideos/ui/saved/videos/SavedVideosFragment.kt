@@ -7,11 +7,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -31,6 +34,7 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -44,9 +48,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -154,6 +162,20 @@ class SavedVideosFragment : Fragment() {
         }
 
         fileInStream.close()
+
+        val mutableInteractionSource = remember {
+            MutableInteractionSource()
+        }
+        val pressed = mutableInteractionSource.collectIsPressedAsState()
+        val scale by animateFloatAsState(
+
+            targetValue = if (pressed.value) {
+                32f
+            } else {
+                2f
+            },
+            label = "scale"
+        )
         Row(modifier) {
             Box(
                 Modifier
@@ -172,6 +194,11 @@ class SavedVideosFragment : Fragment() {
                     contentDescription = null,
                     modifier = Modifier
                         .align(alignment = Alignment.Center)
+                        .graphicsLayer {
+                            this.scaleY = scale
+                            this.scaleX = scale
+                            transformOrigin = TransformOrigin.Center
+                        }
                         .clickable(
                             enabled = true,
                             onClick = {
@@ -180,8 +207,8 @@ class SavedVideosFragment : Fragment() {
                                 savedVideosViewModel.play()
                                 savedVideosViewModel.setMediaVisibility(true)
                             },
-                            indication = ripple(color = Color.Magenta),
-                            interactionSource = remember { MutableInteractionSource() })
+                            indication = null,
+                            interactionSource = mutableInteractionSource)
                 )
                 Text(
                     text = data.duration,
@@ -199,21 +226,27 @@ class SavedVideosFragment : Fragment() {
                 Text(
                     text = data.title
                 )
-                Text(text = data.downloadDate.toString())
+                Row {
+                    Icon(painter = painterResource(id = R.drawable.download_rounded_base), contentDescription = "Download Icon")
+                    Text(text = data.downloadDateFormatted,
+                        fontSize = 11.sp,
+                        modifier= Modifier.align(alignment = Alignment.CenterVertically))
+                }
+
             }
-            Image(
-                painter = painterResource(id = R.drawable.three_dots), contentDescription = null,
-                modifier = Modifier
-                    .align(alignment = Alignment.CenterVertically)
-                    .clickable(
-                        enabled = true,
-                        onClick = {
-                            savedVideosViewModel.setBottomSheetVisibility(true)
-                            savedVideosViewModel.setBottomSheetVideoId(data.videoId)
-                        },
-                        indication = ripple(),
-                        interactionSource = remember { MutableInteractionSource() })
-            )
+            IconButton(onClick = {
+                savedVideosViewModel.setBottomSheetVisibility(true)
+                savedVideosViewModel.setBottomSheetVideoId(data.videoId)
+            }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.three_dots),
+                    contentDescription = null,
+
+                    modifier = Modifier
+
+                        .align(alignment = Alignment.CenterVertically)
+                )
+            }
 
         }
         HorizontalDivider(Modifier.padding(4.dp), color = Color.LightGray)
