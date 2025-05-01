@@ -1,5 +1,6 @@
 package com.ivax.descarregarvideos.helpers
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import com.ivax.descarregarvideos.classes.SearchResponseFoo
@@ -83,21 +84,34 @@ class ApiClient : IApiClient {
                             sectionRContent.videoRenderer.thumbnail.thumbnails.firstOrNull()?.url
                         val viewCount = sectionRContent.videoRenderer.viewCountText.simpleText
                         val duration = sectionRContent.videoRenderer.lengthText.simpleText
+                        val author=sectionRContent.videoRenderer.ownerText.runs.firstOrNull()?.text
+                        val uriChannelThumbnail=sectionRContent.videoRenderer.avatar.
+                        decoratedAvatarViewModel.avatar.
+                        avatarViewModel.image.sources.firstOrNull { it.height==68 && it.width==68 }?.url
+                        Log.d("DescarregarVideos","Autor: ${author}")
                         //val imgUrl=uriString?.toUri()
 
                         withContext(Dispatchers.IO) {
                             try {
-                                val newurl = URL(uriString);
+                                val newurl = URL(uriString)
                                 val thumbnail = BitmapFactory.decodeStream(
-                                    newurl.openConnection().getInputStream()
+                                    newurl.openConnection().inputStream
                                 );
+                                var channelThumbnail : Bitmap?=null
+                                if(uriChannelThumbnail!=null) {
+                                    channelThumbnail = BitmapFactory.decodeStream(
+                                        URL(uriChannelThumbnail).openConnection().inputStream
+                                    )
+                                }
                                 videoList.add(
                                     VideoItem(
                                         videoId = sectionRContent.videoRenderer.videoId,
                                         title = title.toString(),
                                         imgUrl = thumbnail,
                                         duration = duration,
-                                        viewCount = viewCount
+                                        viewCount = viewCount,
+                                        author=author,
+                                        channelThumbnail=channelThumbnail
                                     )
                                 )
                             } catch (e: Exception) {

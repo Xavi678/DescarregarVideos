@@ -13,7 +13,9 @@ data class SavedVideo(@PrimaryKey val videoId: String, val title: String, val im
                       val duration: String, val viewCount: String, var videoUrl: String?=null,
                       var playListId: Int?=null,
                       @ColumnInfo(defaultValue = "2025-04-27T15:00:00" )
-                      var downloadDate : LocalDateTime = LocalDateTime.now()) {
+                      var downloadDate : LocalDateTime = LocalDateTime.now(),
+                      @ColumnInfo(defaultValue = "NULL" )
+                      var author: String?=null) {
 
     val downloadDateFormatted : String get()=downloadDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
 }

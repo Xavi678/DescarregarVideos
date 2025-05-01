@@ -67,6 +67,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.adapter.SavedVideosAdapter
 import com.ivax.descarregarvideos.custom.composables.SearchComposable
+import com.ivax.descarregarvideos.custom.composables.bounceClick
 import com.ivax.descarregarvideos.databinding.FragmentSavedVideosBinding
 import com.ivax.descarregarvideos.dialog_fragments.saved.videos.SavedVideosMenuFragment
 import com.ivax.descarregarvideos.entities.SavedVideo
@@ -285,31 +286,5 @@ class SavedVideosFragment : Fragment() {
         }
 
     }
-    enum class ButtonState { Pressed, Idle }
-    fun Modifier.bounceClick() = composed {
-        var buttonState by remember { mutableStateOf(ButtonState.Idle) }
-        val scale by animateFloatAsState(if (buttonState == ButtonState.Pressed) 0.70f else 1f)
 
-        this
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = {  }
-            )
-            .pointerInput(buttonState) {
-                awaitPointerEventScope {
-                    buttonState = if (buttonState == ButtonState.Pressed) {
-                        waitForUpOrCancellation()
-                        ButtonState.Idle
-                    } else {
-                        awaitFirstDown(false)
-                        ButtonState.Pressed
-                    }
-                }
-            }
-    }
 }

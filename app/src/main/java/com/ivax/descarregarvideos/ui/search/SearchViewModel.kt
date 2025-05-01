@@ -4,11 +4,9 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.ivax.descarregarvideos.classes.SearchResponseFoo
 import com.ivax.descarregarvideos.classes.VideoDownloadedData
-import com.ivax.descarregarvideos.classes.VideoItem
 import com.ivax.descarregarvideos.entities.SavedVideo
 import com.ivax.descarregarvideos.repository.FileRepository
 import com.ivax.descarregarvideos.repository.VideoRepository
@@ -16,12 +14,9 @@ import com.ivax.descarregarvideos.repository.YoutubeRepository
 import com.ivax.descarregarvideos.responses.PlayerResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,7 +30,7 @@ class SearchViewModel @Inject constructor(
         value = "This is slideshow Fragment"
     }
     //private val _currentVideos= MutableStateFlow( videoRepository.getAllVideos())
-    public val searchModel = MutableStateFlow<SearchResponseFoo?>(null)
+    public val searchResponseFoo = MutableStateFlow<SearchResponseFoo?>(null)
     public val isLoading = MutableStateFlow<Boolean>(false)
     public val videoDownloadedData = MutableStateFlow<VideoDownloadedData?>(null)
     val videoExists : MutableStateFlow<Boolean> by lazy {
@@ -65,7 +60,7 @@ class SearchViewModel @Inject constructor(
                 isLoading.value = true
 
                 val result = youtubeRepository.Search(searchQuery, nextToken)
-                searchModel.update { result }
+                searchResponseFoo.update { result }
                 //continuationToken=result.nextToken
             } catch (e: Exception) {
                 Log.d("DescarregarVideos",e.message.toString())

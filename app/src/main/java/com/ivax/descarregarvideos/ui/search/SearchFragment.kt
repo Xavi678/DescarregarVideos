@@ -1,35 +1,60 @@
 package com.ivax.descarregarvideos.ui.search
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.util.Log
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.Toast
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.core.view.isVisible
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.adapter.VideoAdapter
+import com.ivax.descarregarvideos.classes.VideoItem
 import com.ivax.descarregarvideos.custom.composables.SearchComposable
+import com.ivax.descarregarvideos.custom.composables.bounceClick
 import com.ivax.descarregarvideos.databinding.FragmentSearchBinding
 import com.ivax.descarregarvideos.entities.SavedVideo
-import com.ivax.descarregarvideos.ui.saved.videos.SavedVideosViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.collectLatest
+import java.io.File
+import java.io.FileInputStream
 
 //import org.jsoup.Jsoup
 
@@ -64,20 +89,19 @@ class SearchFragment : Fragment() {
         binding.composeViewSearch.setContent {
             Column {
                 SearchComposable(onClickInvoker = fun(text: String) {
-
+                    searchViewModel.SearchVideos(text)
                 })
-                SearchVideos()
+                Box(modifier = Modifier.fillMaxSize(),contentAlignment = Alignment.Center){
+                    Loading()
+                    SearchVideos()
+                }
+
             }
         }
         adapter= VideoAdapter(itemClickListener = fun(saveVideo: SavedVideo, finished: ()->Unit) {
                 searchViewModel.downloadVideoResponse(saveVideo,finished)
 
         })
-        lifecycleScope.launch {
-            /*searchViewModel.currentVideos.collectLatest {
-                adapter.addCurrentVideos(it)
-            }*/
-        }
         val root: View = binding.root
         /*binding.layoutSearchSearch.btnSearch.setOnClickListener { view ->
             var searchQuery = binding.layoutSearchSearch.tbxView.text.toString()
@@ -164,17 +188,137 @@ class SearchFragment : Fragment() {
 
     @Composable
     fun SearchVideos(
-        savedVideosViewModel: SavedVideosViewModel = viewModel()
+        searchViewModel: SearchViewModel = viewModel()
     ) {
-        val savedVideos by savedVideosViewModel.allSavedVideos.collectAsStateWithLifecycle(listOf<SavedVideo>())
-        LazyColumn(Modifier.fillMaxSize()) {
-            items(savedVideos) {
-                Item()
+        val searchResponseFoo by searchViewModel.searchResponseFoo.collectAsStateWithLifecycle()
+        if(searchResponseFoo!=null) {
+            LazyColumn(Modifier.fillMaxSize()) {
+                items(searchResponseFoo!!.videos) {
+                    Item(it)
+                }
             }
         }
     }
-    @Composable
-    fun Item(){
 
+    @Composable
+    fun Loading(searchViewModel: SearchViewModel = viewModel()){
+        val isLoading by searchViewModel.isLoading.collectAsStateWithLifecycle()
+        if(isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.width(64.dp),
+                color = MaterialTheme.colorScheme.secondary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            )
+        }
+    }
+    @Composable
+    fun Item(video: VideoItem){
+
+
+        Row() {
+
+            Box(
+                Modifier
+                    .width(86.dp)
+                    .padding(top = 8.dp, start = 8.dp)
+                    .background(
+                        Color.Blue
+                    )
+            ) {
+                Image(
+                    bitmap = video.imgUrl!!.asImageBitmap(),
+                    contentDescription = null,
+                )
+
+                /*Image(
+                    painter = painterResource(id = R.drawable.play_button_rect_mod),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(alignment = Alignment.Center)
+                        //.bounceClick()
+                        .clickable(
+                            enabled = true,
+                            onClick = {
+                            },
+
+                            )
+                )*/
+                Text(
+                    text = video.duration,
+                    color = Color.White,
+                    modifier = Modifier
+                        .align(alignment = Alignment.BottomStart)
+                        .background(Color.Black)
+                )
+            }
+
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+                .weight(1f)) {
+                Text(
+                    text = video.title,
+                    fontSize = 16.sp
+                )
+                Row {
+                    if(video.channelThumbnail!=null) {
+                        Image(
+                            bitmap = video.channelThumbnail!!.asImageBitmap(),
+                            contentDescription = "Channel Video Thumbnail"
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                    }
+                        Text(
+                        text = video.author.toString(),
+                        fontSize = 13.sp,
+                            modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                    )
+                }
+                Text(text = video.viewCount,
+                    fontSize = 11.sp,
+                    color = Color.LightGray
+                )
+
+
+            }
+            IconButton(onClick = {
+                val imgPath = "${video.videoId}_thumbnail.bmp"
+                var dir = File("${context?.filesDir}/fotos")
+                var d = dir.mkdir()
+                var f = File("${dir}/${imgPath}")
+
+                if (f.exists()) {
+                    f.delete()
+                }
+                f.createNewFile()
+                f.outputStream().use {
+                    video.imgUrl?.compress(Bitmap.CompressFormat.PNG, 100, it)
+                }
+                var saveVideo = SavedVideo(
+                    video.videoId,
+                    video.title,
+                    "${dir}/${imgPath}",
+                    video.duration,
+                    video.viewCount,
+                    author = video.author
+                )
+                searchViewModel.downloadVideoResponse(saveVideo, finished = fun (){
+
+                })
+                /*savedVideosViewModel.setBottomSheetVisibility(true)
+                savedVideosViewModel.setBottomSheetVideoId(data.videoId)*/
+            }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.downloading),
+                    contentDescription = null,
+
+                    modifier = Modifier
+                        .animateContentSize()
+                        .align(alignment = Alignment.CenterVertically)
+                )
+            }
+
+        }
+        HorizontalDivider(Modifier.padding(4.dp), color = Color.LightGray)
     }
 }
