@@ -5,17 +5,28 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ivax.descarregarvideos.adapter.VideoAdapter
+import com.ivax.descarregarvideos.custom.composables.SearchComposable
 import com.ivax.descarregarvideos.databinding.FragmentSearchBinding
 import com.ivax.descarregarvideos.entities.SavedVideo
+import com.ivax.descarregarvideos.ui.saved.videos.SavedVideosViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collectLatest
@@ -50,17 +61,25 @@ class SearchFragment : Fragment() {
 
 
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
+        binding.composeViewSearch.setContent {
+            Column {
+                SearchComposable(onClickInvoker = fun(text: String) {
+
+                })
+                SearchVideos()
+            }
+        }
         adapter= VideoAdapter(itemClickListener = fun(saveVideo: SavedVideo, finished: ()->Unit) {
                 searchViewModel.downloadVideoResponse(saveVideo,finished)
 
         })
         lifecycleScope.launch {
-            searchViewModel.currentVideos.collectLatest {
+            /*searchViewModel.currentVideos.collectLatest {
                 adapter.addCurrentVideos(it)
-            }
+            }*/
         }
         val root: View = binding.root
-        binding.layoutSearchSearch.btnSearch.setOnClickListener { view ->
+        /*binding.layoutSearchSearch.btnSearch.setOnClickListener { view ->
             var searchQuery = binding.layoutSearchSearch.tbxView.text.toString()
 
             lifecycleScope.launch {
@@ -90,7 +109,7 @@ class SearchFragment : Fragment() {
                 }
             }
 
-        }
+        }*/
         /*val textView: TextView = binding.textHome
         searchViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
@@ -99,7 +118,7 @@ class SearchFragment : Fragment() {
         return root
     }
     private fun setupUi(){
-        binding.recylcerViewVideo.layoutManager =
+        /*binding.recylcerViewVideo.layoutManager =
             LinearLayoutManager(this@SearchFragment.context)
         binding.recylcerViewVideo.addOnScrollListener(object : RecyclerView.OnScrollListener(){
             var currentPos=0
@@ -134,11 +153,28 @@ class SearchFragment : Fragment() {
                 }
             }
         })
-        binding.recylcerViewVideo.adapter = adapter
+        binding.recylcerViewVideo.adapter = adapter*/
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+
+    @Composable
+    fun SearchVideos(
+        savedVideosViewModel: SavedVideosViewModel = viewModel()
+    ) {
+        val savedVideos by savedVideosViewModel.allSavedVideos.collectAsStateWithLifecycle(listOf<SavedVideo>())
+        LazyColumn(Modifier.fillMaxSize()) {
+            items(savedVideos) {
+                Item()
+            }
+        }
+    }
+    @Composable
+    fun Item(){
+
     }
 }

@@ -34,7 +34,7 @@ class SearchViewModel @Inject constructor(
     private val _text = MutableLiveData<String>().apply {
         value = "This is slideshow Fragment"
     }
-    private val _currentVideos= MutableStateFlow( videoRepository.getAllVideos())
+    //private val _currentVideos= MutableStateFlow( videoRepository.getAllVideos())
     public val searchModel = MutableStateFlow<SearchResponseFoo?>(null)
     public val isLoading = MutableStateFlow<Boolean>(false)
     public val videoDownloadedData = MutableStateFlow<VideoDownloadedData?>(null)
@@ -103,24 +103,5 @@ class SearchViewModel @Inject constructor(
     }
 
     val text: LiveData<String> = _text
-    val currentVideos : StateFlow<List<SavedVideo>> =_currentVideos
-    /*companion object {
-
-        val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(
-                modelClass: Class<T>,
-                extras: CreationExtras
-            ): T {
-                // Get the Application object from extras
-                val application = checkNotNull(extras[APPLICATION_KEY])
-                // Create a SavedStateHandle for this ViewModel from extras
-                val savedStateHandle = extras.createSavedStateHandle()
-
-                return SearchViewModel(
-                    (application as MyApplication).videoRepository
-                ) as T
-            }
-        }
-    }*/
+    //val currentVideos : StateFlow<List<SavedVideo>> =_currentVideos
 }

@@ -7,7 +7,19 @@
     tools:context=".ui.search.SearchFragment"
     android:id="@+id/search_layout">
 
-    <include
+
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/compose_view_search"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+    </androidx.compose.ui.platform.ComposeView>
+    <!--
+        <include
         android:id="@+id/layoutSearchSearch"
         layout="@layout/search_layout"
         android:layout_width="wrap_content"
@@ -18,8 +30,6 @@
         app:layout_constraintTop_toTopOf="parent">
 
     </include>
-
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recylcerViewVideo"
         android:layout_width="0dp"
@@ -41,7 +51,7 @@
         app:layout_constraintEnd_toEndOf="@+id/search_layout"
         app:layout_constraintStart_toStartOf="@+id/search_layout"
         app:layout_constraintTop_toTopOf="@+id/search_layout"
-        android:visibility="gone"/>
+        android:visibility="gone"/>-->
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

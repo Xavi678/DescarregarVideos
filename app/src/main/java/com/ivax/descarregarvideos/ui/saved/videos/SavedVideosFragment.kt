@@ -7,12 +7,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
@@ -47,11 +50,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -163,20 +168,9 @@ class SavedVideosFragment : Fragment() {
 
         fileInStream.close()
 
-        val mutableInteractionSource = remember {
-            MutableInteractionSource()
-        }
-        val pressed = mutableInteractionSource.collectIsPressedAsState()
-        val scale by animateFloatAsState(
 
-            targetValue = if (pressed.value) {
-                32f
-            } else {
-                2f
-            },
-            label = "scale"
-        )
         Row(modifier) {
+
             Box(
                 Modifier
                     .width(86.dp)
@@ -189,16 +183,13 @@ class SavedVideosFragment : Fragment() {
                     bitmap = bmp.asImageBitmap(),
                     contentDescription = null,
                 )
+
                 Image(
                     painter = painterResource(id = R.drawable.play_button_rect_mod),
                     contentDescription = null,
                     modifier = Modifier
                         .align(alignment = Alignment.Center)
-                        .graphicsLayer {
-                            this.scaleY = scale
-                            this.scaleX = scale
-                            transformOrigin = TransformOrigin.Center
-                        }
+                        .bounceClick()
                         .clickable(
                             enabled = true,
                             onClick = {
@@ -207,8 +198,8 @@ class SavedVideosFragment : Fragment() {
                                 savedVideosViewModel.play()
                                 savedVideosViewModel.setMediaVisibility(true)
                             },
-                            indication = null,
-                            interactionSource = mutableInteractionSource)
+
+                            )
                 )
                 Text(
                     text = data.duration,
@@ -243,7 +234,7 @@ class SavedVideosFragment : Fragment() {
                     contentDescription = null,
 
                     modifier = Modifier
-
+                        .animateContentSize()
                         .align(alignment = Alignment.CenterVertically)
                 )
             }
@@ -293,5 +284,32 @@ class SavedVideosFragment : Fragment() {
             }
         }
 
+    }
+    enum class ButtonState { Pressed, Idle }
+    fun Modifier.bounceClick() = composed {
+        var buttonState by remember { mutableStateOf(ButtonState.Idle) }
+        val scale by animateFloatAsState(if (buttonState == ButtonState.Pressed) 0.70f else 1f)
+
+        this
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = {  }
+            )
+            .pointerInput(buttonState) {
+                awaitPointerEventScope {
+                    buttonState = if (buttonState == ButtonState.Pressed) {
+                        waitForUpOrCancellation()
+                        ButtonState.Idle
+                    } else {
+                        awaitFirstDown(false)
+                        ButtonState.Pressed
+                    }
+                }
+            }
     }
 }
