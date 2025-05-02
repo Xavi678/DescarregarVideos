@@ -32,34 +32,23 @@ class SearchViewModel @Inject constructor(
     //private val _currentVideos= MutableStateFlow( videoRepository.getAllVideos())
     public val searchResponseFoo = MutableStateFlow<SearchResponseFoo?>(null)
     public val isLoading = MutableStateFlow<Boolean>(false)
-    public val videoDownloadedData = MutableStateFlow<VideoDownloadedData?>(null)
     val videoExists : MutableStateFlow<Boolean> by lazy {
         MutableStateFlow<Boolean>(false)
     }
-    //private val useCase = SearchVideosUseCase()
-    //private val getVideoUseCase = GetVideoDataUseCase()
-    //private val downloadStreamUseCase = DownloadStreamUseCase()
-
-
-    /*fun insertVideo(video: SavedVideo){
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                repository.insetVideo(video)
-            }
-        }
-
-    }*/
     fun hasVideo(videoId : String)  {
         viewModelScope.launch(Dispatchers.IO) {
             videoExists.update { videoRepository.videoExists(videoId) }
         }
     }
     fun SearchVideos(searchQuery: String, nextToken: String?=null) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 isLoading.value = true
 
                 val result = youtubeRepository.Search(searchQuery, nextToken)
+                result.videos.forEach {
+                    it.videoDownloaded=videoRepository.videoExists(it.videoId)
+                }
                 searchResponseFoo.update { result }
                 //continuationToken=result.nextToken
             } catch (e: Exception) {
@@ -88,15 +77,10 @@ class SearchViewModel @Inject constructor(
 
 
                 }
-                //videoInfo.value=vi
 
                 Log.d("DescarregarVide", savedVideo.videoId)
-            /*}else{
-
-            }*/
         }
     }
 
     val text: LiveData<String> = _text
-    //val currentVideos : StateFlow<List<SavedVideo>> =_currentVideos
 }
