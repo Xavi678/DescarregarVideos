@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +15,9 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -198,14 +203,33 @@ class SearchFragment : Fragment() {
     fun SearchVideos(
         searchViewModel: SearchViewModel = viewModel()
     ) {
-        val searchResponseFoo by searchViewModel.searchResponseFoo.collectAsStateWithLifecycle()
-        if (searchResponseFoo != null) {
-            LazyColumn(Modifier.fillMaxSize()) {
-                items(searchResponseFoo!!.videos) {
+        val videos by searchViewModel.videos.collectAsStateWithLifecycle()
+        val isLoading by searchViewModel.isLoading.collectAsStateWithLifecycle()
+
+            var offset by remember { mutableStateOf(0f) }
+            var listState=rememberLazyListState()
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize().scrollable(
+                orientation = Orientation.Vertical,
+                state = rememberScrollableState { delta ->
+                    offset += delta
+
+                    Log.d("DescarregarVideos","Offset: ${offset} Delta: ${delta}")
+                    Log.d("DescarregarVideos","Can Scroll Forward: ${listState.canScrollForward} " +
+                            "Last Scroll Forward: ${listState.lastScrolledForward}")
+                    if(!listState.canScrollForward && !isLoading){
+                        searchViewModel.loadMoreVideos()
+                    }
+                    delta
+
+                },
+                )) {
+                items(videos) {
                     Item(it)
                 }
             }
-        }
+
     }
 
     @Composable
@@ -295,8 +319,7 @@ class SearchFragment : Fragment() {
 
 
             }
-            var downloadState by remember { mutableStateOf(DownloadState.NotDownloaded) }
-            searchViewModel.hasVideo(video.videoId)
+            var downloadState by remember { mutableStateOf( if(video.videoDownloaded) DownloadState.Downloaded else DownloadState.NotDownloaded) }
             IconButton(onClick = {
                 downloadState = DownloadState.Downloading
                 val imgPath = "${video.videoId}_thumbnail.bmp"

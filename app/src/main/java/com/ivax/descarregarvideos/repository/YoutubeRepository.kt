@@ -37,8 +37,12 @@ import javax.inject.Inject
 class YoutubeRepository @Inject constructor(private val apiClient : IApiClient) {
 
 
-    suspend fun Search(searchQuery: String, token: String?=null): SearchResponseFoo{
-        return apiClient.Search(searchQuery,token)
+    suspend fun Search(searchQuery: String): SearchResponseFoo{
+        return apiClient.Search(searchQuery)
+    }
+
+    suspend fun SearchMore( token: String): SearchResponseFoo{
+        return apiClient.SearchMoreVideos(token)
     }
 
     suspend fun GetVideoData(videoId: String): PlayerResponse {

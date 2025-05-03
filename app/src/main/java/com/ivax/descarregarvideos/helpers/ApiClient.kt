@@ -10,11 +10,12 @@ import com.ivax.descarregarvideos.requests.SearchContext
 import com.ivax.descarregarvideos.requests.SearchRequest
 import com.ivax.descarregarvideos.responses.PlayerResponse
 import com.ivax.descarregarvideos.responses.SearchResponse
+import com.ivax.descarregarvideos.responses.SearchResponseContinuation
+import com.ivax.descarregarvideos.responses.SearchVideoRenderer
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.timeout
 import io.ktor.client.request.post
 import io.ktor.client.request.prepareGet
 import io.ktor.client.request.setBody
@@ -33,6 +34,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.io.readByteArray
 import kotlinx.serialization.json.Json
 import java.net.URL
+import kotlin.String
 
 class ApiClient : IApiClient {
     var httpClient = HttpClient(CIO) {
@@ -47,11 +49,44 @@ class ApiClient : IApiClient {
             requestTimeout=0
         }
     }
+    override suspend fun SearchMoreVideos(continuationToken: String) : SearchResponseFoo{
+        val searchContext= SearchContext()
+        var searchRequest = SearchRequest(context = searchContext,continuation = continuationToken)
+        var rsp = httpClient.post("https://www.youtube.com/youtubei/v1/search") {
+            contentType(ContentType.Application.Json)
+            setBody(searchRequest)
 
-    override suspend fun Search(searchQuery: String,continuationToken: String?): SearchResponseFoo{
+            headers {
+                append(
+                    HttpHeaders.UserAgent,
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0"
+                )
+            }
+        }
+        var nextToken : String?=null
+        var videoList = ArrayList<VideoItem>()
+        var searchResponseContinuation=rsp.body<SearchResponseContinuation>()
+        searchResponseContinuation.onResponseReceivedCommands.firstOrNull()?.
+        appendContinuationItemsAction?.continuationItems?.forEach {
+            if(it.continuationItemRenderer?.continuationEndpoint?.continuationCommand?.token!=null) {
+                nextToken =
+                    it.continuationItemRenderer.continuationEndpoint.continuationCommand.token
+            }
+            it.itemSectionRenderer?.contents?.forEach { x->
+
+                if(x.videoRenderer!=null) {
+                    toVideo(x.videoRenderer, videoList)
+                }
+            }
+
+        }
+        val foo=SearchResponseFoo(videoList,nextToken)
+        return foo
+    }
+
+    override suspend fun Search(searchQuery: String): SearchResponseFoo{
        val searchContext= SearchContext()
         var nextToken : String? =null
-        searchContext.continuation=continuationToken
         var searchRequest = SearchRequest(query = searchQuery, context = searchContext)
         var rsp = httpClient.post("https://www.youtube.com/youtubei/v1/search") {
             contentType(ContentType.Application.Json)
@@ -78,52 +113,58 @@ class ApiClient : IApiClient {
             if (itemSectionR != null) {
                 for (sectionRContent in itemSectionR.contents) {
                     if (sectionRContent.videoRenderer != null) {
-                        val title =
-                            sectionRContent.videoRenderer.title.runs.firstOrNull()?.text
-                        val uriString =
-                            sectionRContent.videoRenderer.thumbnail.thumbnails.firstOrNull()?.url
-                        val viewCount = sectionRContent.videoRenderer.viewCountText.simpleText
-                        val duration = sectionRContent.videoRenderer.lengthText.simpleText
-                        val author=sectionRContent.videoRenderer.ownerText.runs.firstOrNull()?.text
-                        val uriChannelThumbnail=sectionRContent.videoRenderer.avatar.
-                        decoratedAvatarViewModel.avatar.
-                        avatarViewModel.image.sources.firstOrNull { it.height==68 && it.width==68 }?.url
-                        Log.d("DescarregarVideos","Autor: ${author}")
-                        //val imgUrl=uriString?.toUri()
-
-                        withContext(Dispatchers.IO) {
-                            try {
-                                val newurl = URL(uriString)
-                                val thumbnail = BitmapFactory.decodeStream(
-                                    newurl.openConnection().inputStream
-                                );
-                                var channelThumbnail : Bitmap?=null
-                                if(uriChannelThumbnail!=null) {
-                                    channelThumbnail = BitmapFactory.decodeStream(
-                                        URL(uriChannelThumbnail).openConnection().inputStream
-                                    )
-                                }
-                                videoList.add(
-                                    VideoItem(
-                                        videoId = sectionRContent.videoRenderer.videoId,
-                                        title = title.toString(),
-                                        imgUrl = thumbnail,
-                                        duration = duration,
-                                        viewCount = viewCount,
-                                        author=author,
-                                        channelThumbnail=channelThumbnail
-                                    )
-                                )
-                            } catch (e: Exception) {
-                                Log.d("DescarregarVideos", e.message.toString())
-                            }
-                        }
+                        toVideo(sectionRContent.videoRenderer, videoList)
                     }
                 }
             }
         }
         val foo=SearchResponseFoo(videoList,nextToken)
         return foo
+    }
+
+    private suspend fun toVideo(
+        videoRenderer: SearchVideoRenderer,
+        videoList: ArrayList<VideoItem>
+    ) {
+        val title =
+            videoRenderer.title.runs.firstOrNull()?.text
+        val uriString =
+            videoRenderer.thumbnail.thumbnails.firstOrNull()?.url
+        val viewCount = videoRenderer.viewCountText.simpleText
+        val duration = videoRenderer.lengthText.simpleText
+        val author = videoRenderer.ownerText.runs.firstOrNull()?.text
+        val uriChannelThumbnail =
+            videoRenderer.avatar.decoratedAvatarViewModel.avatar.avatarViewModel.image.sources.firstOrNull { it.height == 68 && it.width == 68 }?.url
+        Log.d("DescarregarVideos", "Autor: ${title}")
+        //val imgUrl=uriString?.toUri()
+
+        withContext(Dispatchers.IO) {
+            try {
+                val newurl = URL(uriString)
+                val thumbnail = BitmapFactory.decodeStream(
+                    newurl.openConnection().inputStream
+                );
+                var channelThumbnail: Bitmap? = null
+                if (uriChannelThumbnail != null) {
+                    channelThumbnail = BitmapFactory.decodeStream(
+                        URL(uriChannelThumbnail).openConnection().inputStream
+                    )
+                }
+                videoList.add(
+                    VideoItem(
+                        videoId = videoRenderer.videoId,
+                        title = title.toString(),
+                        imgUrl = thumbnail,
+                        duration = duration,
+                        viewCount = viewCount,
+                        author = author,
+                        channelThumbnail = channelThumbnail
+                    )
+                )
+            } catch (e: Exception) {
+                Log.d("DescarregarVideos", e.message.toString())
+            }
+        }
     }
 
     override suspend fun GetVideoData(videoId: String): PlayerResponse {
