@@ -16,6 +16,7 @@ import com.ivax.descarregarvideos.responses.PlayerResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -32,10 +33,11 @@ class SearchViewModel @Inject constructor(
     }
     //private val _currentVideos= MutableStateFlow( videoRepository.getAllVideos())
     //public val searchResponseFoo = MutableStateFlow<SearchResponseFoo?>(null)
-    val videos = MutableStateFlow<ArrayList<VideoItem>>(ArrayList<VideoItem>())
+    private val _videos = MutableStateFlow<List<VideoItem>>(emptyList())
     val continuationToken = MutableStateFlow<String?>(null)
-    public val isLoading = MutableStateFlow<Boolean>(false)
-
+    private val _isLoading = MutableStateFlow<Boolean>(false)
+    val isLoading=_isLoading.asStateFlow()
+    val videos=_videos.asStateFlow()
     val videoExists : MutableStateFlow<Boolean> by lazy {
         MutableStateFlow<Boolean>(false)
     }
@@ -48,40 +50,40 @@ class SearchViewModel @Inject constructor(
     fun SearchVideos(searchQuery: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                isLoading.value = true
+                _isLoading.value = true
                 this@SearchViewModel.searchQuery=searchQuery
                 val result = youtubeRepository.Search(searchQuery)
                 result.videos.forEach {
                     it.videoDownloaded=videoRepository.videoExists(it.videoId)
                 }
-                videos.update { result.videos }
+                _videos.update { result.videos }
                 continuationToken.value= result.nextToken
             } catch (e: Exception) {
                 Log.d("DescarregarVideos",e.message.toString())
             } finally {
-                isLoading.value = false
+                _isLoading.value = false
             }
         }
     }
     fun loadMoreVideos(){
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                isLoading.value = true
+                _isLoading.value = true
                 val result = youtubeRepository.SearchMore(token  = continuationToken.value.toString())
                 result.videos.forEach {
                     it.videoDownloaded=videoRepository.videoExists(it.videoId)
                 }
                 //videos.value.addAll(result.videos)
 
-                var newList: ArrayList<VideoItem> = videos.value
-                newList.addAll(result.videos)
-                videos.update { newList }
+
+                _videos.value+=result.videos
+                //_videos.value+=result.videos
                 //videos.emit(result.videos)
                 continuationToken.value= result.nextToken
             } catch (e: Exception) {
                 Log.d("DescarregarVideos",e.message.toString())
             } finally {
-                isLoading.value = false
+                _isLoading.value = false
             }
         }
     }

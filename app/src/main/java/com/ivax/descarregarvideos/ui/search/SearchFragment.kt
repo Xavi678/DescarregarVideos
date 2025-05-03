@@ -38,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -206,29 +207,37 @@ class SearchFragment : Fragment() {
         val videos by searchViewModel.videos.collectAsStateWithLifecycle()
         val isLoading by searchViewModel.isLoading.collectAsStateWithLifecycle()
 
-            var offset by remember { mutableStateOf(0f) }
-            var listState=rememberLazyListState()
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize().scrollable(
-                orientation = Orientation.Vertical,
-                state = rememberScrollableState { delta ->
-                    offset += delta
+        var offset by remember { mutableFloatStateOf(0f) }
+        var listState = rememberLazyListState()
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .fillMaxSize()
+                .scrollable(
+                    orientation = Orientation.Vertical,
+                    state = rememberScrollableState { delta ->
+                        offset += delta
 
-                    Log.d("DescarregarVideos","Offset: ${offset} Delta: ${delta}")
-                    Log.d("DescarregarVideos","Can Scroll Forward: ${listState.canScrollForward} " +
-                            "Last Scroll Forward: ${listState.lastScrolledForward}")
-                    if(!listState.canScrollForward && !isLoading){
-                        searchViewModel.loadMoreVideos()
-                    }
-                    delta
+                        Log.d("DescarregarVideos", "Offset: ${offset} Delta: ${delta}")
+                        Log.d(
+                            "DescarregarVideos",
+                            "Can Scroll Forward: ${listState.canScrollForward} " +
+                                    "Last Scroll Forward: ${listState.lastScrolledForward}"
+                        )
+                        if (!listState.canScrollForward && !isLoading) {
+                            searchViewModel.loadMoreVideos()
+                        }
+                        delta
 
-                },
-                )) {
-                items(videos) {
-                    Item(it)
-                }
+                    },
+                )
+        ) {
+            Log.d("DescarregarVideos","Total Videos: ${videos.count()}")
+            items(videos,key = {it.videoId}) {
+
+                Item(it)
             }
+        }
 
     }
 
@@ -264,20 +273,6 @@ class SearchFragment : Fragment() {
                     bitmap = video.imgUrl!!.asImageBitmap(),
                     contentDescription = null,
                 )
-
-                /*Image(
-                    painter = painterResource(id = R.drawable.play_button_rect_mod),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .align(alignment = Alignment.Center)
-                        //.bounceClick()
-                        .clickable(
-                            enabled = true,
-                            onClick = {
-                            },
-
-                            )
-                )*/
                 Text(
                     text = video.duration,
                     color = Color.White,
@@ -319,7 +314,7 @@ class SearchFragment : Fragment() {
 
 
             }
-            var downloadState by remember { mutableStateOf( if(video.videoDownloaded) DownloadState.Downloaded else DownloadState.NotDownloaded) }
+            var downloadState by remember { mutableStateOf(if (video.videoDownloaded) DownloadState.Downloaded else DownloadState.NotDownloaded) }
             IconButton(onClick = {
                 downloadState = DownloadState.Downloading
                 val imgPath = "${video.videoId}_thumbnail.bmp"
@@ -343,10 +338,12 @@ class SearchFragment : Fragment() {
                     author = video.author
                 )
                 searchViewModel.downloadVideoResponse(saveVideo, finished = fun() {
-                    downloadState= DownloadState.Downloaded
+                    downloadState = DownloadState.Downloaded
                     Handler(Looper.getMainLooper()).post {
-                        Toast.makeText(context,"Video ${saveVideo.videoId} Descarregat Correctament",
-                            Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            context, "Video ${saveVideo.videoId} Descarregat Correctament",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
 
 
