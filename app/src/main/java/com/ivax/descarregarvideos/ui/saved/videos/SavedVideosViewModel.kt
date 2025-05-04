@@ -10,9 +10,13 @@ import com.ivax.descarregarvideos.repository.MediaPlayerRepository
 import com.ivax.descarregarvideos.repository.VideoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,20 +25,18 @@ import kotlin.collections.ArrayList
 @HiltViewModel
 class SavedVideosViewModel @Inject constructor(private val repository: VideoRepository, private val mediaPlayerRepository: MediaPlayerRepository) : ViewModel() {
 
+    val _filterFlow= MutableStateFlow<String?>(null)
 
-    val _allSavedVideos : MutableStateFlow<List<SavedVideo>> by lazy {
-        MutableStateFlow<List<SavedVideo>>(ArrayList<SavedVideo>())
-    }
 
-    init {
-        viewModelScope.launch(Dispatchers.IO) {
-            _allSavedVideos.update { repository.getAllVideos() }
+    val filterFlow=_filterFlow.asStateFlow()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    var allSavedVideos=filterFlow.flatMapLatest {
+        if(it.isNullOrEmpty()){
+            repository.getAllVideos()
+        }else{
+            repository.getAllVideos(it.toString())
         }
     }
-
-
-    var allSavedVideos: StateFlow<List<SavedVideo>> = _allSavedVideos
-            //val allSavedVideos: LiveData<List<SavedVideo>> = _allSavedVideos.asLiveData()
 
     private val _isBottomSheetVisible= MutableStateFlow<Boolean>(false)
     private val _bottomSheetParameter= MutableStateFlow<String?>(null)
@@ -60,18 +62,16 @@ class SavedVideosViewModel @Inject constructor(private val repository: VideoRepo
     fun filterSavedVideos(savedVideoName: String){
             viewModelScope.launch(Dispatchers.IO) {
                 if (savedVideoName != "") {
-                    _allSavedVideos.update {
-                        repository.getAllVideos(savedVideoName)
+                    _filterFlow.update {
+                        savedVideoName
                     }
+
                 }else{
-                    _allSavedVideos.update {
-                        repository.getAllVideos()
+                    _filterFlow.update {
+                        null
                     }
                 }
             }
-
-               // _allSavedVideosState.value = _allSavedVideos.filter { it.title.contains(savedVideoName,ignoreCase = true) }
-
     }
     fun deleteVideo(videoId: String){
         viewModelScope.launch(Dispatchers.IO) {

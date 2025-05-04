@@ -23,10 +23,10 @@ class VideoRepository @Inject constructor(private val videoDao: VideoDao,
         videoDao.insertAll(video)
     }
 
-    fun getAllVideos(): List<SavedVideo> {
+    fun getAllVideos(): Flow<List<SavedVideo>> {
        return videoDao.getAll()
     }
-    fun getAllVideos(filter: String): List<SavedVideo> {
+    fun getAllVideos(filter: String): Flow<List<SavedVideo>> {
         return videoDao.getAll(filter)
     }
     fun getPlaylistSavedVideoCrossRefbyPlaylistId(playlistId: Int) : List<PlaylistSavedVideoCrossRef>{
@@ -89,7 +89,7 @@ class VideoRepository @Inject constructor(private val videoDao: VideoDao,
     }
 
     fun deleteVideo(videoId: String) {
-        videoDao.delete(videoId)
+        val resDel=videoDao.delete(videoId)
         playlistSavedVideoCrossRefDao.deleteVideo(videoId = videoId)
     }
 

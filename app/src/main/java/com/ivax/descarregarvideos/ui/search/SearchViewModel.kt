@@ -73,12 +73,8 @@ class SearchViewModel @Inject constructor(
                 result.videos.forEach {
                     it.videoDownloaded=videoRepository.videoExists(it.videoId)
                 }
-                //videos.value.addAll(result.videos)
-
 
                 _videos.value+=result.videos
-                //_videos.value+=result.videos
-                //videos.emit(result.videos)
                 continuationToken.value= result.nextToken
             } catch (e: Exception) {
                 Log.d("DescarregarVideos",e.message.toString())

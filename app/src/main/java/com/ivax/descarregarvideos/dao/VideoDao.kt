@@ -22,10 +22,10 @@ interface VideoDao {
     fun findByName(first: String, last: String): User*/
 
     @Query("SELECT * FROM savedvideo")
-    fun getAll(): List<SavedVideo>
+    fun getAll(): Flow<List<SavedVideo>>
 
     @Query("SELECT * FROM savedvideo WHERE title LIKE '%' || :filter || '%'")
-    fun getAll(filter: String): List<SavedVideo>
+    fun getAll(filter: String): Flow<List<SavedVideo>>
 
     @Upsert
     fun insertAll(vararg savedVideo: SavedVideo)
@@ -33,7 +33,7 @@ interface VideoDao {
     @Query("UPDATE savedvideo SET playListId=:playListId WHERE videoId=:videoId")
     fun addVideoToPlaylist(playListId: Int,videoId: String)
     @Query("DELETE FROM savedvideo WHERE videoId=:videoId")
-    fun delete(videoId: String)
+    fun delete(videoId: String) : Int
     @Query("SELECT * FROM savedvideo WHERE videoId=:videoId LIMIT 1")
     fun first(videoId: String): SavedVideo?
     @Query("SELECT sv.* FROM playlistsavedvideocrossref psvr INNER JOIN savedvideo sv " +
