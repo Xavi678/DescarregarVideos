@@ -28,12 +28,39 @@ import com.ivax.descarregarvideos.general.viewmodels.MediaViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.FileInputStream
 import android.widget.LinearLayout
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.Player.MediaItemTransitionReason
 import androidx.media3.common.Timeline
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.ivax.descarregarvideos.services.PlaybackService
@@ -52,8 +79,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnSkipForward: ImageButton
     private lateinit var btnMinimizePlayer: ImageButton
     private lateinit var btnDestroyPlayer: ImageButton
-    private lateinit var controllerFuture : ListenableFuture<MediaController>
-    private  var playlistLayout: LinearLayout?=null
+    private lateinit var controllerFuture: ListenableFuture<MediaController>
+    private var playlistLayout: LinearLayout? = null
     private lateinit var tbxPlaylistName: TextView
 
 
@@ -69,21 +96,25 @@ class MainActivity : AppCompatActivity() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
     }
+
     override fun onStart() {
+        binding.appBarMain.composeViewMain.setContent {
+            MainScaffold()
+        }
         val sessionToken =
             SessionToken(this, ComponentName(this, PlaybackService::class.java))
         controllerFuture =
             MediaController.Builder(this, sessionToken).buildAsync()
         controllerFuture.addListener({
-            try{
-                val mediaController=controllerFuture.get()
+            try {
+                val mediaController = controllerFuture.get()
                 mediaViewModel.setMediaController(mediaController)
                 player = mediaViewModel.getMediaPlayer()
                 binding.appBarMain.playerView.player = player
                 player.repeatMode = Player.REPEAT_MODE_ALL
-                if(player.isPlaying){
-                    val mediaItem=player.currentMediaItem
-                    if(mediaItem!=null){
+                if (player.isPlaying) {
+                    val mediaItem = player.currentMediaItem
+                    if (mediaItem != null) {
                         mediaViewModel.isMediaPlayerMaximized.postValue(true)
                         setMetadata(mediaItem)
                     }
@@ -103,13 +134,15 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     override fun onPlaybackStateChanged(playbackState: Int) {
-                        Log.d("DescarregarVideos","Playback Changed")
+                        Log.d("DescarregarVideos", "Playback Changed")
                         super.onPlaybackStateChanged(playbackState)
                     }
+
                     override fun onTimelineChanged(timeline: Timeline, reason: Int) {
-                        Log.d("DescarregarVideos","Timeline Chnaged")
+                        Log.d("DescarregarVideos", "Timeline Chnaged")
                         super.onTimelineChanged(timeline, reason)
                     }
+
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
                         hasNextAndPreviousMedia()
                         super.onIsPlayingChanged(isPlaying)
@@ -119,7 +152,7 @@ class MainActivity : AppCompatActivity() {
                         mediaItem: MediaItem?,
                         @MediaItemTransitionReason reason: Int
                     ) {
-                        if(mediaItem!=null) {
+                        if (mediaItem != null) {
                             setMetadata(mediaItem)
 
                         }
@@ -127,9 +160,9 @@ class MainActivity : AppCompatActivity() {
 
 
                 })
-        }catch (e: Exception){
-            Log.d("DescarregarVideos",e.message.toString())
-        }
+            } catch (e: Exception) {
+                Log.d("DescarregarVideos", e.message.toString())
+            }
             // MediaController is available here with controllerFuture.get()
         }, MoreExecutors.directExecutor())
 
@@ -164,6 +197,7 @@ class MainActivity : AppCompatActivity() {
         MediaController.releaseFuture(controllerFuture)
         super.onStop()
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
@@ -171,7 +205,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.appBarMain.toolbar)
-
 
 
         var playButton =
@@ -185,18 +218,21 @@ class MainActivity : AppCompatActivity() {
         //tbxTimeDuration = binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeDuration)
         //seekBarI = binding.appBarMain.root.findViewById<SeekBar>(R.id.seekBar)
         //tbxTimeTotal = binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeTotal)
-        btnMinimizePlayer=binding.appBarMain.root.findViewById<ImageButton>(R.id.imageButtonMinimizePlayer)
-        btnDestroyPlayer=binding.appBarMain.root.findViewById<ImageButton>(R.id.imageButtonDestroyPlayer)
-        tbxPlaylistName=binding.appBarMain.root.findViewById<TextView>(R.id.tbxCurrentPlaylist)
-        playlistLayout=binding.appBarMain.root.findViewById<LinearLayout>(R.id.layoutCurrentPlaylist)
+        btnMinimizePlayer =
+            binding.appBarMain.root.findViewById<ImageButton>(R.id.imageButtonMinimizePlayer)
+        btnDestroyPlayer =
+            binding.appBarMain.root.findViewById<ImageButton>(R.id.imageButtonDestroyPlayer)
+        tbxPlaylistName = binding.appBarMain.root.findViewById<TextView>(R.id.tbxCurrentPlaylist)
+        playlistLayout =
+            binding.appBarMain.root.findViewById<LinearLayout>(R.id.layoutCurrentPlaylist)
         mediaViewModel.isMediaPlayerMaximized.observe(this) {
 
             binding.appBarMain.mediaPlayer.visibility = if (it) View.VISIBLE else View.GONE
-            binding.appBarMain.fab.visibility= if(it) View.GONE else View.VISIBLE
+            binding.appBarMain.fab.visibility = if (it) View.GONE else View.VISIBLE
         }
         lifecycleScope.launch {
             mediaViewModel.isMediaPlayerVisible.collectLatest {
-                if(!it) {
+                if (!it) {
                     binding.appBarMain.fab.visibility = View.GONE
                     binding.appBarMain.mediaPlayer.visibility = View.GONE
                 }
@@ -226,15 +262,18 @@ class MainActivity : AppCompatActivity() {
         }*/
         lifecycleScope.launch {
             mediaViewModel.title.collectLatest {
-                Log.d("DescarregarVideos","Visibilitat Player: ${binding.appBarMain.playerView.visibility}")
+                Log.d(
+                    "DescarregarVideos",
+                    "Visibilitat Player: ${binding.appBarMain.playerView.visibility}"
+                )
 
                 playerSongTextView.text = it
-                playerSongTextView.isSelected=true
+                playerSongTextView.isSelected = true
             }
         }
         lifecycleScope.launch {
             mediaViewModel.thumbnail.collectLatest {
-                if(it!=null) {
+                if (it != null) {
                     thumbnailPlayer.setImageBitmap(it)
                 }
             }
@@ -242,7 +281,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             mediaViewModel.playlistName.collectLatest {
 
-                if(playlistLayout!=null) {
+                if (playlistLayout != null) {
                     if (it != null) {
                         playlistLayout!!.visibility = View.VISIBLE
                         tbxPlaylistName.text = it
@@ -271,7 +310,7 @@ class MainActivity : AppCompatActivity() {
             player.stop()
             player.clearMediaItems()
             player.release()
-            mediaViewModel.isMediaPlayerVisible.update{
+            mediaViewModel.isMediaPlayerVisible.update {
                 false
             }
 
@@ -367,16 +406,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun hasNextMedia(it : Boolean) {
+    private fun hasNextMedia(it: Boolean) {
         btnSkipForward.visibility = if (it) View.VISIBLE
         else View.INVISIBLE
     }
 
-    private fun hasPreviousMedia(it : Boolean) {
+    private fun hasPreviousMedia(it: Boolean) {
         btnSkipBackward.visibility = if (it) View.VISIBLE
         else View.INVISIBLE
     }
-
 
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -389,4 +427,142 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
+
+    @Composable
+    fun BottomNavWithScaffold(
+    ) {
+        val navController = rememberNavController()
+        NavHost(
+            navController = navController,
+            startDestination = "",
+            modifier = Modifier.fillMaxSize()
+        ) {
+            composable(route = "") {
+                ProvaScreen() {
+                    navController.navigate(it)
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun HomeNavHost(
+        modifier: Modifier,
+        navController: NavHostController,
+        startDestination: String,
+        navigateTo: (route: String) -> Unit
+    ) {
+
+        NavHost(
+            navController = navController, startDestination = startDestination, modifier = modifier
+        ) {
+
+            composable(route = "") {
+                Screen1()
+            }
+            composable(route = "") {
+                Screen2()
+            }
+            composable(route = "") {
+                Screen3()
+            }
+
+
+        }
+    }
+
+    @Composable
+    fun Screen1() {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Text(text = "One Screen", fontSize = 20.sp)
+        }
+    }
+
+    @Composable
+    fun Screen2() {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Text(text = "Two Screen", fontSize = 20.sp)
+        }
+    }
+
+    @Composable
+    fun Screen3() {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Text(text = "Three Screen", fontSize = 20.sp)
+        }
+    }
+
+    @Composable
+    fun MainScaffold(
+        navigateTo: (route: String) -> Unit
+    ) {
+        val showBottomBar = remember { mutableStateOf(true) }
+        val title = remember {
+            mutableStateOf("Home")
+        }
+        val navController = rememberNavController()
+        Scaffold(bottomBar = {
+            BottomAppBar(
+                actions = {
+                    IconButton(onClick = {
+
+                    }, modifier = Modifier.weight(0.33f)) {
+                        Column() {
+                            Text("Search")
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Icon(
+                                painter = painterResource(R.drawable.ic_menu_search),
+                                contentDescription = null,
+                                modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+                            )
+                        }
+                    }
+                    IconButton(onClick = {
+
+                    }, modifier = Modifier.weight(0.33f)) {
+                        Column {
+                            Text("Saved Videos")
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Icon(
+                                painter = painterResource(R.drawable.download_rounded_base),
+                                contentDescription = null,
+                                modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+                            )
+                        }
+                    }
+                    IconButton(onClick = {
+
+                    }, modifier = Modifier.weight(0.33f)) {
+                        Column {
+                            Text("Playlists")
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Icon(
+                                painter = painterResource(R.drawable.collection_fill),
+                                contentDescription = null,
+                                modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+                            )
+                        }
+                    }
+                }
+            )
+
+        }) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+            ) {
+                HomeNavHost(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .weight(1f),
+                    navController = navController,
+                    startDestination = "",
+                    navigateTo = navigateTo
+                )
+
+            }
+        }
+    }
 }
+
