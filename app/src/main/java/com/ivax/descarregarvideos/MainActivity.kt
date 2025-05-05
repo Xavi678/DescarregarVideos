@@ -28,12 +28,9 @@ import com.ivax.descarregarvideos.general.viewmodels.MediaViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.FileInputStream
 import android.widget.LinearLayout
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.BottomAppBar
@@ -47,8 +44,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -57,16 +52,20 @@ import androidx.media3.common.Player.MediaItemTransitionReason
 import androidx.media3.common.Timeline
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
+import com.ivax.descarregarvideos.routes.Route
+import com.ivax.descarregarvideos.routes.Route.Playlists
 import com.ivax.descarregarvideos.services.PlaybackService
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 
 
 @AndroidEntryPoint
@@ -99,7 +98,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         binding.appBarMain.composeViewMain.setContent {
-            MainScaffold()
+            MainWrapper()
+
         }
         val sessionToken =
             SessionToken(this, ComponentName(this, PlaybackService::class.java))
@@ -437,11 +437,10 @@ class MainActivity : AppCompatActivity() {
             startDestination = "",
             modifier = Modifier.fillMaxSize()
         ) {
-            composable(route = "") {
-                ProvaScreen() {
-                    navController.navigate(it)
-                }
+            composable<Playlists>{
+
             }
+            composable<Playlists>{}
         }
     }
 
@@ -449,22 +448,21 @@ class MainActivity : AppCompatActivity() {
     fun HomeNavHost(
         modifier: Modifier,
         navController: NavHostController,
-        startDestination: String,
+        startDestination: Any,
         navigateTo: (route: String) -> Unit
     ) {
-
         NavHost(
             navController = navController, startDestination = startDestination, modifier = modifier
         ) {
 
-            composable(route = "") {
-                Screen1()
+            composable<Route.Search>{
+                Search()
             }
-            composable(route = "") {
-                Screen2()
+            composable<Playlists> {
+                Playlist()
             }
-            composable(route = "") {
-                Screen3()
+            composable<Route.SavedAudio> {
+                SavedVideo()
             }
 
 
@@ -472,26 +470,32 @@ class MainActivity : AppCompatActivity() {
     }
 
     @Composable
-    fun Screen1() {
+    fun Playlist() {
         Column(modifier = Modifier.fillMaxSize()) {
-            Text(text = "One Screen", fontSize = 20.sp)
+            Text(text = "PLaylist", fontSize = 100.sp)
         }
     }
 
     @Composable
-    fun Screen2() {
+    fun Search() {
         Column(modifier = Modifier.fillMaxSize()) {
-            Text(text = "Two Screen", fontSize = 20.sp)
+            Text(text = "Search", fontSize = 100.sp)
         }
     }
 
     @Composable
-    fun Screen3() {
+    fun SavedVideo() {
         Column(modifier = Modifier.fillMaxSize()) {
-            Text(text = "Three Screen", fontSize = 20.sp)
+            Text(text = "Saved Video", fontSize = 100.sp)
         }
     }
-
+    @Composable
+    fun MainWrapper(){
+        val navController = rememberNavController()
+        MainScaffold {
+            navController.navigate(it)
+        }
+    }
     @Composable
     fun MainScaffold(
         navigateTo: (route: String) -> Unit
@@ -505,7 +509,13 @@ class MainActivity : AppCompatActivity() {
             BottomAppBar(
                 actions = {
                     IconButton(onClick = {
-
+                        navController.navigate(Route.Search){
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState=true
+                            }
+                            restoreState = true
+                            launchSingleTop = true
+                        }
                     }, modifier = Modifier.weight(0.33f)) {
                         Column() {
                             Text("Search")
@@ -518,7 +528,13 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                     IconButton(onClick = {
-
+                        navController.navigate(Route.SavedAudio){
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState=true
+                            }
+                            restoreState = true
+                            launchSingleTop = true
+                        }
                     }, modifier = Modifier.weight(0.33f)) {
                         Column {
                             Text("Saved Videos")
@@ -531,7 +547,13 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                     IconButton(onClick = {
-
+                        navController.navigate(Route.Playlists){
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState=true
+                            }
+                            restoreState = true
+                            launchSingleTop = true
+                        }
                     }, modifier = Modifier.weight(0.33f)) {
                         Column {
                             Text("Playlists")
@@ -557,7 +579,7 @@ class MainActivity : AppCompatActivity() {
                         .fillMaxSize()
                         .weight(1f),
                     navController = navController,
-                    startDestination = "",
+                    startDestination = Route.Search,
                     navigateTo = navigateTo
                 )
 
