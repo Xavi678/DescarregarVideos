@@ -28,6 +28,7 @@ import com.ivax.descarregarvideos.general.viewmodels.MediaViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.FileInputStream
 import android.widget.LinearLayout
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,19 +40,24 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.Player.MediaItemTransitionReason
 import androidx.media3.common.Timeline
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -62,6 +68,12 @@ import com.google.common.util.concurrent.MoreExecutors
 import com.ivax.descarregarvideos.routes.Route
 import com.ivax.descarregarvideos.routes.Route.Playlists
 import com.ivax.descarregarvideos.services.PlaybackService
+import com.ivax.descarregarvideos.ui.playlists.PlaylistScreen
+import com.ivax.descarregarvideos.ui.playlists.PlaylistsViewModel
+import com.ivax.descarregarvideos.ui.saved.videos.SavedVideosViewModel
+import com.ivax.descarregarvideos.ui.saved.videos.SearchAudioScreen
+import com.ivax.descarregarvideos.ui.search.SearchScreen
+import com.ivax.descarregarvideos.ui.search.SearchViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -97,7 +109,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStart() {
-        binding.appBarMain.composeViewMain.setContent {
+        /*binding.appBarMain.composeViewMain.setContent {
             MainWrapper()
 
         }
@@ -166,7 +178,7 @@ class MainActivity : AppCompatActivity() {
             // MediaController is available here with controllerFuture.get()
         }, MoreExecutors.directExecutor())
 
-
+*/
         super.onStart()
     }
 
@@ -201,13 +213,15 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContent {
+            MainWrapper()
+        }
+        //binding = ActivityMainBinding.inflate(layoutInflater)
+        //setContentView(binding.root)
 
-        setSupportActionBar(binding.appBarMain.toolbar)
 
 
-        var playButton =
+        /*var playButton =
             binding.appBarMain.root.findViewById<ImageButton>(R.id.mediaPlayerPlayButton)
         var thumbnailPlayer =
             binding.appBarMain.root.findViewById<ImageView>(R.id.mediaPlayerThumbnail)
@@ -215,9 +229,6 @@ class MainActivity : AppCompatActivity() {
             binding.appBarMain.root.findViewById<TextView>(R.id.playerSongTextView)
         btnSkipBackward = binding.appBarMain.root.findViewById<ImageButton>(R.id.skipBackward)
         btnSkipForward = binding.appBarMain.root.findViewById<ImageButton>(R.id.skipBForward)
-        //tbxTimeDuration = binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeDuration)
-        //seekBarI = binding.appBarMain.root.findViewById<SeekBar>(R.id.seekBar)
-        //tbxTimeTotal = binding.appBarMain.root.findViewById<TextView>(R.id.tbxTimeTotal)
         btnMinimizePlayer =
             binding.appBarMain.root.findViewById<ImageButton>(R.id.imageButtonMinimizePlayer)
         btnDestroyPlayer =
@@ -246,20 +257,7 @@ class MainActivity : AppCompatActivity() {
         btnSkipForward.setOnClickListener {
             player.seekToNextMediaItem()
         }
-        //binding.appBarMain.mediaPlayer.visibility=View.VISIBLE
-        /*mediaViewModel.currentMedia.observe(this) {
-            it.videoUrl
-            var bmp: Bitmap
-            var fileInStream= FileInputStream(it.imgUrl)
-            fileInStream.use {
-                bmp = BitmapFactory.decodeStream(it)
-            }
-            fileInStream.close()
-            thumbnailPlayer.setImageBitmap(bmp)
-            playerSongTextView.text=it.title
-            //playerSongTextView.startAnimation(animMove)
-            //thumbnailPlayer.setImageBitmap(it)
-        }*/
+
         lifecycleScope.launch {
             mediaViewModel.title.collectLatest {
                 Log.d(
@@ -315,42 +313,8 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
-        /*seekBarI!!.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(
-                seekBar: SeekBar?,
-                progress: Int,
-                fromUser: Boolean
-            ) {
-                if (fromUser) {
-                    var seekTo = (progress * 1000).toLong()
-                    Log.d("DescarregarVideos", seekTo.toString())
-                    seekBarProgress = progress
-                    player.seekTo(seekTo)
-                    tbxTimeDuration.text = MathExtensions.toTime(progress)
-                    playButton.setImageDrawable(
-                        ResourcesCompat.getDrawable(
-                            this@MainActivity.resources,
-                            R.drawable.pause_button_white,
-                            null
-                        )
-                    )
-                }
-            }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                isSeeking = true
-                isTimerCancelled = true
-            }
 
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                isSeeking = false
-                isTimerCancelled = false
-                player.prepare()
-                player.play()
-
-            }
-
-        })*/
 
         playButton.setOnClickListener { view ->
             var playPause = (view as ImageButton)
@@ -382,11 +346,10 @@ class MainActivity : AppCompatActivity() {
 
             mediaViewModel.isMediaPlayerMaximized.postValue(true)
         }
+
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_content_main)
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.nav_search,
@@ -394,7 +357,7 @@ class MainActivity : AppCompatActivity() {
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)
+        navView.setupWithNavController(navController)*/
     }
 
     private fun hasNextAndPreviousMedia() {
@@ -456,13 +419,16 @@ class MainActivity : AppCompatActivity() {
         ) {
 
             composable<Route.Search>{
-                Search()
+                val viewModel = hiltViewModel<SearchViewModel>()
+                SearchScreen(viewModel)
             }
             composable<Playlists> {
-                Playlist()
+                val viewModel = hiltViewModel<PlaylistsViewModel>()
+                PlaylistScreen(viewModel)
             }
             composable<Route.SavedAudio> {
-                SavedVideo()
+                val viewModel = hiltViewModel<SavedVideosViewModel>()
+                SearchAudioScreen(viewModel)
             }
 
 
@@ -476,12 +442,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @Composable
-    fun Search() {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Text(text = "Search", fontSize = 100.sp)
-        }
-    }
 
     @Composable
     fun SavedVideo() {
@@ -505,7 +465,13 @@ class MainActivity : AppCompatActivity() {
             mutableStateOf("Home")
         }
         val navController = rememberNavController()
-        Scaffold(bottomBar = {
+        var currentDest by remember { mutableStateOf("") }
+        Scaffold(containerColor = Color.White, topBar = {
+            navController.addOnDestinationChangedListener { controller, destination, arguments ->
+                currentDest=destination.route.toString()
+            }
+            Text(currentDest)
+        },bottomBar = {
             BottomAppBar(
                 actions = {
                     IconButton(onClick = {
