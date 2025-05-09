@@ -36,8 +36,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ivax.descarregarvideos.R
-import com.ivax.descarregarvideos.custom.composables.SearchComposable
-import com.ivax.descarregarvideos.custom.composables.bounceClick
+import com.ivax.descarregarvideos.ui.composables.SearchComposable
+import com.ivax.descarregarvideos.ui.composables.bounceClick
 import com.ivax.descarregarvideos.entities.SavedVideo
 import java.io.FileInputStream
 

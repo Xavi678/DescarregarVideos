@@ -1,4 +1,4 @@
-package com.ivax.descarregarvideos.routes
+package com.ivax.descarregarvideos.ui.routes
 
 import kotlinx.serialization.Serializable
 
@@ -9,4 +9,6 @@ class Route {
     object Search
     @Serializable
     object SavedAudio
+    @Serializable
+    data class EditPlaylist(val playlistId: Int)
 }

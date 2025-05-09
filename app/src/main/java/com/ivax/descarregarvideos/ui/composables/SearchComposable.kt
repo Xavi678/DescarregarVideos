@@ -1,4 +1,4 @@
-package com.ivax.descarregarvideos.custom.composables
+package com.ivax.descarregarvideos.ui.composables
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable

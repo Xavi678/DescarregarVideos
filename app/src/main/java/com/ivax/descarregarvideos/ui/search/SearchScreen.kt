@@ -32,7 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCompositionContext
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,7 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.classes.VideoItem
-import com.ivax.descarregarvideos.custom.composables.SearchComposable
+import com.ivax.descarregarvideos.ui.composables.SearchComposable
 import com.ivax.descarregarvideos.entities.SavedVideo
 import java.io.File
 

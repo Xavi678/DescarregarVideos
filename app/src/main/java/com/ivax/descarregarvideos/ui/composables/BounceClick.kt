@@ -1,4 +1,4 @@
-package com.ivax.descarregarvideos.custom.composables
+package com.ivax.descarregarvideos.ui.composables
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable

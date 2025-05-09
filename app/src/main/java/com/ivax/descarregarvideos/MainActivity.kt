@@ -1,28 +1,19 @@
 package com.ivax.descarregarvideos
 
-import android.content.ComponentName
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.View
 import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.TextView
-import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
 import com.ivax.descarregarvideos.databinding.ActivityMainBinding
 import com.ivax.descarregarvideos.general.viewmodels.MediaViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -52,37 +43,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.lifecycleScope
-import androidx.media3.common.Player.MediaItemTransitionReason
-import androidx.media3.common.Timeline
 import androidx.media3.session.MediaController
-import androidx.media3.session.SessionToken
-import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.google.common.util.concurrent.ListenableFuture
-import com.google.common.util.concurrent.MoreExecutors
-import com.ivax.descarregarvideos.routes.Route
-import com.ivax.descarregarvideos.routes.Route.Playlists
-import com.ivax.descarregarvideos.services.PlaybackService
+import com.ivax.descarregarvideos.ui.edit.playlist.EditPlaylistScreen
+import com.ivax.descarregarvideos.ui.edit.playlist.EditPlaylistViewModel
+import com.ivax.descarregarvideos.ui.routes.Route
+import com.ivax.descarregarvideos.ui.routes.Route.Playlists
 import com.ivax.descarregarvideos.ui.playlists.PlaylistScreen
 import com.ivax.descarregarvideos.ui.playlists.PlaylistsViewModel
 import com.ivax.descarregarvideos.ui.saved.videos.SavedVideosViewModel
 import com.ivax.descarregarvideos.ui.saved.videos.SearchAudioScreen
 import com.ivax.descarregarvideos.ui.search.SearchScreen
 import com.ivax.descarregarvideos.ui.search.SearchViewModel
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
 
 
 @AndroidEntryPoint
@@ -436,24 +418,16 @@ class MainActivity : AppCompatActivity() {
                 SearchAudioScreen(viewModel)
             }
 
+            composable<Route.EditPlaylist> {
+                val playlistId=it.toRoute<Int>()
+                val viewModel = hiltViewModel<EditPlaylistViewModel>()
+                EditPlaylistScreen(playlistId,viewModel)
+            }
+
 
         }
     }
 
-    @Composable
-    fun Playlist() {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Text(text = "PLaylist", fontSize = 100.sp)
-        }
-    }
-
-
-    @Composable
-    fun SavedVideo() {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Text(text = "Saved Video", fontSize = 100.sp)
-        }
-    }
     @Composable
     fun MainWrapper(){
         val navController = rememberNavController()
@@ -529,7 +503,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                     IconButton(onClick = {
-                        navController.navigate(Route.Playlists){
+                        navController.navigate(Playlists){
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState=true
                             }
