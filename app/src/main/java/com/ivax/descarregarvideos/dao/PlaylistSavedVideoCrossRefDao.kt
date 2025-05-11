@@ -23,9 +23,9 @@ interface PlaylistSavedVideoCrossRefDao {
     fun deleteAll() : Int
     @Query("SELECT * FROM playlistsavedvideocrossref WHERE playListId=:playListId")
     fun getByPlaylistId(playListId: Int): List<PlaylistSavedVideoCrossRef>
-    @Query("SELECT r.playListId,r.videoId,r.position,s.duration,s.imgUrl,s.title,s.videoUrl,s.viewCount FROM playlistsavedvideocrossref r JOIN savedvideo s ON r.videoId=s.videoId  WHERE r.playListId=:playlistId order by r.position")
+    @Query("SELECT r.playListId,r.videoId,r.position,s.duration,s.imgUrl,s.title,s.videoUrl,s.viewCount,s.downloadDate FROM playlistsavedvideocrossref r JOIN savedvideo s ON r.videoId=s.videoId  WHERE r.playListId=:playlistId order by r.position")
     fun getByPlaylistIdWithPositions(playlistId: Int) : List<VideosWithPositionFoo>
-    @Query("SELECT r.playListId,r.videoId,r.position,s.duration,s.imgUrl,s.title,s.videoUrl,s.viewCount FROM playlistsavedvideocrossref r JOIN savedvideo s ON r.videoId=s.videoId order by r.position")
+    @Query("SELECT r.playListId,r.videoId,r.position,s.duration,s.imgUrl,s.title,s.videoUrl,s.viewCount,s.downloadDate FROM playlistsavedvideocrossref r JOIN savedvideo s ON r.videoId=s.videoId order by r.position")
     fun getAllVideosWithPositionFoo() : Flow<List<VideosWithPositionFoo>>
     @Update
     fun updatePlaylistSavedVideoCrossRef(playlistSavedVideoCrossRef: PlaylistSavedVideoCrossRef,)

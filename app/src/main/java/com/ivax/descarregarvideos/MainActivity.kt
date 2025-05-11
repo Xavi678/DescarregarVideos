@@ -379,22 +379,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     @Composable
-    fun BottomNavWithScaffold(
-    ) {
-        val navController = rememberNavController()
-        NavHost(
-            navController = navController,
-            startDestination = "",
-            modifier = Modifier.fillMaxSize()
-        ) {
-            composable<Playlists>{
-
-            }
-            composable<Playlists>{}
-        }
-    }
-
-    @Composable
     fun HomeNavHost(
         modifier: Modifier,
         navController: NavHostController,
@@ -411,7 +395,15 @@ class MainActivity : AppCompatActivity() {
             }
             composable<Playlists> {
                 val viewModel = hiltViewModel<PlaylistsViewModel>()
-                PlaylistScreen(viewModel)
+                PlaylistScreen(viewModel,fun (playlistId: Int){
+                    navController.navigate(Route.EditPlaylist(playlistId)){
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState=true
+                        }
+                        restoreState = true
+                        launchSingleTop = true
+                    }
+                })
             }
             composable<Route.SavedAudio> {
                 val viewModel = hiltViewModel<SavedVideosViewModel>()
@@ -419,11 +411,10 @@ class MainActivity : AppCompatActivity() {
             }
 
             composable<Route.EditPlaylist> {
-                val playlistId=it.toRoute<Int>()
+                val arg=it.toRoute<Route.EditPlaylist>()
                 val viewModel = hiltViewModel<EditPlaylistViewModel>()
-                EditPlaylistScreen(playlistId,viewModel)
+                EditPlaylistScreen(arg.playlistId,viewModel)
             }
-
 
         }
     }

@@ -35,7 +35,7 @@ class PlaylistsViewModel @Inject constructor(private val videoRepository: VideoR
                     playlistsWithPos.forEach { y->
                         listOrderedVideos.add(OrderedVideos(videoId = y.videoId, viewCount = y.viewCount,
                             position = y.position, imgUrl = y.imgUrl, videoUrl = y.videoUrl,
-                            title = y.title, duration = y.duration))
+                            title = y.title, duration = y.duration,))
                     }
                     tmp.add(PlaylistWithOrderedVideosFoo(playlist = x, orderedVideos = listOrderedVideos))
                 }

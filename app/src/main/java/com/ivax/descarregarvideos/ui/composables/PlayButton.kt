@@ -18,9 +18,11 @@ import androidx.compose.ui.unit.sp
 import com.ivax.descarregarvideos.R
 
 @Composable
-fun PlayButton(){
+fun PlayButton(onClickDelegate : () -> Unit ){
     Row {
-        Button(modifier = Modifier.height(36.dp),onClick = {}, colors = ButtonColors(
+        Button(modifier = Modifier.height(36.dp),onClick = {
+            onClickDelegate()
+        }, colors = ButtonColors(
             contentColor = Color.White,
             containerColor = MaterialTheme.colorScheme.primary,
             disabledContentColor = Color.White,
