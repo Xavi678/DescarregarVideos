@@ -3,6 +3,7 @@ package com.ivax.descarregarvideos.ui.playlists
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -21,11 +23,16 @@ import com.ivax.descarregarvideos.ui.composables.SearchComposable
 import com.ivax.descarregarvideos.entities.Playlist
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.classes.PlaylistWithOrderedVideosFoo
 import com.ivax.descarregarvideos.ui.composables.PlayButton
 import com.ivax.descarregarvideos.ui.preview.providers.PlaylistWithOrderedVideosFooPreviewParameterProvider
@@ -95,6 +102,18 @@ fun Item(playlistWithOrderedVideosFoo: PlaylistWithOrderedVideosFoo, function: (
             fileInStream.close()
 
             Image(bitmap = bmp.asImageBitmap(), contentDescription = "First Video Thumbnail")
+            Row(modifier = Modifier.align(alignment = Alignment.BottomEnd)
+                .background(Color.Black)) {
+                Icon(painter = painterResource(R.drawable.playlist),
+                    contentDescription = "Collection Icon", tint = Color.White,
+                    modifier = Modifier.align(alignment = Alignment.CenterVertically))
+                Text(
+                    text = "${playlistWithOrderedVideosFoo.orderedVideos.count()}",
+                    color = Color.White,
+                    fontSize = 11.sp,
+                    modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                )
+            }
         }
         }
         Column(modifier = Modifier
