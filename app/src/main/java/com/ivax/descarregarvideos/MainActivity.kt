@@ -23,13 +23,17 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -47,10 +51,12 @@ import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.session.MediaController
+import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.google.common.util.concurrent.ListenableFuture
@@ -205,7 +211,6 @@ class MainActivity : AppCompatActivity() {
         }
         //binding = ActivityMainBinding.inflate(layoutInflater)
         //setContentView(binding.root)
-
 
 
         /*var playButton =
@@ -389,16 +394,16 @@ class MainActivity : AppCompatActivity() {
             navController = navController, startDestination = startDestination, modifier = modifier
         ) {
 
-            composable<Route.Search>{
+            composable<Route.Search> {
                 val viewModel = hiltViewModel<SearchViewModel>()
                 SearchScreen(viewModel)
             }
             composable<Playlists> {
                 val viewModel = hiltViewModel<PlaylistsViewModel>()
-                PlaylistScreen(viewModel,fun (playlistId: Int){
-                    navController.navigate(Route.EditPlaylist(playlistId)){
+                PlaylistScreen(viewModel, fun(playlistId: Int) {
+                    navController.navigate(Route.EditPlaylist(playlistId)) {
                         popUpTo(navController.graph.findStartDestination().id) {
-                            saveState=true
+                            saveState = true
                         }
                         restoreState = true
                         launchSingleTop = true
@@ -411,21 +416,22 @@ class MainActivity : AppCompatActivity() {
             }
 
             composable<Route.EditPlaylist> {
-                val arg=it.toRoute<Route.EditPlaylist>()
+                val arg = it.toRoute<Route.EditPlaylist>()
                 val viewModel = hiltViewModel<EditPlaylistViewModel>()
-                EditPlaylistScreen(arg.playlistId,viewModel)
+                EditPlaylistScreen(arg.playlistId, viewModel)
             }
 
         }
     }
 
     @Composable
-    fun MainWrapper(){
+    fun MainWrapper() {
         val navController = rememberNavController()
         MainScaffold {
             navController.navigate(it)
         }
     }
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun MainScaffold(
@@ -436,86 +442,87 @@ class MainActivity : AppCompatActivity() {
         var currentDest by remember { mutableStateOf("") }
 
 
-        navController.addOnDestinationChangedListener{
-            controller,destination,arguments ->
-            var parsedRoute=destination.route.toString()
-            currentDest=parsedRoute.substring( parsedRoute.indexOfLast { it=='.' }+1)
+        navController.addOnDestinationChangedListener { controller, destination, arguments ->
+            var parsedRoute = destination.route.toString()
+            currentDest = parsedRoute.substring(parsedRoute.indexOfLast { it == '.' } + 1)
         }
-        Scaffold(containerColor = Color.White, topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                title = {
-                    Text(text=currentDest)
-                }
-            )
-        },
+        Scaffold(
+            containerColor = Color.White, topBar = {
+                TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.primary,
+                    ),
+                    title = {
+                        Text(text = currentDest)
+                    }
+                )
+            },
             bottomBar = {
-            BottomAppBar(
-                actions = {
-                    IconButton(onClick = {
-                        navController.navigate(Route.Search){
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState=true
+                NavBar(navController)
+                /*BottomAppBar(
+                    actions = {
+                        IconButton(onClick = {
+                            navController.navigate(Route.Search){
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState=true
+                                }
+                                restoreState = true
+                                launchSingleTop = true
                             }
-                            restoreState = true
-                            launchSingleTop = true
+                        }, modifier = Modifier.weight(0.33f)) {
+                            Column() {
+                                Text("Search")
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_menu_search),
+                                    contentDescription = null,
+                                    modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+                                )
+                            }
                         }
-                    }, modifier = Modifier.weight(0.33f)) {
-                        Column() {
-                            Text("Search")
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Icon(
-                                painter = painterResource(R.drawable.ic_menu_search),
-                                contentDescription = null,
-                                modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-                            )
+                        IconButton(onClick = {
+                            navController.navigate(Route.SavedAudio){
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState=true
+                                }
+                                restoreState = true
+                                launchSingleTop = true
+                            }
+                        }, modifier = Modifier.weight(0.33f)) {
+                            Column {
+                                Text("Saved Videos")
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Icon(
+                                    painter = painterResource(R.drawable.download_rounded_base),
+                                    contentDescription = null,
+                                    modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+                                )
+                            }
+                        }
+                        IconButton(onClick = {
+                            navController.navigate(Playlists){
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState=true
+                                }
+                                restoreState = true
+                                launchSingleTop = true
+                            }
+                        }, modifier = Modifier.weight(0.33f)) {
+                            Column {
+                                Text("Playlists")
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Icon(
+                                    painter = painterResource(R.drawable.collection_fill),
+                                    contentDescription = null,
+                                    modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
+                                )
+                            }
                         }
                     }
-                    IconButton(onClick = {
-                        navController.navigate(Route.SavedAudio){
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState=true
-                            }
-                            restoreState = true
-                            launchSingleTop = true
-                        }
-                    }, modifier = Modifier.weight(0.33f)) {
-                        Column {
-                            Text("Saved Videos")
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Icon(
-                                painter = painterResource(R.drawable.download_rounded_base),
-                                contentDescription = null,
-                                modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-                            )
-                        }
-                    }
-                    IconButton(onClick = {
-                        navController.navigate(Playlists){
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState=true
-                            }
-                            restoreState = true
-                            launchSingleTop = true
-                        }
-                    }, modifier = Modifier.weight(0.33f)) {
-                        Column {
-                            Text("Playlists")
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Icon(
-                                painter = painterResource(R.drawable.collection_fill),
-                                contentDescription = null,
-                                modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-                            )
-                        }
-                    }
-                }
-            )
+                )*/
 
-        }) { innerPadding ->
+            }) { innerPadding ->
             Column(
                 modifier = Modifier
                     .padding(innerPadding)
@@ -531,6 +538,77 @@ class MainActivity : AppCompatActivity() {
                 )
 
             }
+        }
+    }
+
+    @Composable
+    fun NavBar(navController: NavController) {
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentRoute = navBackStackEntry?.destination?.route
+        NavigationBar(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentWidth()
+        ) {
+            NavigationBarItem(
+                selected = false, onClick = {
+                navController.navigate(Route.Search) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    restoreState = true
+                    launchSingleTop = true
+                }
+            }, icon = {
+                Icon(
+                    painter = painterResource(R.drawable.ic_menu_search),
+                    contentDescription = null
+                )
+            },
+                label = {
+                    Text("Search")
+                }
+            )
+            NavigationBarItem(
+                selected = false, onClick = {
+                    navController.navigate(Route.SavedAudio) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        restoreState = true
+                        launchSingleTop = true
+                    }
+                }, icon = {
+                    Icon(
+                        painter = painterResource(R.drawable.download_rounded_base),
+                        contentDescription = null,
+                    )
+                },
+                label = {
+                    Text("Saved Audio")
+                }
+            )
+            NavigationBarItem(
+                selected = false, onClick = {
+                    navController.navigate(Route.Playlists) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        restoreState = true
+                        launchSingleTop = true
+                    }
+                }, icon = {
+                    Icon(
+                        painter = painterResource(R.drawable.collection_fill),
+                        contentDescription = null,
+                    )
+                },
+                label = {
+                    Text("Playlists")
+                }
+            )
+
+
         }
     }
 }
