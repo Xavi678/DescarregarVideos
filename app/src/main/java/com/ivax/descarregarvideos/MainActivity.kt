@@ -52,6 +52,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.session.MediaController
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -59,7 +60,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.google.common.base.Objects
 import com.google.common.util.concurrent.ListenableFuture
+import com.ivax.descarregarvideos.classes.RouteLabel
 import com.ivax.descarregarvideos.ui.edit.playlist.EditPlaylistScreen
 import com.ivax.descarregarvideos.ui.edit.playlist.EditPlaylistViewModel
 import com.ivax.descarregarvideos.ui.routes.Route
@@ -70,6 +73,7 @@ import com.ivax.descarregarvideos.ui.saved.videos.SavedVideosViewModel
 import com.ivax.descarregarvideos.ui.saved.videos.SearchAudioScreen
 import com.ivax.descarregarvideos.ui.search.SearchScreen
 import com.ivax.descarregarvideos.ui.search.SearchViewModel
+import com.ivax.descarregarvideos.ui.theme.MainAppTheme
 import kotlinx.coroutines.flow.update
 
 
@@ -207,7 +211,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         installSplashScreen()
         setContent {
-            MainWrapper()
+            MainAppTheme {
+                MainWrapper()
+            }
         }
         //binding = ActivityMainBinding.inflate(layoutInflater)
         //setContentView(binding.root)
@@ -441,11 +447,14 @@ class MainActivity : AppCompatActivity() {
         val navController = rememberNavController()
         var currentDest by remember { mutableStateOf("") }
 
-
-        navController.addOnDestinationChangedListener { controller, destination, arguments ->
-            var parsedRoute = destination.route.toString()
-            currentDest = parsedRoute.substring(parsedRoute.indexOfLast { it == '.' } + 1)
-        }
+        val currentBackState by navController.currentBackStackEntryAsState()
+        val ruta= currentBackState?.destination?.route
+       when{
+           ruta?.contains( "Search")==true -> currentDest="Search"
+           ruta?.contains(  "SavedAudio")==true -> currentDest="Saved Audios"
+           ruta?.contains( "Playlists")==true -> currentDest="Playlists"
+           ruta?.contains( "EditPlaylist")==true -> currentDest="Edit Playlist"
+       }
         Scaffold(
             containerColor = Color.White, topBar = {
                 TopAppBar(
