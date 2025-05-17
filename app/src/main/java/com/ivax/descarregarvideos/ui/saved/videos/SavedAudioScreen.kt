@@ -223,7 +223,7 @@ fun ShowBottomDialog(savedVideosViewModel: SavedVideosViewModel = viewModel()) {
                     )
 
                     Text(
-                        text = "Delete Audio", color = Color.White,
+                        text = "Afegir a la Playlist", color = Color.White,
                         modifier = Modifier.align(alignment = Alignment.CenterVertically)
                     )
                 }

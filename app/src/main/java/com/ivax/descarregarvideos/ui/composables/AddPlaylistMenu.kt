@@ -1,17 +1,25 @@
 package com.ivax.descarregarvideos.ui.composables
 
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LibraryAdd
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
@@ -27,40 +35,50 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ivax.descarregarvideos.entities.Playlist
 import com.ivax.descarregarvideos.ui.MainViewModel
 
+
 @Composable
-fun AddPlaylistMenu(mainViewModel : MainViewModel= viewModel()) {
+fun AddPlaylistMenu(mainViewModel: MainViewModel = hiltViewModel()) {
     val playlists by mainViewModel.playlists.collectAsStateWithLifecycle(emptyList())
     val showPlaylistMenu by mainViewModel.showPlaylistMenu.collectAsStateWithLifecycle()
-    var showCreatePlaylistMenu by remember { mutableStateOf(false) }
-    if(showPlaylistMenu) {
+    val showCreatePlaylistMenu by mainViewModel.showCreatePlaylistMenu.collectAsStateWithLifecycle()
+    if (showPlaylistMenu) {
         Dialog(onDismissRequest = {
             mainViewModel.dismissPlaylistMenu()
         }) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .heightIn(200.dp, 350.dp)
                     .padding(16.dp),
                 shape = RoundedCornerShape(16.dp),
             ) {
-                LazyColumn {
-                    items(playlists) {
-                        ListItem(it)
+                Column(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(modifier = Modifier.padding(8.dp)) {
+                        items(playlists) {
+                            ListItem(it)
+                        }
                     }
-                }
-                TextButton(onClick = {
-                    showCreatePlaylistMenu=true
-                }) {
-                    Text("Crear Playlist")
-                    Icon(
-                        imageVector = Icons.Default.LibraryAdd,
-                        contentDescription = "Create Playlist"
-                    )
+                    Button(
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .weight(1f)
+                            .align(alignment = Alignment.CenterHorizontally)
+                            .wrapContentHeight(align = Alignment.Bottom), onClick = {
+                            mainViewModel.showCreatePlaylistMenu()
+                        }) {
+                        Text("Crear Playlist")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Icon(
+                            imageVector = Icons.Default.LibraryAdd,
+                            contentDescription = "Create Playlist"
+                        )
+                    }
+
                 }
             }
         }
@@ -69,35 +87,49 @@ fun AddPlaylistMenu(mainViewModel : MainViewModel= viewModel()) {
 }
 
 @Composable
-fun CreatePlaylistDialog(showCreatePlaylistMenu: Boolean) {
+fun CreatePlaylistDialog(
+    showCreatePlaylistMenu: Boolean,
+    mainViewModel: MainViewModel = hiltViewModel()
+) {
 
-    if(showCreatePlaylistMenu) {
-        var text by remember { mutableStateOf("") }
+    var isError by remember { mutableStateOf(false) }
+    if (showCreatePlaylistMenu) {
+        var playlistName by remember { mutableStateOf("") }
         Dialog(onDismissRequest = {
 
         }) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
                     .padding(16.dp),
                 shape = RoundedCornerShape(16.dp),
             ) {
                 Column(modifier = Modifier.padding(8.dp)) {
-                    OutlinedTextField(value = text, onValueChange = {
-                        text = it
-                    }, label = {
+                    OutlinedTextField(value = playlistName, onValueChange = {
+                        playlistName = it
+                    }, isError = isError, label = {
                         Text("Nom")
                     }, modifier = Modifier.fillMaxWidth())
-                    Row(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 8.dp)
+                            .wrapContentWidth(align = Alignment.End)
+                    ) {
                         TextButton(onClick = {
-
-                        }) {
+                            mainViewModel.dismissCreatePlaylistMenu()
+                        }, modifier = Modifier) {
                             Text("Cancel·lar")
                         }
                         TextButton(onClick = {
+                            if (playlistName.isBlank()) {
+                                isError = true
+                            } else {
+                                mainViewModel.createPlaylist(playlistName)
+                                isError = false
+                            }
 
-                        }) {
+                        }, modifier = Modifier) {
                             Text("Ok")
                         }
                     }
@@ -115,13 +147,19 @@ fun ListItem(playlist: Playlist) {
         Text(
             text = playlist.name.toString(),
             modifier = Modifier
+                .weight(1f)
                 .padding(start = 8.dp)
                 .wrapContentWidth(align = Alignment.Start)
+                .align(alignment = Alignment.CenterVertically)
         )
-        Checkbox(checked = checked, onCheckedChange = {
-            checked = it
-        }, modifier = Modifier
-            .padding(end = 8.dp)
-            .wrapContentWidth(align = Alignment.End))
+        Checkbox(
+            checked = checked, onCheckedChange = {
+                checked = it
+            }, modifier = Modifier
+                .weight(1f)
+                .padding(end = 8.dp)
+                .wrapContentWidth(align = Alignment.End)
+                .align(alignment = Alignment.CenterVertically)
+        )
     }
 }

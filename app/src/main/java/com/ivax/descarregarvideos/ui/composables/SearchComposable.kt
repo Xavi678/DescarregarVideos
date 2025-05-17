@@ -13,11 +13,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,11 +38,14 @@ import androidx.compose.ui.unit.dp
 import com.ivax.descarregarvideos.R
 
 @Composable
-fun SearchComposable(onClickInvoker : (text: String)->Unit) {
+fun SearchComposable(onClickInvoker: (text: String) -> Unit) {
     var text by rememberSaveable { mutableStateOf("") }
-    Row(modifier = Modifier
-        .height(intrinsicSize = IntrinsicSize.Max)
-        .padding(8.dp).fillMaxWidth()) {
+    Row(
+        modifier = Modifier
+            .height(intrinsicSize = IntrinsicSize.Max)
+            .padding(8.dp)
+            .fillMaxWidth()
+    ) {
         OutlinedTextField(
             value = text,
             onValueChange = {
@@ -45,8 +54,18 @@ fun SearchComposable(onClickInvoker : (text: String)->Unit) {
             placeholder = {
                 Text(text = "Search...")
             },
+            leadingIcon = {
+                IconButton(onClick = {
+                    onClickInvoker(text)
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search Icon", tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            },
             trailingIcon = {
-                if (text.count() > 0) {
+                if (text.isNotEmpty()) {
                     Icon(
                         imageVector = Icons.Default.Clear,
                         contentDescription = "Clear Icon",
@@ -60,14 +79,15 @@ fun SearchComposable(onClickInvoker : (text: String)->Unit) {
                     )
                 }
             },
-            modifier = Modifier.border(
-                4.dp,
-                Color(29, 27, 32, 255),
-                shape = RoundedCornerShape(12.dp, 0.dp, 0.dp, 12.dp)
-            ).weight(1f)
-            , shape = RoundedCornerShape(12.dp)
+            modifier = Modifier
+                /*.border(
+                    4.dp,
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(12.dp, 0.dp, 0.dp, 12.dp)
+                )*/
+                .weight(1f), shape = RoundedCornerShape(12.dp)
         )
-        Button(
+        /*Button(
             onClick = {
                 onClickInvoker(text)
             }, shape = RoundedCornerShape(0.dp, 12.dp, 12.dp, 0.dp), colors =
@@ -83,6 +103,6 @@ fun SearchComposable(onClickInvoker : (text: String)->Unit) {
                 painter = painterResource(id = R.drawable.ic_menu_search),
                 contentDescription = "Search Icon", tint = Color.White
             )
-        }
+        }*/
     }
 }
