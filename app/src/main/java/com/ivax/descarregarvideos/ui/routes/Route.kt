@@ -1,19 +1,26 @@
 package com.ivax.descarregarvideos.ui.routes
 
+import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.classes.RouteLabel
 import kotlinx.serialization.Serializable
 
-class Route {
+@Serializable
+open class Route(val label: String,val icon: Int?=null) {
     @Serializable
-    @RouteLabel("Playlists")
-    object Playlists
+    object Playlists : Route("Playlists",R.drawable.collection_fill )
+
     @Serializable
-    @RouteLabel("Search")
-    object Search
+    object Search : Route("Search",R.drawable.ic_menu_search)
+
     @Serializable
-    @RouteLabel("Saved Audios")
-    object SavedAudio
+    object SavedAudio : Route("Saved Audios",R.drawable.download_rounded_base)
+
     @Serializable
-    @RouteLabel("Edit Playlist")
-    data class EditPlaylist(val playlistId: Int)
+    data class EditPlaylist(val playlistId: Int){
+        companion object{
+            fun get() : Route{
+               return Route("EditPlaylist")
+            }
+        }
+    }
 }

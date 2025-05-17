@@ -34,6 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -51,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.session.MediaController
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -69,12 +71,15 @@ import com.ivax.descarregarvideos.ui.routes.Route
 import com.ivax.descarregarvideos.ui.routes.Route.Playlists
 import com.ivax.descarregarvideos.ui.playlists.PlaylistScreen
 import com.ivax.descarregarvideos.ui.playlists.PlaylistsViewModel
+import com.ivax.descarregarvideos.ui.routes.Route.EditPlaylist.*
 import com.ivax.descarregarvideos.ui.saved.videos.SavedVideosViewModel
 import com.ivax.descarregarvideos.ui.saved.videos.SearchAudioScreen
 import com.ivax.descarregarvideos.ui.search.SearchScreen
 import com.ivax.descarregarvideos.ui.search.SearchViewModel
 import com.ivax.descarregarvideos.ui.theme.MainAppTheme
 import kotlinx.coroutines.flow.update
+
+
 
 
 @AndroidEntryPoint
@@ -443,18 +448,15 @@ class MainActivity : AppCompatActivity() {
     fun MainScaffold(
         navigateTo: (route: String) -> Unit
     ) {
+
         val showBottomBar = remember { mutableStateOf(true) }
         val navController = rememberNavController()
-        var currentDest by remember { mutableStateOf("") }
+
 
         val currentBackState by navController.currentBackStackEntryAsState()
-        val ruta= currentBackState?.destination?.route
-       when{
-           ruta?.contains( "Search")==true -> currentDest="Search"
-           ruta?.contains(  "SavedAudio")==true -> currentDest="Saved Audios"
-           ruta?.contains( "Playlists")==true -> currentDest="Playlists"
-           ruta?.contains( "EditPlaylist")==true -> currentDest="Edit Playlist"
-       }
+        val ruta=currentBackState.getRoute()
+
+
         Scaffold(
             containerColor = Color.White, topBar = {
                 TopAppBar(
@@ -463,74 +465,12 @@ class MainActivity : AppCompatActivity() {
                         titleContentColor = MaterialTheme.colorScheme.primary,
                     ),
                     title = {
-                        Text(text = currentDest)
+                        Text(text = ruta.toString())
                     }
                 )
             },
             bottomBar = {
                 NavBar(navController)
-                /*BottomAppBar(
-                    actions = {
-                        IconButton(onClick = {
-                            navController.navigate(Route.Search){
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState=true
-                                }
-                                restoreState = true
-                                launchSingleTop = true
-                            }
-                        }, modifier = Modifier.weight(0.33f)) {
-                            Column() {
-                                Text("Search")
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_menu_search),
-                                    contentDescription = null,
-                                    modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-                                )
-                            }
-                        }
-                        IconButton(onClick = {
-                            navController.navigate(Route.SavedAudio){
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState=true
-                                }
-                                restoreState = true
-                                launchSingleTop = true
-                            }
-                        }, modifier = Modifier.weight(0.33f)) {
-                            Column {
-                                Text("Saved Videos")
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Icon(
-                                    painter = painterResource(R.drawable.download_rounded_base),
-                                    contentDescription = null,
-                                    modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-                                )
-                            }
-                        }
-                        IconButton(onClick = {
-                            navController.navigate(Playlists){
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState=true
-                                }
-                                restoreState = true
-                                launchSingleTop = true
-                            }
-                        }, modifier = Modifier.weight(0.33f)) {
-                            Column {
-                                Text("Playlists")
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Icon(
-                                    painter = painterResource(R.drawable.collection_fill),
-                                    contentDescription = null,
-                                    modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-                                )
-                            }
-                        }
-                    }
-                )*/
-
             }) { innerPadding ->
             Column(
                 modifier = Modifier
@@ -552,33 +492,52 @@ class MainActivity : AppCompatActivity() {
 
     @Composable
     fun NavBar(navController: NavController) {
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.destination?.route
+       val currentBackStackEntry by navController.currentBackStackEntryAsState()
+        val navItems= listOf(
+            Route.Search,
+            Route.SavedAudio,
+            Route.Playlists
+        )
+
         NavigationBar(
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentWidth()
+                .wrapContentWidth(),
+            contentColor = MaterialTheme.colorScheme.primary,
+            containerColor = MaterialTheme.colorScheme.primaryContainer
         ) {
-            NavigationBarItem(
-                selected = false, onClick = {
-                navController.navigate(Route.Search) {
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        saveState = true
-                    }
-                    restoreState = true
-                    launchSingleTop = true
-                }
-            }, icon = {
-                Icon(
-                    painter = painterResource(R.drawable.ic_menu_search),
-                    contentDescription = null
+            navItems.forEach {
+                NavigationBarItem(
+                    selected = currentBackStackEntry?.destination?.hasRoute(it::class)==true, onClick = {
+                        navController.navigate(it) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            restoreState = true
+                            launchSingleTop = true
+                        }
+                    }, icon = {
+                        Icon(
+                            painter = painterResource(it.icon!!),
+                            contentDescription = null
+                        )
+                    },
+                    label = {
+                        Text(it.label)
+                    },
+                    colors = NavigationBarItemColors(
+                        selectedIndicatorColor = MaterialTheme.colorScheme.inversePrimary,
+                        disabledIconColor = Color.LightGray,
+                        disabledTextColor = Color.LightGray,
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        unselectedIconColor = Color.Black,
+                        unselectedTextColor = Color.Black
+                    )
                 )
-            },
-                label = {
-                    Text("Search")
-                }
-            )
-            NavigationBarItem(
+            }
+
+            /*NavigationBarItem(
                 selected = false, onClick = {
                     navController.navigate(Route.SavedAudio) {
                         popUpTo(navController.graph.findStartDestination().id) {
@@ -615,10 +574,21 @@ class MainActivity : AppCompatActivity() {
                 label = {
                     Text("Playlists")
                 }
-            )
+            )*/
 
 
         }
     }
 }
 
+private fun NavBackStackEntry?.getRoute() : String? {
+    return this?.let {
+        when{
+            destination.hasRoute<Route.Search>()->Route.Search.label
+            destination.hasRoute<Route.SavedAudio>()->Route.SavedAudio.label
+            destination.hasRoute<Route.Playlists>()->Route.Playlists.label
+            destination.hasRoute<Route.EditPlaylist>()->Route.EditPlaylist.Companion.get().label
+            else -> null
+        }
+    }
+}
