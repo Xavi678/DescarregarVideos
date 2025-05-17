@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.ivax.descarregarvideos.classes.PlaylistWithOrderedVideosFoo
 import com.ivax.descarregarvideos.entities.SavedVideo
 import com.ivax.descarregarvideos.repository.MediaPlayerRepository
+import com.ivax.descarregarvideos.repository.UIRepository
 import com.ivax.descarregarvideos.repository.VideoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -23,68 +24,79 @@ import javax.inject.Inject
 import kotlin.collections.ArrayList
 
 @HiltViewModel
-class SavedVideosViewModel @Inject constructor(private val repository: VideoRepository, private val mediaPlayerRepository: MediaPlayerRepository) : ViewModel() {
+class SavedVideosViewModel @Inject
+constructor(
+    private val repository: VideoRepository,
+    private val mediaPlayerRepository: MediaPlayerRepository,
+    private val uiRepository: UIRepository
+) : ViewModel() {
 
-    val _filterFlow= MutableStateFlow<String?>(null)
+    val _filterFlow = MutableStateFlow<String?>(null)
+    val filterFlow = _filterFlow.asStateFlow()
 
-
-    val filterFlow=_filterFlow.asStateFlow()
     @OptIn(ExperimentalCoroutinesApi::class)
-    var allSavedVideos=filterFlow.flatMapLatest {
-        if(it.isNullOrEmpty()){
+    var allSavedVideos = filterFlow.flatMapLatest {
+        if (it.isNullOrEmpty()) {
             repository.getAllVideos()
-        }else{
+        } else {
             repository.getAllVideos(it.toString())
         }
     }
 
-    private val _isBottomSheetVisible= MutableStateFlow<Boolean>(false)
-    private val _bottomSheetParameter= MutableStateFlow<String?>(null)
-    val bottomSheetParameter=_bottomSheetParameter.asStateFlow()
-    fun addSingleItemMedia(savedVideo: SavedVideo){
+    private val _isBottomSheetVisible = MutableStateFlow<Boolean>(false)
+    private val _bottomSheetParameter = MutableStateFlow<String?>(null)
+    val bottomSheetParameter = _bottomSheetParameter.asStateFlow()
+    fun addSingleItemMedia(savedVideo: SavedVideo) {
         mediaPlayerRepository.clear()
-        val mediaItem=mediaPlayerRepository.SavedVideoToMediaItem(savedVideo)
+        val mediaItem = mediaPlayerRepository.SavedVideoToMediaItem(savedVideo)
         mediaPlayerRepository.addItemMedia(mediaItem)
     }
 
-    fun play(){
+    fun play() {
         mediaPlayerRepository.play()
     }
 
-    fun setSavedVideo(savedVideo: SavedVideo){
+    fun setSavedVideo(savedVideo: SavedVideo) {
         mediaPlayerRepository.setSavedVideo(savedVideo)
     }
 
-    fun setMediaVisibility(visibility: Boolean){
+    fun setMediaVisibility(visibility: Boolean) {
         mediaPlayerRepository.isMediaPlayerMaximized().postValue(visibility)
     }
 
-    fun filterSavedVideos(savedVideoName: String){
-            viewModelScope.launch(Dispatchers.IO) {
-                if (savedVideoName != "") {
-                    _filterFlow.update {
-                        savedVideoName
-                    }
+    fun filterSavedVideos(savedVideoName: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (savedVideoName != "") {
+                _filterFlow.update {
+                    savedVideoName
+                }
 
-                }else{
-                    _filterFlow.update {
-                        null
-                    }
+            } else {
+                _filterFlow.update {
+                    null
                 }
             }
+        }
     }
-    fun deleteVideo(videoId: String){
+
+    fun deleteVideo(videoId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.deleteVideo(videoId)
         }
 
     }
-    val isBottomSheetVisible : StateFlow<Boolean> = _isBottomSheetVisible.asStateFlow()
 
-    fun setBottomSheetVisibility(state: Boolean){
-        _isBottomSheetVisible.value=state
+    val isBottomSheetVisible: StateFlow<Boolean> = _isBottomSheetVisible.asStateFlow()
+
+    fun setBottomSheetVisibility(state: Boolean) {
+        _isBottomSheetVisible.value = state
     }
-    fun setBottomSheetVideoId(videoId: String){
-        _bottomSheetParameter.value=videoId
+
+    fun setBottomSheetVideoId(videoId: String) {
+        _bottomSheetParameter.value = videoId
+    }
+
+    fun showPlaylistMenu(){
+            uiRepository.showPlaylistMenu.value=true
     }
 }

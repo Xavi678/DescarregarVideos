@@ -16,10 +16,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
@@ -171,32 +175,59 @@ fun ShowBottomDialog(savedVideosViewModel: SavedVideosViewModel = viewModel()) {
                 savedVideosViewModel.setBottomSheetVisibility(false)
             }, containerColor = Color(29, 27, 32, 255)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .clickable(
-                        enabled = true,
-                        onClick = {
-                            savedVideosViewModel.deleteVideo(videoId)
-                            savedVideosViewModel.setBottomSheetVisibility(false)
-                        },
-                        indication = ripple(color = Color.Magenta),
-                        interactionSource = remember { MutableInteractionSource() }
+            Column {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .clickable(
+                            enabled = true,
+                            onClick = {
+                                savedVideosViewModel.deleteVideo(videoId)
+                                savedVideosViewModel.setBottomSheetVisibility(false)
+                            },
+                            indication = ripple(color = MaterialTheme.colorScheme.primary),
+                            interactionSource = remember { MutableInteractionSource() }
+                        )
+                        .align(alignment = Alignment.CenterHorizontally)) {
+
+                    Icon(
+                        imageVector = Icons.Default.DeleteForever,
+                        contentDescription = null,
+                        tint = Color.White
                     )
-                    .align(alignment = Alignment.CenterHorizontally)) {
 
-                Image(
-                    painter = painterResource(id = R.drawable.remove_trash),
-                    contentDescription = null
-                )
+                    Text(
+                        text = "Delete Audio", color = Color.White,
+                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .clickable(
+                            enabled = true,
+                            onClick = {
+                                savedVideosViewModel.showPlaylistMenu()
+                            },
+                            indication = ripple(color = MaterialTheme.colorScheme.primary),
+                            interactionSource = remember { MutableInteractionSource() }
+                        )
+                        .align(alignment = Alignment.CenterHorizontally)) {
 
-                Text(
-                    text = "Delete Audio", color = Color.White,
-                    modifier = Modifier.align(alignment = Alignment.CenterVertically)
-                )
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+
+                    Text(
+                        text = "Delete Audio", color = Color.White,
+                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                    )
+                }
             }
-
         }
     }
 

@@ -96,6 +96,7 @@ dependencies {
     implementation(libs.androidx.navigation.ui.compose)
     implementation(libs.androidx.navigation.dynamic.features.compose)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.material.icons.extended)
     ksp(libs.dagger.compiler)
     ksp(libs.android.room.ksp)
     testImplementation(libs.junit)

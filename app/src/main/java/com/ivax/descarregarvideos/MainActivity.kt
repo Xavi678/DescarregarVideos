@@ -65,6 +65,7 @@ import androidx.navigation.toRoute
 import com.google.common.base.Objects
 import com.google.common.util.concurrent.ListenableFuture
 import com.ivax.descarregarvideos.classes.RouteLabel
+import com.ivax.descarregarvideos.ui.composables.AddPlaylistMenu
 import com.ivax.descarregarvideos.ui.edit.playlist.EditPlaylistScreen
 import com.ivax.descarregarvideos.ui.edit.playlist.EditPlaylistViewModel
 import com.ivax.descarregarvideos.ui.routes.Route
@@ -218,6 +219,7 @@ class MainActivity : AppCompatActivity() {
         setContent {
             MainAppTheme {
                 MainWrapper()
+
             }
         }
         //binding = ActivityMainBinding.inflate(layoutInflater)
@@ -441,6 +443,7 @@ class MainActivity : AppCompatActivity() {
         MainScaffold {
             navController.navigate(it)
         }
+        AddPlaylistMenu()
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -448,8 +451,6 @@ class MainActivity : AppCompatActivity() {
     fun MainScaffold(
         navigateTo: (route: String) -> Unit
     ) {
-
-        val showBottomBar = remember { mutableStateOf(true) }
         val navController = rememberNavController()
 
 

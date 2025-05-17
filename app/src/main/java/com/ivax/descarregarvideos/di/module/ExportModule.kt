@@ -9,7 +9,9 @@ import com.ivax.descarregarvideos.helpers.CustomFileWriter
 import com.ivax.descarregarvideos.helpers.FileWriter
 import com.ivax.descarregarvideos.helpers.IApiClient
 import com.ivax.descarregarvideos.helpers.IMediaHelper
+import com.ivax.descarregarvideos.helpers.IUIManager
 import com.ivax.descarregarvideos.helpers.MediaHelper
+import com.ivax.descarregarvideos.helpers.UIManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,6 +27,11 @@ object ExportModule {
     @Provides
     fun provideFileWriter(@ApplicationContext context: Context): FileWriter {
         return CustomFileWriter(context)
+    }
+    @Singleton
+    @Provides
+    fun provideUIManager() : IUIManager {
+        return UIManager()
     }
     @Provides
     fun provideUserDatabase(

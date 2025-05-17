@@ -70,7 +70,7 @@ androidx-navigation-fragment-compose = {group="androidx.navigation", name="navig
 androidx-navigation-ui-compose = {group="androidx.navigation", name="navigation-ui", version.ref="navComposeVersion"}
 androidx-navigation-dynamic-features-compose = {group="androidx.navigation", name="navigation-dynamic-features-fragment", version.ref="navComposeVersion"}
 androidx-hilt-navigation-compose= {group="androidx.hilt", name="hilt-navigation-compose", version.ref="hiltNavCompose"}
-
+material-icons-extended={group="androidx.compose.material", name="material-icons-extended"}
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
