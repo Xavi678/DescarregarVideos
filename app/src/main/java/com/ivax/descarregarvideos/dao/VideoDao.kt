@@ -40,6 +40,8 @@ interface VideoDao {
             "ON psvr.videoId=sv.videoId WHERE psvr.playlistId=:playListId " +
             "ORDER BY psvr.position LIMIT 1")
     fun getFirstByPlaylist(playListId: Int) : SavedVideo?
+    @Query("DELETE FROM playlistsavedvideocrossref WHERE playListId=:playlistId AND videoId=:videoId")
+    fun deletePlaylistSavedVideo(playlistId: Int, videoId: String) : Int
 
     /*@Delete
     fun delete(user: User)*/

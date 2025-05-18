@@ -210,6 +210,7 @@ fun ShowBottomDialog(savedVideosViewModel: SavedVideosViewModel = viewModel()) {
                             enabled = true,
                             onClick = {
                                 savedVideosViewModel.showPlaylistMenu()
+                                savedVideosViewModel.setSelectedVideoId(videoId)
                             },
                             indication = ripple(color = MaterialTheme.colorScheme.primary),
                             interactionSource = remember { MutableInteractionSource() }

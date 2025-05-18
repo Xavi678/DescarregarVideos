@@ -99,4 +99,7 @@ constructor(
     fun showPlaylistMenu(){
             uiRepository.showPlaylistMenu.value=true
     }
+    fun setSelectedVideoId(videoId : String){
+        uiRepository.videoId.value=videoId
+    }
 }

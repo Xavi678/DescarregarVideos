@@ -7,4 +7,5 @@ import javax.inject.Inject
 
 class UIRepository @Inject constructor(uiManager: IUIManager) {
     var showPlaylistMenu =uiManager.showPlaylistMenu
+    var videoId=uiManager.selectedVideoId
 }

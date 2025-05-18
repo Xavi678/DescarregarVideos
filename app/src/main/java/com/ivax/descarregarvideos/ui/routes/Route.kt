@@ -19,7 +19,7 @@ open class Route(val label: String,val icon: Int?=null) {
     data class EditPlaylist(val playlistId: Int){
         companion object{
             fun get() : Route{
-               return Route("EditPlaylist")
+               return Route("Edit Playlist")
             }
         }
     }

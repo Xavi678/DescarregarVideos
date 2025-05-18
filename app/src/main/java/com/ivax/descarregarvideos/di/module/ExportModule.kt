@@ -33,6 +33,7 @@ object ExportModule {
     fun provideUIManager() : IUIManager {
         return UIManager()
     }
+    @Singleton
     @Provides
     fun provideUserDatabase(
         @ApplicationContext app: Context

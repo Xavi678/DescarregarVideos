@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.callbackFlow
 
 class UIManager : IUIManager {
     override val showPlaylistMenu=MutableStateFlow(false)
+    override val selectedVideoId=MutableStateFlow<String?>(null)
 
 
 }

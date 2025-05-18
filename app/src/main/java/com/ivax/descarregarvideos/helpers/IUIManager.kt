@@ -5,4 +5,5 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 interface IUIManager {
     val showPlaylistMenu : MutableStateFlow<Boolean>
+    val selectedVideoId : MutableStateFlow<String?>
 }
