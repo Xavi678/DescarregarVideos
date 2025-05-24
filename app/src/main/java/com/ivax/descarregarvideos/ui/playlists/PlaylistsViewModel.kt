@@ -12,14 +12,19 @@ import com.ivax.descarregarvideos.repository.VideoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PlaylistsViewModel @Inject constructor(private val videoRepository: VideoRepository,private val mediaPlayerRepository: MediaPlayerRepository) : ViewModel() {
-
+class PlaylistsViewModel @Inject constructor(private val videoRepository: VideoRepository,
+                                             private val mediaPlayerRepository: MediaPlayerRepository) : ViewModel() {
+    private val _isBottomSheetVisible=MutableStateFlow(false)
+    val isBottomSheetVisible=_isBottomSheetVisible.asStateFlow()
+    private val _selectedPlaylist= MutableStateFlow<Int?>(null)
+     val selectedPlaylist= _selectedPlaylist.asStateFlow()
     //val playlists=videoRepository.getAllPlaylistsWithVideos().asLiveData()
     val playlists= videoRepository.getAllPlaylists()
     val orderedPlaylist : MutableStateFlow<ArrayList<PlaylistWithOrderedVideosFoo>> by lazy {
@@ -87,5 +92,18 @@ class PlaylistsViewModel @Inject constructor(private val videoRepository: VideoR
             }
         }
 
+    }
+
+    fun setBottomSheetVisibility(isVisible: Boolean) {
+        _isBottomSheetVisible.value=isVisible
+
+    }
+
+    fun setSelectedPlaylist(playlistId: Int) {
+        _selectedPlaylist.value=playlistId
+    }
+
+    fun deletePlaylist(playlistId: Int) {
+        videoRepository.deletePlaylist(playlistId = playlistId)
     }
 }
