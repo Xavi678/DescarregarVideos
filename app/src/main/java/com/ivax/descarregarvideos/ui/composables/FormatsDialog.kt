@@ -28,8 +28,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 
 @Composable
-fun FormatsDialog(formats: List<AdaptiveFormats>,onClose: (url: String?)->Unit) {
-    var selectedUrl by remember {  mutableStateOf<String?>(null) }
+fun FormatsDialog(formats: List<AdaptiveFormats>,onClose: (format: AdaptiveFormats?)->Unit) {
+    var selectedFormat by remember {  mutableStateOf<AdaptiveFormats?>(null) }
     Dialog(onDismissRequest = {
 
     }) {
@@ -45,8 +45,8 @@ fun FormatsDialog(formats: List<AdaptiveFormats>,onClose: (url: String?)->Unit) 
                 LazyColumn {
                     itemsIndexed(formats){
                         idx,item ->
-                        AdaptiveFormatItem(item,idx,selectedUrl,fun (url: String?){
-                            selectedUrl=url
+                        AdaptiveFormatItem(item,idx,selectedFormat,fun (format: AdaptiveFormats?){
+                            selectedFormat=format
                         })
                     }
                 }
@@ -62,7 +62,7 @@ fun FormatsDialog(formats: List<AdaptiveFormats>,onClose: (url: String?)->Unit) 
                         Text("Cancel·lar")
                     }
                     TextButton(onClick = {
-                        onClose(selectedUrl)
+                        onClose(selectedFormat)
 
                     }, modifier = Modifier) {
                         Text("Ok")
@@ -73,12 +73,12 @@ fun FormatsDialog(formats: List<AdaptiveFormats>,onClose: (url: String?)->Unit) 
     }
 }
 @Composable
-fun AdaptiveFormatItem(adaptiveFormat: AdaptiveFormats,idx: Int,selectedUrl: String?,onSelected: (url: String?)->Unit){
+fun AdaptiveFormatItem(adaptiveFormat: AdaptiveFormats,idx: Int,selectedFormat: AdaptiveFormats?,onSelected: (url: AdaptiveFormats?)->Unit){
     Row(modifier = Modifier.fillMaxWidth()) {
         Text(adaptiveFormat.mimeType, modifier = Modifier.padding(start = 8.dp).weight(1f)
             .wrapContentWidth(align = Alignment.Start))
-        RadioButton(selected = if(selectedUrl==null) idx==1 else selectedUrl==adaptiveFormat.url, onClick = {
-            onSelected(adaptiveFormat.url)
+        RadioButton(selected = if(selectedFormat==null) idx==1 else selectedFormat.url==adaptiveFormat.url, onClick = {
+            onSelected(adaptiveFormat)
         } , modifier = Modifier.padding(start = 8.dp).weight(1f)
             .wrapContentWidth(align = Alignment.Start))
     }

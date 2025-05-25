@@ -1,7 +1,6 @@
 package com.ivax.descarregarvideos.ui.search
 
 import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import androidx.core.net.toUri
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
@@ -93,30 +93,33 @@ class SearchViewModel @Inject constructor(
                 if(lists.isNotEmpty()){
                     callback(lists)
                 }
-                /*if (found != null) {
-
-                    var bytes =
-                        youtubeRepository.DownloadVideoStream("${found.url}&range=0-9898989")
-                    var videoUrl = fileRepository.saveFile(savedVideo.videoId, bytes)
-                    savedVideo.videoUrl = videoUrl
-                    videoRepository.insetVideo(savedVideo)
-                    finished()
-
-
-                }*/
 
                 Log.d("DescarregarVide", savedVideo.videoId)
         }
     }
 
-    fun downloadVideo(selectedUrl: String) {
-        var bytes =
-            youtubeRepository.DownloadVideoStream("${found.url}&range=0-9898989")
-        var videoUrl = fileRepository.saveFile(savedVideo.videoId, bytes)
-        savedVideo.videoUrl = videoUrl
-        videoRepository.insetVideo(savedVideo)
-        //finished()
+    fun downloadVideo(selectedFormat: AdaptiveFormats, savedVideo: SavedVideo, finished: ()->Unit) {
+        this.viewModelScope.launch(Dispatchers.IO) {
+            val uri= selectedFormat.url.toUri()
+            val segmentLength=if(uri.getQueryParameter("ratebypass")=="yes") 9898989L
+            else {
+                if(selectedFormat.contentLength==null){
+                    uri.getQueryParameter("clen")!!.toLong()
+                }else{
+                    selectedFormat.contentLength.toLong()
+                }
+
+            }
+            val bytes =
+                youtubeRepository.DownloadVideoStream( "${selectedFormat}&range=0-${segmentLength}")
+            val videoUrl = fileRepository.saveFile(savedVideo.videoId, bytes)
+            savedVideo.videoUrl = videoUrl
+            videoRepository.insetVideo(savedVideo)
+        }
+        finished()
     }
 
-    val text: LiveData<String> = _text
+    fun setFormats(formats: List<AdaptiveFormats>) {
+        _formats.value=formats
+    }
 }

@@ -82,124 +82,137 @@ enum class DownloadState { NotDownloaded, Downloaded, Downloading }
 
 @Composable
 fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
-
-    //val
+    var downloadState by remember { mutableStateOf(if (video.videoDownloaded) DownloadState.Downloaded else DownloadState.NotDownloaded) }
+    val formats by searchViewModel.formats.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    var savedVideo by remember { mutableStateOf<SavedVideo?>(null) }
+    LaunchedEffect(Unit) {
+        val imgPath = "${video.videoId}_thumbnail.bmp"
+        var dir = File("${context.filesDir}/fotos")
+        var d = dir.mkdir()
+        var f = File("${dir}/${imgPath}")
 
-    Row() {
-
-        Box(
-            Modifier
-                .width(86.dp)
-                .padding(top = 8.dp, start = 8.dp)
-                .background(
-                    Color.Blue
-                )
-        ) {
-            Image(
-                bitmap = video.imgUrl!!.asImageBitmap(),
-                contentDescription = null,
-            )
-            Text(
-                text = video.duration,
-                color = Color.White,
-                modifier = Modifier
-                    .align(alignment = Alignment.BottomStart)
-                    .background(Color.Black)
-            )
+        if (f.exists()) {
+            f.delete()
         }
+        f.createNewFile()
+        f.outputStream().use {
+            video.imgUrl?.compress(Bitmap.CompressFormat.PNG, 100, it)
+        }
+        val saveVideo = SavedVideo(
+            video.videoId,
+            video.title,
+            "${dir}/${imgPath}",
+            video.duration,
+            video.viewCount,
+            author = video.author
+        )
+        savedVideo=saveVideo
+    }
+    if (savedVideo!=null) {
+        FormatsDialog(formats, onClose = fun(selectedFormat: AdaptiveFormats?) {
+            if (selectedFormat != null) {
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp)
-                .weight(1f)
-        ) {
-            Text(
-                text = video.title,
-                fontSize = 16.sp
-            )
-            Row {
-                if (video.channelThumbnail != null) {
-                    Image(
-                        bitmap = video.channelThumbnail!!.asImageBitmap(),
-                        contentDescription = "Channel Video Thumbnail"
+                searchViewModel.downloadVideo(selectedFormat, savedVideo!!, finished = fun() {
+
+                    downloadState = DownloadState.Downloaded
+                    Handler(Looper.getMainLooper()).post {
+                        Toast.makeText(
+                            context, "Video ${savedVideo!!.videoId} Descarregat Correctament",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                })
+            }
+        })
+        Row() {
+
+            Box(
+                Modifier
+                    .width(86.dp)
+                    .padding(top = 8.dp, start = 8.dp)
+                    .background(
+                        Color.Blue
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
+            ) {
+                Image(
+                    bitmap = video.imgUrl!!.asImageBitmap(),
+                    contentDescription = null,
+                )
+                Text(
+                    text = video.duration,
+                    color = Color.White,
+                    modifier = Modifier
+                        .align(alignment = Alignment.BottomStart)
+                        .background(Color.Black)
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp)
+                    .weight(1f)
+            ) {
+                Text(
+                    text = video.title,
+                    fontSize = 16.sp
+                )
+                Row {
+                    if (video.channelThumbnail != null) {
+                        Image(
+                            bitmap = video.channelThumbnail!!.asImageBitmap(),
+                            contentDescription = "Channel Video Thumbnail"
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                    }
+                    Text(
+                        text = video.author.toString(),
+                        fontSize = 13.sp,
+                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                    )
                 }
                 Text(
-                    text = video.author.toString(),
-                    fontSize = 13.sp,
-                    modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                    text = video.viewCount,
+                    fontSize = 11.sp,
+                    color = Color.LightGray
+                )
+
+
+            }
+
+            IconButton(onClick = {
+                downloadState = DownloadState.Downloading
+                searchViewModel.getAudioUrlsResponse(
+                    savedVideo!!,
+                    callback = fun(formats: List<AdaptiveFormats>, ) {
+                        searchViewModel.setFormats(formats)
+                    })
+            }) {
+                Icon(
+                    painter = painterResource(
+                        id = when
+                                     (downloadState) {
+                            DownloadState.NotDownloaded
+                                -> R.drawable.download_button
+
+                            DownloadState.Downloading ->
+                                R.drawable.downloading
+
+                            else -> R.drawable.finished_downloading
+                        }
+                    ),
+                    contentDescription = null,
+
+                    modifier = Modifier
+                        .animateContentSize()
+                        .align(alignment = Alignment.CenterVertically)
                 )
             }
-            Text(
-                text = video.viewCount,
-                fontSize = 11.sp,
-                color = Color.LightGray
-            )
-
 
         }
-        var downloadState by remember { mutableStateOf(if (video.videoDownloaded) DownloadState.Downloaded else DownloadState.NotDownloaded) }
-        IconButton(onClick = {
-            downloadState = DownloadState.Downloading
-            val imgPath = "${video.videoId}_thumbnail.bmp"
-            var dir = File("${context.filesDir}/fotos")
-            var d = dir.mkdir()
-            var f = File("${dir}/${imgPath}")
-
-            if (f.exists()) {
-                f.delete()
-            }
-            f.createNewFile()
-            f.outputStream().use {
-                video.imgUrl?.compress(Bitmap.CompressFormat.PNG, 100, it)
-            }
-            val saveVideo = SavedVideo(
-                video.videoId,
-                video.title,
-                "${dir}/${imgPath}",
-                video.duration,
-                video.viewCount,
-                author = video.author
-            )
-            searchViewModel.getAudioUrlsResponse(saveVideo, callback = fun(formats : List<AdaptiveFormats>) {
-
-                downloadState = DownloadState.Downloaded
-                Handler(Looper.getMainLooper()).post {
-                    Toast.makeText(
-                        context, "Video ${saveVideo.videoId} Descarregat Correctament",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-
-
-            })
-        }) {
-            Icon(
-                painter = painterResource(
-                    id = when
-                                 (downloadState) {
-                        DownloadState.NotDownloaded
-                            -> R.drawable.download_button
-
-                        DownloadState.Downloading ->
-                            R.drawable.downloading
-
-                        else -> R.drawable.finished_downloading
-                    }
-                ),
-                contentDescription = null,
-
-                modifier = Modifier
-                    .animateContentSize()
-                    .align(alignment = Alignment.CenterVertically)
-            )
-        }
-
+        HorizontalDivider(Modifier.padding(4.dp), color = Color.LightGray)
     }
-    HorizontalDivider(Modifier.padding(4.dp), color = Color.LightGray)
 }
 @Composable
 fun SearchVideos(
@@ -207,13 +220,9 @@ fun SearchVideos(
 ) {
     val videos by searchViewModel.videos.collectAsStateWithLifecycle()
     val isLoading by searchViewModel.isLoading.collectAsStateWithLifecycle()
-    val formats by searchViewModel.formats.collectAsStateWithLifecycle()
 
-        FormatsDialog(formats, onClose = fun (selectedUrl: String?){
-            if(selectedUrl!=null) {
-                searchViewModel.downloadVideo(selectedUrl)
-            }
-    })
+
+
 
 
 
