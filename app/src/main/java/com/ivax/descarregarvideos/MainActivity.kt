@@ -414,13 +414,7 @@ class MainActivity : AppCompatActivity() {
             composable<Playlists> {
                 val viewModel = hiltViewModel<PlaylistsViewModel>()
                 PlaylistScreen(viewModel, fun(playlistId: Int) {
-                    navController.navigate(Route.EditPlaylist(playlistId)) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
-                        }
-                        restoreState = true
-                        launchSingleTop = true
-                    }
+                    navController.navigate(Route.EditPlaylist(playlistId))
                 })
             }
             composable<Route.SavedAudio> {

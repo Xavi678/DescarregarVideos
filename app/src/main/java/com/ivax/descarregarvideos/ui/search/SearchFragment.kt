@@ -47,7 +47,7 @@ class SearchFragment : Fragment() {
         }
         adapter =
             VideoAdapter(itemClickListener = fun(saveVideo: SavedVideo, finished: () -> Unit) {
-                searchViewModel.downloadVideoResponse(saveVideo, finished)
+                //searchViewModel.getAudioUrlsResponse(saveVideo, finished)
 
             })
         val root: View = binding.root

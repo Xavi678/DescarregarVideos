@@ -5,13 +5,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ivax.descarregarvideos.classes.SearchResponseFoo
-import com.ivax.descarregarvideos.classes.VideoDownloadedData
 import com.ivax.descarregarvideos.classes.VideoItem
 import com.ivax.descarregarvideos.entities.SavedVideo
 import com.ivax.descarregarvideos.repository.FileRepository
 import com.ivax.descarregarvideos.repository.VideoRepository
 import com.ivax.descarregarvideos.repository.YoutubeRepository
+import com.ivax.descarregarvideos.responses.AdaptiveFormats
 import com.ivax.descarregarvideos.responses.PlayerResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -31,8 +30,8 @@ class SearchViewModel @Inject constructor(
     private val _text = MutableLiveData<String>().apply {
         value = "This is slideshow Fragment"
     }
-    //private val _currentVideos= MutableStateFlow( videoRepository.getAllVideos())
-    //public val searchResponseFoo = MutableStateFlow<SearchResponseFoo?>(null)
+    private val _formats= MutableStateFlow<List<AdaptiveFormats>>(emptyList())
+    val formats=_formats.asStateFlow()
     private val _videos = MutableStateFlow<List<VideoItem>>(emptyList())
     val continuationToken = MutableStateFlow<String?>(null)
     private val _isLoading = MutableStateFlow<Boolean>(false)
@@ -84,14 +83,17 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    fun downloadVideoResponse(savedVideo: SavedVideo, finished: () -> Unit) {
+    fun getAudioUrlsResponse(savedVideo: SavedVideo, callback: (List<AdaptiveFormats>) -> Unit) {
         this.viewModelScope.launch(Dispatchers.IO) {
 
-                var playerResponse: PlayerResponse =
+                val playerResponse: PlayerResponse =
                     youtubeRepository.GetVideoData(savedVideo.videoId)
-                var listFormats = playerResponse.streamingData.adaptiveFormats
-                var found = listFormats.firstOrNull { it.mimeType.contains("audio") }
-                if (found != null) {
+                val listFormats = playerResponse.streamingData.adaptiveFormats
+                val lists = listFormats.filter { it.mimeType.contains("audio") }
+                if(lists.isNotEmpty()){
+                    callback(lists)
+                }
+                /*if (found != null) {
 
                     var bytes =
                         youtubeRepository.DownloadVideoStream("${found.url}&range=0-9898989")
@@ -101,10 +103,19 @@ class SearchViewModel @Inject constructor(
                     finished()
 
 
-                }
+                }*/
 
                 Log.d("DescarregarVide", savedVideo.videoId)
         }
+    }
+
+    fun downloadVideo(selectedUrl: String) {
+        var bytes =
+            youtubeRepository.DownloadVideoStream("${found.url}&range=0-9898989")
+        var videoUrl = fileRepository.saveFile(savedVideo.videoId, bytes)
+        savedVideo.videoUrl = videoUrl
+        videoRepository.insetVideo(savedVideo)
+        //finished()
     }
 
     val text: LiveData<String> = _text

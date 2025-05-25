@@ -28,6 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -47,6 +48,8 @@ import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.classes.VideoItem
 import com.ivax.descarregarvideos.ui.composables.SearchComposable
 import com.ivax.descarregarvideos.entities.SavedVideo
+import com.ivax.descarregarvideos.responses.AdaptiveFormats
+import com.ivax.descarregarvideos.ui.composables.FormatsDialog
 import java.io.File
 
 @Composable
@@ -153,7 +156,7 @@ fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
             f.outputStream().use {
                 video.imgUrl?.compress(Bitmap.CompressFormat.PNG, 100, it)
             }
-            var saveVideo = SavedVideo(
+            val saveVideo = SavedVideo(
                 video.videoId,
                 video.title,
                 "${dir}/${imgPath}",
@@ -161,7 +164,8 @@ fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
                 video.viewCount,
                 author = video.author
             )
-            searchViewModel.downloadVideoResponse(saveVideo, finished = fun() {
+            searchViewModel.getAudioUrlsResponse(saveVideo, callback = fun(formats : List<AdaptiveFormats>) {
+
                 downloadState = DownloadState.Downloaded
                 Handler(Looper.getMainLooper()).post {
                     Toast.makeText(
@@ -172,8 +176,6 @@ fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
 
 
             })
-            /*savedVideosViewModel.setBottomSheetVisibility(true)
-            savedVideosViewModel.setBottomSheetVideoId(data.videoId)*/
         }) {
             Icon(
                 painter = painterResource(
@@ -205,6 +207,16 @@ fun SearchVideos(
 ) {
     val videos by searchViewModel.videos.collectAsStateWithLifecycle()
     val isLoading by searchViewModel.isLoading.collectAsStateWithLifecycle()
+    val formats by searchViewModel.formats.collectAsStateWithLifecycle()
+
+        FormatsDialog(formats, onClose = fun (selectedUrl: String?){
+            if(selectedUrl!=null) {
+                searchViewModel.downloadVideo(selectedUrl)
+            }
+    })
+
+
+
 
     var offset by remember { mutableFloatStateOf(0f) }
     var listState = rememberLazyListState()
