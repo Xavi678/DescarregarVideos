@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ivax.descarregarvideos.R
+import com.ivax.descarregarvideos.classes.DownloadState
 import com.ivax.descarregarvideos.classes.VideoItem
 import com.ivax.descarregarvideos.ui.composables.SearchComposable
 import com.ivax.descarregarvideos.entities.SavedVideo
@@ -78,12 +79,12 @@ fun Loading(searchViewModel: SearchViewModel = viewModel()) {
     }
 }
 
-enum class DownloadState { NotDownloaded, Downloaded, Downloading }
+
 
 @Composable
 fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
-    var downloadState by remember { mutableStateOf(if (video.videoDownloaded) DownloadState.Downloaded else DownloadState.NotDownloaded) }
-    val formats by searchViewModel.formats.collectAsStateWithLifecycle()
+    var downloadState by remember { mutableStateOf(video.videoDownloaded) }
+
     val context = LocalContext.current
     var savedVideo by remember { mutableStateOf<SavedVideo?>(null) }
     LaunchedEffect(Unit) {
@@ -110,21 +111,7 @@ fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
         savedVideo=saveVideo
     }
     if (savedVideo!=null) {
-        FormatsDialog(formats, onClose = fun(selectedFormat: AdaptiveFormats?) {
-            if (selectedFormat != null) {
 
-                searchViewModel.downloadVideo(selectedFormat, savedVideo!!, finished = fun() {
-
-                    downloadState = DownloadState.Downloaded
-                    Handler(Looper.getMainLooper()).post {
-                        Toast.makeText(
-                            context, "Video ${savedVideo!!.videoId} Descarregat Correctament",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                })
-            }
-        })
         Row() {
 
             Box(
@@ -182,11 +169,10 @@ fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
             }
 
             IconButton(onClick = {
-                downloadState = DownloadState.Downloading
                 searchViewModel.getAudioUrlsResponse(
                     savedVideo!!,
                     callback = fun(formats: List<AdaptiveFormats>, ) {
-                        searchViewModel.setFormats(formats)
+                        searchViewModel.setFormats(savedVideo!!,formats)
                     })
             }) {
                 Icon(
@@ -220,9 +206,9 @@ fun SearchVideos(
 ) {
     val videos by searchViewModel.videos.collectAsStateWithLifecycle()
     val isLoading by searchViewModel.isLoading.collectAsStateWithLifecycle()
-
-
-
+    val currentVideo by searchViewModel.currentVideo.collectAsStateWithLifecycle()
+    val formats by searchViewModel.formats.collectAsStateWithLifecycle()
+    val context=LocalContext.current
 
 
 
@@ -257,6 +243,24 @@ fun SearchVideos(
 
             Item(it)
         }
+    }
+
+    if(formats.isNotEmpty() && currentVideo!=null) {
+        FormatsDialog(formats, onClose = fun(selectedFormat: AdaptiveFormats?) {
+            if (selectedFormat != null) {
+                searchViewModel.setDownloading(currentVideo!!)
+                searchViewModel.downloadVideo(selectedFormat, currentVideo!!, finished = fun() {
+                    searchViewModel.setDownloaded(currentVideo!!)
+                    Handler(Looper.getMainLooper()).post {
+                        Toast.makeText(
+                            context, "Video ${currentVideo!!.videoId} Descarregat Correctament",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                })
+            }
+            searchViewModel.resetDialog()
+        })
     }
 
 }

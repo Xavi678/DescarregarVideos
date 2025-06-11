@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.core.net.toUri
+import com.ivax.descarregarvideos.classes.DownloadState
+import kotlinx.coroutines.flow.firstOrNull
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
@@ -30,88 +32,105 @@ class SearchViewModel @Inject constructor(
     private val _text = MutableLiveData<String>().apply {
         value = "This is slideshow Fragment"
     }
-    private val _formats= MutableStateFlow<List<AdaptiveFormats>>(emptyList())
-    val formats=_formats.asStateFlow()
+    private val _formats = MutableStateFlow<List<AdaptiveFormats>>(emptyList())
+    val formats = _formats.asStateFlow()
     private val _videos = MutableStateFlow<List<VideoItem>>(emptyList())
     val continuationToken = MutableStateFlow<String?>(null)
     private val _isLoading = MutableStateFlow<Boolean>(false)
-    val isLoading=_isLoading.asStateFlow()
-    val videos=_videos.asStateFlow()
-    val videoExists : MutableStateFlow<Boolean> by lazy {
+    val isLoading = _isLoading.asStateFlow()
+    val videos = _videos.asStateFlow()
+    val videoExists: MutableStateFlow<Boolean> by lazy {
         MutableStateFlow<Boolean>(false)
     }
-    var searchQuery : String?=null
-    fun hasVideo(videoId : String)  {
+    private val _currentVideo = MutableStateFlow<SavedVideo?>(null)
+
+    val currentVideo = _currentVideo.asStateFlow()
+    var searchQuery: String? = null
+    fun hasVideo(videoId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             videoExists.update { videoRepository.videoExists(videoId) }
         }
     }
+
     fun SearchVideos(searchQuery: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _isLoading.value = true
-                this@SearchViewModel.searchQuery=searchQuery
+                this@SearchViewModel.searchQuery = searchQuery
                 val result = youtubeRepository.Search(searchQuery)
                 result.videos.forEach {
-                    it.videoDownloaded=videoRepository.videoExists(it.videoId)
+                    it.videoDownloaded = IsDownloaded(it.videoId)
                 }
                 _videos.update { result.videos }
-                continuationToken.value= result.nextToken
+                continuationToken.value = result.nextToken
             } catch (e: Exception) {
-                Log.d("DescarregarVideos",e.message.toString())
+                Log.d("DescarregarVideos", e.message.toString())
             } finally {
                 _isLoading.value = false
             }
         }
     }
-    fun loadMoreVideos(){
+
+    fun loadMoreVideos() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 _isLoading.value = true
-                val result = youtubeRepository.SearchMore(token  = continuationToken.value.toString())
+                val result =
+                    youtubeRepository.SearchMore(token = continuationToken.value.toString())
                 result.videos.forEach {
-                    it.videoDownloaded=videoRepository.videoExists(it.videoId)
+                    it.videoDownloaded = IsDownloaded(it.videoId)
                 }
 
-                _videos.value+=result.videos
-                continuationToken.value= result.nextToken
+                _videos.value += result.videos
+                continuationToken.value = result.nextToken
             } catch (e: Exception) {
-                Log.d("DescarregarVideos",e.message.toString())
+                Log.d("DescarregarVideos", e.message.toString())
             } finally {
                 _isLoading.value = false
             }
         }
     }
+
+    private fun IsDownloaded(videoId: String) =
+        if (videoRepository.videoExists(videoId)) {
+            DownloadState.Downloaded
+        } else {
+            DownloadState.NotDownloaded
+        }
 
     fun getAudioUrlsResponse(savedVideo: SavedVideo, callback: (List<AdaptiveFormats>) -> Unit) {
         this.viewModelScope.launch(Dispatchers.IO) {
 
-                val playerResponse: PlayerResponse =
-                    youtubeRepository.GetVideoData(savedVideo.videoId)
-                val listFormats = playerResponse.streamingData.adaptiveFormats
-                val lists = listFormats.filter { it.mimeType.contains("audio") }
-                if(lists.isNotEmpty()){
-                    callback(lists)
-                }
+            val playerResponse: PlayerResponse =
+                youtubeRepository.GetVideoData(savedVideo.videoId)
+            val listFormats = playerResponse.streamingData.adaptiveFormats
+            val lists = listFormats.filter { it.mimeType.contains("audio") }
+            if (lists.isNotEmpty()) {
+                callback(lists)
+            }
 
-                Log.d("DescarregarVide", savedVideo.videoId)
+            Log.d("DescarregarVide", savedVideo.videoId)
         }
     }
 
-    fun downloadVideo(selectedFormat: AdaptiveFormats, savedVideo: SavedVideo, finished: ()->Unit) {
+    fun downloadVideo(
+        selectedFormat: AdaptiveFormats,
+        savedVideo: SavedVideo,
+        finished: () -> Unit
+    ) {
         this.viewModelScope.launch(Dispatchers.IO) {
-            val uri= selectedFormat.url.toUri()
-            val segmentLength=if(uri.getQueryParameter("ratebypass")=="yes") 9898989L
+            val uri = selectedFormat.url.toUri()
+            val segmentLength = if (uri.getQueryParameter("ratebypass") == "yes") 9898989L
             else {
-                if(selectedFormat.contentLength==null){
+                if (selectedFormat.contentLength == null) {
                     uri.getQueryParameter("clen")!!.toLong()
-                }else{
+                } else {
                     selectedFormat.contentLength.toLong()
                 }
 
             }
             val bytes =
-                youtubeRepository.DownloadVideoStream( "${selectedFormat}&range=0-${segmentLength}")
+                youtubeRepository.DownloadVideoStream("${selectedFormat}&range=0-${segmentLength}")
             val videoUrl = fileRepository.saveFile(savedVideo.videoId, bytes)
             savedVideo.videoUrl = videoUrl
             videoRepository.insetVideo(savedVideo)
@@ -119,7 +138,28 @@ class SearchViewModel @Inject constructor(
         finished()
     }
 
-    fun setFormats(formats: List<AdaptiveFormats>) {
-        _formats.value=formats
+    fun setFormats(currentVideo: SavedVideo, formats: List<AdaptiveFormats>) {
+        _currentVideo.value = currentVideo
+        _formats.value = formats
+    }
+
+    fun setDownloaded(currentVideo: SavedVideo) {
+        setDownloadStatus(currentVideo, DownloadState.Downloaded)
+    }
+
+    fun resetDialog() {
+        _videos.value = emptyList()
+        _currentVideo.value = null
+    }
+
+    fun setDownloading(currentVideo: SavedVideo) {
+        setDownloadStatus(currentVideo, DownloadState.Downloading)
+    }
+
+    private fun setDownloadStatus(currentVideo: SavedVideo, downloadState: DownloadState) {
+        val tmpVideos = _videos.value
+        tmpVideos.firstOrNull { it.videoId == currentVideo.videoId }?.videoDownloaded =
+            downloadState
+        _videos.value = tmpVideos
     }
 }
