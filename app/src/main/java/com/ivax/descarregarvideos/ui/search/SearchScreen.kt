@@ -50,6 +50,7 @@ import com.ivax.descarregarvideos.classes.VideoItem
 import com.ivax.descarregarvideos.ui.composables.SearchComposable
 import com.ivax.descarregarvideos.entities.SavedVideo
 import com.ivax.descarregarvideos.responses.AdaptiveFormats
+import com.ivax.descarregarvideos.ui.composables.AddPlaylistMenu
 import com.ivax.descarregarvideos.ui.composables.FormatsDialog
 import java.io.File
 
@@ -251,12 +252,12 @@ fun SearchVideos(
                 searchViewModel.setDownloading(currentVideo!!)
                 searchViewModel.downloadVideo(selectedFormat, currentVideo!!, finished = fun() {
                     searchViewModel.setDownloaded(currentVideo!!)
-                    Handler(Looper.getMainLooper()).post {
+                    //Handler(Looper.getMainLooper()).post {
                         Toast.makeText(
-                            context, "Video ${currentVideo!!.videoId} Descarregat Correctament",
+                            context, "Video \"${currentVideo!!.title}\" Descarregat Correctament",
                             Toast.LENGTH_LONG
                         ).show()
-                    }
+                    //}
                 })
             }
             searchViewModel.resetDialog()

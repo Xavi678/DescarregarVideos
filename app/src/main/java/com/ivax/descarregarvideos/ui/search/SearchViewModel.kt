@@ -130,7 +130,7 @@ class SearchViewModel @Inject constructor(
 
             }
             val bytes =
-                youtubeRepository.DownloadVideoStream("${selectedFormat}&range=0-${segmentLength}")
+                youtubeRepository.DownloadVideoStream("${selectedFormat.url}&range=0-${segmentLength}")
             val videoUrl = fileRepository.saveFile(savedVideo.videoId, bytes)
             savedVideo.videoUrl = videoUrl
             videoRepository.insetVideo(savedVideo)
@@ -162,4 +162,5 @@ class SearchViewModel @Inject constructor(
             downloadState
         _videos.value = tmpVideos
     }
+
 }

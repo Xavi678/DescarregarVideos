@@ -437,7 +437,6 @@ class MainActivity : AppCompatActivity() {
         MainScaffold {
             navController.navigate(it)
         }
-        AddPlaylistMenu()
     }
 
     @OptIn(ExperimentalMaterial3Api::class)

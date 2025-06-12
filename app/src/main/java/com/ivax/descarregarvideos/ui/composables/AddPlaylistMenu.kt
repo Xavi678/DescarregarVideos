@@ -41,14 +41,15 @@ import com.ivax.descarregarvideos.ui.MainViewModel
 
 
 @Composable
-fun AddPlaylistMenu(mainViewModel: MainViewModel = hiltViewModel()) {
+fun AddPlaylistMenu(mainViewModel: MainViewModel = hiltViewModel(),onClose: ()->Unit) {
     val playlists by mainViewModel.playlists.collectAsStateWithLifecycle(emptyList())
     val showPlaylistMenu by mainViewModel.showPlaylistMenu.collectAsStateWithLifecycle()
     val showCreatePlaylistMenu by mainViewModel.showCreatePlaylistMenu.collectAsStateWithLifecycle()
     val videoId by mainViewModel.videoId.collectAsStateWithLifecycle()
-    if (showPlaylistMenu && videoId!=null) {
+    if (showPlaylistMenu && videoId != null) {
         Dialog(onDismissRequest = {
             mainViewModel.dismissPlaylistMenu()
+            onClose()
         }) {
             Card(
                 modifier = Modifier
@@ -58,35 +59,50 @@ fun AddPlaylistMenu(mainViewModel: MainViewModel = hiltViewModel()) {
                 shape = RoundedCornerShape(16.dp),
             ) {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    TextButton(
+                    CrearPlaylistButton()
+                    Column(
                         modifier = Modifier
-                            .padding(end = 8.dp)
+                            .padding(start = 8.dp)
                             .weight(1f)
-                            .align(alignment = Alignment.CenterHorizontally)
-                            .wrapContentHeight(align = Alignment.Bottom), onClick = {
-                            mainViewModel.showCreatePlaylistMenu()
-                        }) {
-                        Icon(
-                            imageVector = Icons.Default.LibraryAdd,
-                            contentDescription = "Create Playlist"
+                            .wrapContentHeight(align = Alignment.Top)
+                    ) {
+                        TextButton(
+                            modifier = Modifier
+                                .align(alignment = Alignment.CenterHorizontally)
+                                , onClick = {
+                                mainViewModel.showCreatePlaylistMenu()
+                            }) {
+                            Icon(
+                                imageVector = Icons.Default.LibraryAdd,
+                                contentDescription = "Create Playlist"
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Crear Playlist")
+                        }
+                        HorizontalDivider(
+                            modifier = Modifier
+                                .height(4.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Crear Playlist")
                     }
-                    HorizontalDivider(modifier = Modifier.height(4.dp))
-                    LazyColumn(modifier = Modifier.padding(8.dp)) {
+
+                    LazyColumn(modifier = Modifier.fillMaxSize().padding(8.dp)
+                        .weight(1f)
+                        .wrapContentHeight(align = Alignment.Top)) {
                         items(playlists) {
-                            ListItem(it,videoId!!)
+                            ListItem(it, videoId!!)
                         }
                     }
                     HorizontalDivider(modifier = Modifier.height(4.dp))
                     TextButton(
                         onClick = {
                             mainViewModel.saveChanges()
+                            onClose()
                         }
                     ) {
-                        Icon(imageVector = Icons.Default.Check,
-                            contentDescription = "Check")
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Check"
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Guardar")
                     }
@@ -96,6 +112,11 @@ fun AddPlaylistMenu(mainViewModel: MainViewModel = hiltViewModel()) {
         }
         CreatePlaylistDialog(showCreatePlaylistMenu)
     }
+}
+
+@Composable
+fun CrearPlaylistButton() {
+
 }
 
 @Composable
@@ -153,9 +174,13 @@ fun CreatePlaylistDialog(
 }
 
 @Composable
-fun ListItem(playlist: PlaylistWithSavedVideos,videoId: String,mainViewModel: MainViewModel= hiltViewModel()) {
+fun ListItem(
+    playlist: PlaylistWithSavedVideos,
+    videoId: String,
+    mainViewModel: MainViewModel = hiltViewModel()
+) {
 
-    var checked by remember { mutableStateOf(playlist.videos.firstOrNull { it.videoId==videoId }!=null) }
+    var checked by remember { mutableStateOf(playlist.videos.firstOrNull { it.videoId == videoId } != null) }
     Row(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = playlist.playlist.name.toString(),
@@ -168,7 +193,7 @@ fun ListItem(playlist: PlaylistWithSavedVideos,videoId: String,mainViewModel: Ma
         Checkbox(
             checked = checked, onCheckedChange = {
                 checked = it
-                mainViewModel.addChange(playlist.playlist.playListId,videoId,it)
+                mainViewModel.addChange(playlist.playlist.playListId, videoId, it)
             }, modifier = Modifier
                 .weight(1f)
                 .padding(end = 8.dp)

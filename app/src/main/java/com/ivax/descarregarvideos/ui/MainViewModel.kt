@@ -72,4 +72,8 @@ class MainViewModel @Inject constructor(
             changes.add(PlaylistChange(playListId,videoId,checked))
         }
     }
+
+    fun deleteVideo(videoId: String) {
+        videoRepository.deleteVideo(videoId)
+    }
 }

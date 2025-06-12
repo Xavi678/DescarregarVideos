@@ -43,15 +43,29 @@ import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.ui.composables.SearchComposable
 import com.ivax.descarregarvideos.ui.composables.bounceClick
 import com.ivax.descarregarvideos.entities.SavedVideo
+import com.ivax.descarregarvideos.ui.composables.AddPlaylistMenu
+import com.ivax.descarregarvideos.ui.composables.ShowBottomDialogVideoMenu
 import java.io.FileInputStream
 
 @Composable
-fun SearchAudioScreen(savedVideosViewModel: SavedVideosViewModel = viewModel()){
+fun SearchAudioScreen(savedVideosViewModel: SavedVideosViewModel = viewModel()) {
     Column {
         SearchContentWrapper()
         AllVideos()
     }
-    ShowBottomDialog()
+    if (savedVideosViewModel.isBottomSheetVisible.collectAsStateWithLifecycle().value) {
+        val videoId =
+            savedVideosViewModel.bottomSheetParameter.collectAsStateWithLifecycle().value!!
+        ShowBottomDialogVideoMenu(videoId, onClose = fun() {
+            savedVideosViewModel.setBottomSheetVisibility(false)
+        }, onShowPlayListMenu = fun() {
+            savedVideosViewModel.showPlaylistMenu()
+            savedVideosViewModel.setSelectedVideoId(videoId)
+        })
+    }
+    AddPlaylistMenu(onClose = fun() {
+        savedVideosViewModel.setBottomSheetVisibility(false)
+    })
 }
 
 @Composable
@@ -65,9 +79,10 @@ fun AllVideos(
         }
     }
 }
+
 @Composable
-fun SearchContentWrapper(savedVideosViewModel: SavedVideosViewModel = viewModel()){
-    SearchComposable(onClickInvoker = fun (text: String) {
+fun SearchContentWrapper(savedVideosViewModel: SavedVideosViewModel = viewModel()) {
+    SearchComposable(onClickInvoker = fun(text: String) {
         savedVideosViewModel.filterSavedVideos(text)
     })
 }
@@ -130,18 +145,25 @@ fun ListItem(
             )
         }
 
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp)
-            .weight(1f)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+                .weight(1f)
+        ) {
             Text(
                 text = data.title
             )
             Row {
-                Icon(painter = painterResource(id = R.drawable.download_rounded_base), contentDescription = "Download Icon")
-                Text(text = data.downloadDateFormatted,
+                Icon(
+                    painter = painterResource(id = R.drawable.download_rounded_base),
+                    contentDescription = "Download Icon"
+                )
+                Text(
+                    text = data.downloadDateFormatted,
                     fontSize = 11.sp,
-                    modifier= Modifier.align(alignment = Alignment.CenterVertically))
+                    modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                )
             }
 
         }
@@ -163,73 +185,3 @@ fun ListItem(
     HorizontalDivider(Modifier.padding(4.dp), color = Color.LightGray)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ShowBottomDialog(savedVideosViewModel: SavedVideosViewModel = viewModel()) {
-
-    if (savedVideosViewModel.isBottomSheetVisible.collectAsStateWithLifecycle().value) {
-        val videoId =
-            savedVideosViewModel.bottomSheetParameter.collectAsStateWithLifecycle().value!!
-        ModalBottomSheet(
-            onDismissRequest = {
-                savedVideosViewModel.setBottomSheetVisibility(false)
-            }, containerColor = Color(29, 27, 32, 255)
-        ) {
-            Column {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                        .clickable(
-                            enabled = true,
-                            onClick = {
-                                savedVideosViewModel.deleteVideo(videoId)
-                                savedVideosViewModel.setBottomSheetVisibility(false)
-                            },
-                            indication = ripple(color = MaterialTheme.colorScheme.primary),
-                            interactionSource = remember { MutableInteractionSource() }
-                        )
-                        .align(alignment = Alignment.CenterHorizontally)) {
-
-                    Icon(
-                        imageVector = Icons.Default.DeleteForever,
-                        contentDescription = null,
-                        tint = Color.White
-                    )
-
-                    Text(
-                        text = "Delete Audio", color = Color.White,
-                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
-                    )
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                        .clickable(
-                            enabled = true,
-                            onClick = {
-                                savedVideosViewModel.showPlaylistMenu()
-                                savedVideosViewModel.setSelectedVideoId(videoId)
-                            },
-                            indication = ripple(color = MaterialTheme.colorScheme.primary),
-                            interactionSource = remember { MutableInteractionSource() }
-                        )
-                        .align(alignment = Alignment.CenterHorizontally)) {
-
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null,
-                        tint = Color.White
-                    )
-
-                    Text(
-                        text = "Afegir a la Playlist", color = Color.White,
-                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
-                    )
-                }
-            }
-        }
-    }
-
-}

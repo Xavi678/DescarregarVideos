@@ -1,0 +1,96 @@
+package com.ivax.descarregarvideos.ui.composables
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ivax.descarregarvideos.ui.MainViewModel
+import com.ivax.descarregarvideos.ui.saved.videos.SavedVideosViewModel
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ShowBottomDialogVideoMenu(videoId: String,onClose:()->Unit,onShowPlayListMenu:()->Unit,mainViewModel: MainViewModel = viewModel()) {
+
+
+        ModalBottomSheet(
+            onDismissRequest = {
+                onClose()
+            }, containerColor = Color(29, 27, 32, 255)
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .clickable(
+                            enabled = true,
+                            onClick = {
+                                mainViewModel.deleteVideo(videoId)
+                                onClose()
+                            },
+                            indication = ripple(color = MaterialTheme.colorScheme.primary),
+                            interactionSource = remember { MutableInteractionSource() }
+                        )
+                        .align(alignment = Alignment.CenterHorizontally)) {
+
+                    Icon(
+                        imageVector = Icons.Default.DeleteForever,
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+
+                    Text(
+                        text = "Delete Audio", color = Color.White,
+                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .clickable(
+                            enabled = true,
+                            onClick = {
+
+                                onShowPlayListMenu()
+                            },
+                            indication = ripple(color = MaterialTheme.colorScheme.primary),
+                            interactionSource = remember { MutableInteractionSource() }
+                        )
+                        .align(alignment = Alignment.CenterHorizontally)) {
+
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+
+                    Text(
+                        text = "Afegir a la Playlist", color = Color.White,
+                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                    )
+                }
+            }
+
+    }
+
+}
