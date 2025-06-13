@@ -37,81 +37,85 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
-import com.ivax.descarregarvideos.ui.MainViewModel
+import com.ivax.descarregarvideos.general.viewmodels.ModalSheetBottomMenuViewModel
 
 
 @Composable
-fun AddPlaylistMenu(mainViewModel: MainViewModel = hiltViewModel(),onClose: ()->Unit) {
-    val playlists by mainViewModel.playlists.collectAsStateWithLifecycle(emptyList())
-    val showPlaylistMenu by mainViewModel.showPlaylistMenu.collectAsStateWithLifecycle()
-    val showCreatePlaylistMenu by mainViewModel.showCreatePlaylistMenu.collectAsStateWithLifecycle()
-    val videoId by mainViewModel.videoId.collectAsStateWithLifecycle()
-    if (showPlaylistMenu && videoId != null) {
-        Dialog(onDismissRequest = {
-            mainViewModel.dismissPlaylistMenu()
-            onClose()
-        }) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(200.dp, 350.dp)
-                    .padding(16.dp),
-                shape = RoundedCornerShape(16.dp),
-            ) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    CrearPlaylistButton()
-                    Column(
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .weight(1f)
-                            .wrapContentHeight(align = Alignment.Top)
-                    ) {
-                        TextButton(
-                            modifier = Modifier
-                                .align(alignment = Alignment.CenterHorizontally)
-                                , onClick = {
-                                mainViewModel.showCreatePlaylistMenu()
-                            }) {
-                            Icon(
-                                imageVector = Icons.Default.LibraryAdd,
-                                contentDescription = "Create Playlist"
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Crear Playlist")
-                        }
-                        HorizontalDivider(
-                            modifier = Modifier
-                                .height(4.dp)
-                        )
-                    }
-
-                    LazyColumn(modifier = Modifier.fillMaxSize().padding(8.dp)
+fun AddPlaylistMenu(
+    videoId: String,
+    onClose: () -> Unit,
+    modalSheetBottomMenuViewModel: ModalSheetBottomMenuViewModel,
+) {
+    val playlists by modalSheetBottomMenuViewModel.playlists.collectAsStateWithLifecycle(emptyList())
+    val showCreatePlaylistMenu by modalSheetBottomMenuViewModel.showCreatePlaylistMenu.collectAsStateWithLifecycle()
+    Dialog(onDismissRequest = {
+        modalSheetBottomMenuViewModel.dismissPlaylistMenu()
+        onClose()
+    }) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(200.dp, 350.dp)
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                CrearPlaylistButton()
+                Column(
+                    modifier = Modifier
+                        .padding(start = 8.dp)
                         .weight(1f)
-                        .wrapContentHeight(align = Alignment.Top)) {
-                        items(playlists) {
-                            ListItem(it, videoId!!)
-                        }
-                    }
-                    HorizontalDivider(modifier = Modifier.height(4.dp))
+                        .wrapContentHeight(align = Alignment.Top)
+                ) {
                     TextButton(
-                        onClick = {
-                            mainViewModel.saveChanges()
-                            onClose()
-                        }
-                    ) {
+                        modifier = Modifier
+                            .align(alignment = Alignment.CenterHorizontally), onClick = {
+                            modalSheetBottomMenuViewModel.showCreatePlaylistMenu()
+                        }) {
                         Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "Check"
+                            imageVector = Icons.Default.LibraryAdd,
+                            contentDescription = "Create Playlist"
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Guardar")
+                        Text("Crear Playlist")
                     }
-
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .height(4.dp)
+                    )
                 }
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp)
+                        .weight(1f)
+                        .wrapContentHeight(align = Alignment.Top)
+                ) {
+                    items(playlists) {
+                        ListItem(it, videoId, modalSheetBottomMenuViewModel)
+                    }
+                }
+                HorizontalDivider(modifier = Modifier.height(4.dp))
+                TextButton(
+                    onClick = {
+                        modalSheetBottomMenuViewModel.saveChanges()
+                        onClose()
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Check"
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Guardar")
+                }
+
             }
         }
-        CreatePlaylistDialog(showCreatePlaylistMenu)
     }
+    CreatePlaylistDialog(showCreatePlaylistMenu, modalSheetBottomMenuViewModel)
+
 }
 
 @Composable
@@ -122,7 +126,7 @@ fun CrearPlaylistButton() {
 @Composable
 fun CreatePlaylistDialog(
     showCreatePlaylistMenu: Boolean,
-    mainViewModel: MainViewModel = hiltViewModel()
+    modalSheetBottomMenuViewModel: ModalSheetBottomMenuViewModel
 ) {
 
     var isError by remember { mutableStateOf(false) }
@@ -150,7 +154,7 @@ fun CreatePlaylistDialog(
                             .wrapContentWidth(align = Alignment.End)
                     ) {
                         TextButton(onClick = {
-                            mainViewModel.dismissCreatePlaylistMenu()
+                            modalSheetBottomMenuViewModel.dismissCreatePlaylistMenu()
                         }, modifier = Modifier) {
                             Text("Cancel·lar")
                         }
@@ -158,7 +162,7 @@ fun CreatePlaylistDialog(
                             if (playlistName.isBlank()) {
                                 isError = true
                             } else {
-                                mainViewModel.createPlaylist(playlistName)
+                                modalSheetBottomMenuViewModel.createPlaylist(playlistName)
                                 isError = false
                             }
 
@@ -177,7 +181,7 @@ fun CreatePlaylistDialog(
 fun ListItem(
     playlist: PlaylistWithSavedVideos,
     videoId: String,
-    mainViewModel: MainViewModel = hiltViewModel()
+    modalSheetBottomMenuViewModel: ModalSheetBottomMenuViewModel
 ) {
 
     var checked by remember { mutableStateOf(playlist.videos.firstOrNull { it.videoId == videoId } != null) }
@@ -193,7 +197,7 @@ fun ListItem(
         Checkbox(
             checked = checked, onCheckedChange = {
                 checked = it
-                mainViewModel.addChange(playlist.playlist.playListId, videoId, it)
+                modalSheetBottomMenuViewModel.addChange(playlist.playlist.playListId, videoId, it)
             }, modifier = Modifier
                 .weight(1f)
                 .padding(end = 8.dp)

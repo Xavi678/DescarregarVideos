@@ -28,12 +28,12 @@ import com.ivax.descarregarvideos.ui.saved.videos.SavedVideosViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShowBottomDialogVideoMenu(videoId: String,onClose:()->Unit,onShowPlayListMenu:()->Unit,mainViewModel: MainViewModel = viewModel()) {
+fun ShowBottomDialogVideoMenu(videoId: String,onClose:(deleteVideo: Boolean)->Unit,onShowPlayListMenu:()->Unit) {
 
 
         ModalBottomSheet(
             onDismissRequest = {
-                onClose()
+                onClose(false)
             }, containerColor = Color(29, 27, 32, 255)
         ) {
             Column {
@@ -44,8 +44,7 @@ fun ShowBottomDialogVideoMenu(videoId: String,onClose:()->Unit,onShowPlayListMen
                         .clickable(
                             enabled = true,
                             onClick = {
-                                mainViewModel.deleteVideo(videoId)
-                                onClose()
+                                onClose(true)
                             },
                             indication = ripple(color = MaterialTheme.colorScheme.primary),
                             interactionSource = remember { MutableInteractionSource() }

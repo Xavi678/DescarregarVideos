@@ -37,35 +37,33 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.ui.composables.SearchComposable
 import com.ivax.descarregarvideos.ui.composables.bounceClick
 import com.ivax.descarregarvideos.entities.SavedVideo
+import com.ivax.descarregarvideos.general.viewmodels.ModalSheetBottomMenuViewModel
 import com.ivax.descarregarvideos.ui.composables.AddPlaylistMenu
+import com.ivax.descarregarvideos.ui.composables.ModalSheetBottomMenu
 import com.ivax.descarregarvideos.ui.composables.ShowBottomDialogVideoMenu
 import java.io.FileInputStream
 
 @Composable
-fun SearchAudioScreen(savedVideosViewModel: SavedVideosViewModel = viewModel()) {
+fun SearchAudioScreen(savedVideosViewModel: SavedVideosViewModel = viewModel(),
+                      modalSheetBottomMenuViewModel: ModalSheetBottomMenuViewModel= hiltViewModel()) {
     Column {
         SearchContentWrapper()
         AllVideos()
     }
-    if (savedVideosViewModel.isBottomSheetVisible.collectAsStateWithLifecycle().value) {
-        val videoId =
-            savedVideosViewModel.bottomSheetParameter.collectAsStateWithLifecycle().value!!
-        ShowBottomDialogVideoMenu(videoId, onClose = fun() {
-            savedVideosViewModel.setBottomSheetVisibility(false)
-        }, onShowPlayListMenu = fun() {
-            savedVideosViewModel.showPlaylistMenu()
-            savedVideosViewModel.setSelectedVideoId(videoId)
+    val selectedVideoId by
+    savedVideosViewModel.bottomSheetParameter.collectAsStateWithLifecycle()
+    if(selectedVideoId!=null) {
+        ModalSheetBottomMenu(selectedVideoId!!,modalSheetBottomMenuViewModel, onClose = fun (){
+            savedVideosViewModel.resetSelectedVideo()
         })
     }
-    AddPlaylistMenu(onClose = fun() {
-        savedVideosViewModel.setBottomSheetVisibility(false)
-    })
 }
 
 @Composable

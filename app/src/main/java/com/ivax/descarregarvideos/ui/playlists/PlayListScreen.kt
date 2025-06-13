@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.classes.PlaylistWithOrderedVideosFoo
+import com.ivax.descarregarvideos.ui.composables.ModalSheetBottomMenu
 import com.ivax.descarregarvideos.ui.composables.PlayButton
 import com.ivax.descarregarvideos.ui.preview.providers.PlaylistWithOrderedVideosFooPreviewParameterProvider
 import com.ivax.descarregarvideos.ui.theme.MainAppTheme
@@ -62,6 +63,7 @@ fun PlaylistScreen(
         }
         PlaylistBottomDialog()
     }
+
 }
 
 @Composable
@@ -181,7 +183,7 @@ fun PlaylistBottomDialog(playlistsViewModel: PlaylistsViewModel = viewModel()) {
                     )
 
                     Text(
-                        text = "Delete Audio", color = Color.White,
+                        text = "Delete Playlist", color = Color.White,
                         modifier = Modifier.align(alignment = Alignment.CenterVertically)
                     )
                 }

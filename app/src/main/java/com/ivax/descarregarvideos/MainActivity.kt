@@ -21,12 +21,16 @@ import java.io.FileInputStream
 import android.widget.LinearLayout
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -65,6 +69,7 @@ import androidx.navigation.toRoute
 import com.google.common.base.Objects
 import com.google.common.util.concurrent.ListenableFuture
 import com.ivax.descarregarvideos.classes.RouteLabel
+import com.ivax.descarregarvideos.general.viewmodels.ModalSheetBottomMenuViewModel
 import com.ivax.descarregarvideos.ui.composables.AddPlaylistMenu
 import com.ivax.descarregarvideos.ui.edit.playlist.EditPlaylistScreen
 import com.ivax.descarregarvideos.ui.edit.playlist.EditPlaylistViewModel
@@ -93,8 +98,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnSkipForward: ImageButton
     private lateinit var btnMinimizePlayer: ImageButton
     private lateinit var btnDestroyPlayer: ImageButton
-    private lateinit var controllerFuture: ListenableFuture<MediaController>
-    private var playlistLayout: LinearLayout? = null
+    //private lateinit var controllerFuture: ListenableFuture<MediaController>
     private lateinit var tbxPlaylistName: TextView
 
 
@@ -209,7 +213,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
 
-        MediaController.releaseFuture(controllerFuture)
+        //MediaController.releaseFuture(controllerFuture)
         super.onStop()
     }
 
@@ -419,13 +423,15 @@ class MainActivity : AppCompatActivity() {
             }
             composable<Route.SavedAudio> {
                 val viewModel = hiltViewModel<SavedVideosViewModel>()
-                SearchAudioScreen(viewModel)
+                val modalSheetBottomMenuViewModel= hiltViewModel<ModalSheetBottomMenuViewModel>()
+                SearchAudioScreen(viewModel,modalSheetBottomMenuViewModel)
             }
 
             composable<Route.EditPlaylist> {
                 val arg = it.toRoute<Route.EditPlaylist>()
                 val viewModel = hiltViewModel<EditPlaylistViewModel>()
-                EditPlaylistScreen(arg.playlistId, viewModel)
+                navController.currentBackStackEntry?.savedStateHandle?.set("playlistId",arg.playlistId)
+                EditPlaylistScreen( viewModel)
             }
 
         }
@@ -459,7 +465,19 @@ class MainActivity : AppCompatActivity() {
                         titleContentColor = MaterialTheme.colorScheme.primary,
                     ),
                     title = {
-                        Text(text = ruta.toString())
+                        Row {
+                            if (ruta?.hasBackButton == true) {
+                                IconButton(onClick = {
+                                    navController.navigate(Route.Playlists)
+                                }, modifier = Modifier.align(alignment = Alignment.CenterVertically)) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = "Arrow Back"
+                                    )
+                                }
+                            }
+                            Text(text = ruta?.label.toString(),modifier = Modifier.align(alignment = Alignment.CenterVertically))
+                        }
                     }
                 )
             },
@@ -575,13 +593,13 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-private fun NavBackStackEntry?.getRoute() : String? {
+private fun NavBackStackEntry?.getRoute() : Route? {
     return this?.let {
         when{
-            destination.hasRoute<Route.Search>()->Route.Search.label
-            destination.hasRoute<Route.SavedAudio>()->Route.SavedAudio.label
-            destination.hasRoute<Route.Playlists>()->Route.Playlists.label
-            destination.hasRoute<Route.EditPlaylist>()->Route.EditPlaylist.Companion.get().label
+            destination.hasRoute<Route.Search>()->Route.Search
+            destination.hasRoute<Route.SavedAudio>()->Route.SavedAudio
+            destination.hasRoute<Route.Playlists>()->Route.Playlists
+            destination.hasRoute<Route.EditPlaylist>()->Route.EditPlaylist.Companion.get()
             else -> null
         }
     }

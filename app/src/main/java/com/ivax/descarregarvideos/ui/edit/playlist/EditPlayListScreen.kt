@@ -29,28 +29,39 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.classes.VideosWithPositionFoo
+import com.ivax.descarregarvideos.general.viewmodels.ModalSheetBottomMenuViewModel
+import com.ivax.descarregarvideos.ui.composables.ModalSheetBottomMenu
 import com.ivax.descarregarvideos.ui.composables.PlayButton
 import com.ivax.descarregarvideos.ui.composables.bounceClick
 import java.io.FileInputStream
 
 @Composable
 fun EditPlaylistScreen(
-    playlistId: Int,
-    viewModel: EditPlaylistViewModel
+    viewModel: EditPlaylistViewModel,
+    modalSheetBottomMenuViewModel: ModalSheetBottomMenuViewModel= hiltViewModel()
 ) {
     Column(modifier = Modifier.padding(8.dp)) {
-        Top(playlistId,viewModel)
+        Top(viewModel)
         Spacer(modifier = Modifier.width(8.dp))
         Playlists(viewModel)
+    }
+    val selectedVideoId by
+    viewModel.bottomSheetParameter.collectAsStateWithLifecycle()
+    if(selectedVideoId!=null) {
+        ModalSheetBottomMenu(selectedVideoId!!,modalSheetBottomMenuViewModel, onClose = fun (){
+            viewModel.resetSelectedVideo()
+
+        })
     }
 
 }
 @Composable
-fun Top(playlistId: Int,viewModel: EditPlaylistViewModel){
-    viewModel.getPlaylist(playlistId)
+fun Top(viewModel: EditPlaylistViewModel){
 
     val playlist by viewModel.playlist.collectAsState()
     Text(playlist?.name.toString())
@@ -140,8 +151,7 @@ fun ListItem(videosWithPositionFoo: VideosWithPositionFoo,viewModel: EditPlaylis
 
         }
         IconButton(onClick = {
-            /*savedVideosViewModel.setBottomSheetVisibility(true)
-            savedVideosViewModel.setBottomSheetVideoId(data.videoId)*/
+            viewModel.setBottomSheetVideoId(videosWithPositionFoo.videoId)
         }) {
             Icon(
                 painter = painterResource(id = R.drawable.three_dots),

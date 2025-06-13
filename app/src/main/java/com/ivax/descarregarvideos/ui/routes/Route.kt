@@ -5,7 +5,7 @@ import com.ivax.descarregarvideos.classes.RouteLabel
 import kotlinx.serialization.Serializable
 
 @Serializable
-open class Route(val label: String,val icon: Int?=null) {
+open class Route(val label: String,val icon: Int?=null,var hasBackButton: Boolean=false) {
     @Serializable
     object Playlists : Route("Playlists",R.drawable.collection_fill )
 
@@ -19,7 +19,7 @@ open class Route(val label: String,val icon: Int?=null) {
     data class EditPlaylist(val playlistId: Int){
         companion object{
             fun get() : Route{
-               return Route("Edit Playlist")
+               return Route("Edit Playlist", hasBackButton = true)
             }
         }
     }

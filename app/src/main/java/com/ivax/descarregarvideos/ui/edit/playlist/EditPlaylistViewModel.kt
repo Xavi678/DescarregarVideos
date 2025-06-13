@@ -1,5 +1,7 @@
 package com.ivax.descarregarvideos.ui.edit.playlist
 
+import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivax.descarregarvideos.classes.VideosWithPositionFoo
@@ -10,26 +12,33 @@ import com.ivax.descarregarvideos.repository.VideoRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class EditPlaylistViewModel @Inject constructor(private val videoRepository: VideoRepository,
+class EditPlaylistViewModel @Inject constructor(private val savedStateHandle: SavedStateHandle,private val videoRepository: VideoRepository,
 private val mediaPlayerRepository: MediaPlayerRepository) :
     ViewModel() {
     val isMediaVisible=mediaPlayerRepository.isMediaPlayerMaximized()
-    /*private val _playlistWithSavedVideos: MutableStateFlow<List<PlaylistWithSavedVideos>?> by lazy {
-        MutableStateFlow<List<PlaylistWithSavedVideos>?>(null)
-    }*/
+
+    private val _bottomSheetParameter=MutableStateFlow<String?>(null)
+    val bottomSheetParameter=_bottomSheetParameter.asStateFlow()
     private val _playlist: MutableStateFlow<Playlist?> by lazy {
         MutableStateFlow(null)
     }
     private val _playlistIdWithPositions: MutableStateFlow<List<VideosWithPositionFoo>?> by lazy {
         MutableStateFlow<List<VideosWithPositionFoo>?>(null)
     }
+    private var playlistId : Int = savedStateHandle.get<Int>("playlistId")!!
 
-    fun getPlaylist(playlistId: Int) {
+    init {
+        updatePlaylist(playlistId)
+        Log.d("DescarregarVideos",playlistId.toString())
+    }
+
+    fun updatePlaylist(playlistId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             _playlistIdWithPositions.update {
                 videoRepository.getByPlaylistIdWithPositions(playlistId)
@@ -68,6 +77,16 @@ private val mediaPlayerRepository: MediaPlayerRepository) :
         if(playlistPos!=null){
             mediaPlayerRepository.addPlaylist(playlistPos,playlist.value?.name)
         }
+    }
+
+    fun setBottomSheetVideoId(videoId: String) {
+        _bottomSheetParameter.value=videoId
+    }
+
+    fun resetSelectedVideo() {
+
+        _bottomSheetParameter.value=null
+        updatePlaylist(playlistId)
     }
 
     //val playlistWithSavedVideos get() = _playlistWithSavedVideos

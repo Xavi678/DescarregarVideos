@@ -45,7 +45,12 @@ constructor(
 
     private val _isBottomSheetVisible = MutableStateFlow<Boolean>(false)
     private val _bottomSheetParameter = MutableStateFlow<String?>(null)
+    private val _showPlaylistMenu=MutableStateFlow<Boolean>(false)
+    private val _selectedVideoId=MutableStateFlow<String?>(null)
+
     val bottomSheetParameter = _bottomSheetParameter.asStateFlow()
+    val showPlaylistMenu=_showPlaylistMenu.asStateFlow()
+    val selectedVideoId=_selectedVideoId.asStateFlow()
     fun addSingleItemMedia(savedVideo: SavedVideo) {
         mediaPlayerRepository.clear()
         val mediaItem = mediaPlayerRepository.SavedVideoToMediaItem(savedVideo)
@@ -96,10 +101,14 @@ constructor(
         _bottomSheetParameter.value = videoId
     }
 
-    fun showPlaylistMenu(){
-            uiRepository.showPlaylistMenu.value=true
+    fun showPlaylistMenu(showMenu: Boolean){
+        _showPlaylistMenu.value=showMenu
     }
     fun setSelectedVideoId(videoId : String){
-        uiRepository.videoId.value=videoId
+        _selectedVideoId.value=videoId
+    }
+
+    fun resetSelectedVideo() {
+        _bottomSheetParameter.value=null
     }
 }
