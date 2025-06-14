@@ -18,24 +18,29 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class EditPlaylistViewModel @Inject constructor(private val savedStateHandle: SavedStateHandle,private val videoRepository: VideoRepository,
-private val mediaPlayerRepository: MediaPlayerRepository) :
+class EditPlaylistViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle, private val videoRepository: VideoRepository,
+    private val mediaPlayerRepository: MediaPlayerRepository
+) :
     ViewModel() {
-    val isMediaVisible=mediaPlayerRepository.isMediaPlayerMaximized()
+    val isMediaVisible = mediaPlayerRepository.isMediaPlayerMaximized()
 
-    private val _bottomSheetParameter=MutableStateFlow<String?>(null)
-    val bottomSheetParameter=_bottomSheetParameter.asStateFlow()
+    private val _bottomSheetParameter = MutableStateFlow<String?>(null)
+    val bottomSheetParameter = _bottomSheetParameter.asStateFlow()
     private val _playlist: MutableStateFlow<Playlist?> by lazy {
         MutableStateFlow(null)
     }
     private val _playlistIdWithPositions: MutableStateFlow<List<VideosWithPositionFoo>?> by lazy {
-        MutableStateFlow<List<VideosWithPositionFoo>?>(null)
+        MutableStateFlow(null)
     }
-    private var playlistId : Int = savedStateHandle.get<Int>("playlistId")!!
+    private var playlistId: Int = savedStateHandle.get<Int>("playlistId")!!
+
+    val playlistIdWithPositions = _playlistIdWithPositions.asStateFlow()
+    val playlist get() = _playlist
 
     init {
         updatePlaylist(playlistId)
-        Log.d("DescarregarVideos",playlistId.toString())
+        Log.d("DescarregarVideos", playlistId.toString())
     }
 
     fun updatePlaylist(playlistId: Int) {
@@ -66,30 +71,53 @@ private val mediaPlayerRepository: MediaPlayerRepository) :
     }
 
     fun shuffle() {
-       var playlistShuffle= _playlistIdWithPositions.value
-        if(playlistShuffle!=null){
-            mediaPlayerRepository.addPlaylistShuffle(playlistShuffle,playlist.value?.name)
+        var playlistShuffle = _playlistIdWithPositions.value
+        if (playlistShuffle != null) {
+            mediaPlayerRepository.addPlaylistShuffle(playlistShuffle, playlist.value?.name)
         }
 
     }
+
     fun playAll() {
-        val playlistPos=_playlistIdWithPositions.value?.sortedBy { it.position }
-        if(playlistPos!=null){
-            mediaPlayerRepository.addPlaylist(playlistPos,playlist.value?.name)
+        val playlistPos = _playlistIdWithPositions.value?.sortedBy { it.position }
+        if (playlistPos != null) {
+            mediaPlayerRepository.addPlaylist(playlistPos, playlist.value?.name)
         }
     }
 
     fun setBottomSheetVideoId(videoId: String) {
-        _bottomSheetParameter.value=videoId
+        _bottomSheetParameter.value = videoId
     }
 
     fun resetSelectedVideo() {
 
-        _bottomSheetParameter.value=null
+        _bottomSheetParameter.value = null
         updatePlaylist(playlistId)
     }
 
-    //val playlistWithSavedVideos get() = _playlistWithSavedVideos
-    val playlistIdWithPositions get() = _playlistIdWithPositions
-    val playlist get() = _playlist
+    fun changePosition(
+        currentItemKey: Any, currentItemIndex: Int, previousItemKey: Any,
+        previousItemIndex: Int
+    ) {
+        viewModelScope.launch(context = Dispatchers.IO) {
+            videoRepository.updatePosition(currentItemKey.toString(), previousItemIndex, playlistId)
+            videoRepository.updatePosition(previousItemKey.toString(), currentItemIndex, playlistId)
+            updatePlaylist(playlistId)
+        }
+
+    }
+
+    fun detectChanges(playlistIdWithPositions: List<Pair<VideosWithPositionFoo, Float>>) {
+        for (changed in playlistIdWithPositions) {
+            val found =
+                _playlistIdWithPositions.value?.firstOrNull { it.videoId == changed.first.videoId }
+            if (found != null && changed.first.position!=found.position) {
+                viewModelScope.launch(context = Dispatchers.IO) {
+                    videoRepository.updatePosition(found.videoId,found.position,playlistId)
+                }
+            }
+        }
+    }
+
+
 }

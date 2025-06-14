@@ -1,11 +1,16 @@
 package com.ivax.descarregarvideos.ui.playlists
 
+import android.content.ClipDescription
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.draganddrop.dragAndDropSource
+import androidx.compose.foundation.draganddrop.dragAndDropTarget
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteForever
@@ -35,8 +41,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draganddrop.DragAndDropEvent
+import androidx.compose.ui.draganddrop.DragAndDropTarget
+import androidx.compose.ui.draganddrop.mimeTypes
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -77,9 +87,25 @@ fun SearchContentWrapper(playlistsViewModel: PlaylistsViewModel = viewModel()){
 fun ColumnPlaylists(playlistsViewModel: PlaylistsViewModel = viewModel(), function: (Int) -> Unit){
     val playlists by playlistsViewModel.playlists.collectAsStateWithLifecycle(listOf<Playlist>())
     val orderedPlaylist by playlistsViewModel.orderedPlaylist.collectAsStateWithLifecycle()
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    LazyColumn(modifier = Modifier.fillMaxSize()
+        /*.pointerInput(
+        key1 = orderedPlaylist
+    ) {
+        detectDragGesturesAfterLongPress(
+            onDragStart = { offset ->
+                Log.d("DescarregarVideos", offset.x.toString())
+            },
+            onDragEnd = {  },
+            onDragCancel = {},
+            onDrag = {
+                    change,dragAmount ->
+                Log.d("DescarregarVideos", change.toString())
+            }
+        )
+    }*/) {
         items(orderedPlaylist) {
-            Item(it,function)
+            item ->
+            Item(item,function)
         }
     }
 }
@@ -90,62 +116,94 @@ fun ItemPreview(@PreviewParameter(PlaylistWithOrderedVideosFooPreviewParameterPr
     //Item(playlistWithOrderedVideosFoo)
 }
 @Composable
-fun Item(playlistWithOrderedVideosFoo: PlaylistWithOrderedVideosFoo, function: (Int) -> Unit,playlistsViewModel: PlaylistsViewModel = viewModel()){
-
-    Row(modifier = Modifier.padding(start = 8.dp, end = 8.dp).clickable(
-        onClick = {
-
-            function(playlistWithOrderedVideosFoo.playlist.playListId)
-        },
-        interactionSource = remember { MutableInteractionSource() },
-        indication = null
-    )) {
-        Box(
-            Modifier
-                .width(86.dp)
-                .padding(top = 8.dp, start = 8.dp)
-        ) {
-        val firstVideo=playlistWithOrderedVideosFoo.orderedVideos.firstOrNull()
-        if(firstVideo!=null){
-            var bmp: Bitmap
-            var fileInStream = FileInputStream(firstVideo.imgUrl)
-            fileInStream.use {
-                bmp = BitmapFactory.decodeStream(it)
+fun Item(playlistWithOrderedVideosFoo: PlaylistWithOrderedVideosFoo, function: (Int) -> Unit,playlistsViewModel: PlaylistsViewModel = viewModel()
+){
+    Box(modifier = Modifier.dragAndDropTarget(shouldStartDragAndDrop = {
+        event ->
+        event.mimeTypes().contains(ClipDescription.MIMETYPE_UNKNOWN)
+    }, target = remember {
+        object : DragAndDropTarget{
+            override fun onDrop(event: DragAndDropEvent): Boolean {
+                TODO("Not yet implemented")
             }
-            fileInStream.close()
+        } })) {
 
-            Image(bitmap = bmp.asImageBitmap(), contentDescription = "First Video Thumbnail")
-            Row(modifier = Modifier.align(alignment = Alignment.BottomEnd)
-                .background(Color.Black)) {
-                Icon(painter = painterResource(R.drawable.playlist),
-                    contentDescription = "Collection Icon", tint = Color.White,
-                    modifier = Modifier.align(alignment = Alignment.CenterVertically))
-                Text(
-                    text = "${playlistWithOrderedVideosFoo.orderedVideos.count()}",
-                    color = Color.White,
-                    fontSize = 11.sp,
-                    modifier = Modifier.align(alignment = Alignment.CenterVertically)
+
+        Row(
+            modifier = Modifier
+                .padding(start = 8.dp, end = 8.dp)
+
+                .clickable(
+                    onClick = {
+
+                        function(playlistWithOrderedVideosFoo.playlist.playListId)
+                    },
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                )
+        ) {
+
+            Box(
+                Modifier
+                    .width(86.dp)
+                    .padding(top = 8.dp, start = 8.dp)
+            ) {
+                val firstVideo = playlistWithOrderedVideosFoo.orderedVideos.firstOrNull()
+                if (firstVideo != null) {
+                    var bmp: Bitmap
+                    var fileInStream = FileInputStream(firstVideo.imgUrl)
+                    fileInStream.use {
+                        bmp = BitmapFactory.decodeStream(it)
+                    }
+                    fileInStream.close()
+
+                    Image(
+                        bitmap = bmp.asImageBitmap(),
+                        contentDescription = "First Video Thumbnail"
+                    )
+                    Row(
+                        modifier = Modifier
+                            .align(alignment = Alignment.BottomEnd)
+                            .background(Color.Black)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.playlist),
+                            contentDescription = "Collection Icon", tint = Color.White,
+                            modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                        )
+                        Text(
+                            text = "${playlistWithOrderedVideosFoo.orderedVideos.count()}",
+                            color = Color.White,
+                            fontSize = 11.sp,
+                            modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                        )
+                    }
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp)
+                    .weight(1f)
+            ) {
+                Text(playlistWithOrderedVideosFoo.playlist.name.toString())
+                PlayButton(onClickDelegate = fun() {
+
+                })
+
+            }
+            IconButton(onClick = {
+                playlistsViewModel.setSelectedPlaylist(playlistId = playlistWithOrderedVideosFoo.playlist.playListId)
+                playlistsViewModel.setBottomSheetVisibility(true)
+            }) {
+                Icon(
+                    painter = painterResource(R.drawable.three_dots),
+                    contentDescription = "Menu Icon",
+                    modifier = Modifier
+                        .animateContentSize()
+                        .align(alignment = Alignment.CenterVertically)
                 )
             }
-        }
-        }
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp)
-            .weight(1f)) {
-            Text(playlistWithOrderedVideosFoo.playlist.name.toString())
-            PlayButton(onClickDelegate = fun (){
-
-            })
-
-        }
-        IconButton(onClick = {
-            playlistsViewModel.setSelectedPlaylist(playlistId = playlistWithOrderedVideosFoo.playlist.playListId)
-            playlistsViewModel.setBottomSheetVisibility(true)
-        }) {
-            Icon(painter = painterResource(R.drawable.three_dots), contentDescription = "Menu Icon",                modifier = Modifier
-                .animateContentSize()
-                .align(alignment = Alignment.CenterVertically))
         }
     }
 }

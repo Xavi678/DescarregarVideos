@@ -131,4 +131,8 @@ class VideoRepository @Inject constructor(
         val deleted = videoDao.deletePlaylistSavedVideo(playlistId, videoId)
         Log.d("DescarregarVideos", "Borrats $deleted")
     }
+
+    fun updatePosition(videoId: String, position: Int, playlistId: Int) {
+        playlistSavedVideoCrossRefDao.updatePosition(playlistId,videoId,position)
+    }
 }
