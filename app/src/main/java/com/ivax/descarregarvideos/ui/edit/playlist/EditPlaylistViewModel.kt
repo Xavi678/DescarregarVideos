@@ -34,19 +34,22 @@ class EditPlaylistViewModel @Inject constructor(
         MutableStateFlow(null)
     }
     private var playlistId: Int = savedStateHandle.get<Int>("playlistId")!!
-
+    private val _selectedPlaylistId=MutableStateFlow<Int?>(null)
+    val selectedPlaylistId=_selectedPlaylistId.asStateFlow()
     val playlistIdWithPositions = _playlistIdWithPositions.asStateFlow()
     val playlist get() = _playlist
 
     init {
         updatePlaylist(playlistId)
+        _selectedPlaylistId.value=playlistId
         Log.d("DescarregarVideos", playlistId.toString())
     }
 
     fun updatePlaylist(playlistId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
+            val list=videoRepository.getByPlaylistIdWithPositions(playlistId)
             _playlistIdWithPositions.update {
-                videoRepository.getByPlaylistIdWithPositions(playlistId)
+                list
             }
 
             _playlist.update {
@@ -95,27 +98,12 @@ class EditPlaylistViewModel @Inject constructor(
         updatePlaylist(playlistId)
     }
 
-    fun changePosition(
-        currentItemKey: Any, currentItemIndex: Int, previousItemKey: Any,
-        previousItemIndex: Int
-    ) {
-        viewModelScope.launch(context = Dispatchers.IO) {
-            videoRepository.updatePosition(currentItemKey.toString(), previousItemIndex, playlistId)
-            videoRepository.updatePosition(previousItemKey.toString(), currentItemIndex, playlistId)
-            updatePlaylist(playlistId)
-        }
-
-    }
-
     fun detectChanges(playlistIdWithPositions: List<VideosWithPositionFoo>) {
         for (changed in playlistIdWithPositions) {
-            val found =
-                _playlistIdWithPositions.value?.firstOrNull { it.videoId == changed.videoId }
-            if (found != null && changed.position!=found.position) {
                 viewModelScope.launch(context = Dispatchers.IO) {
-                    videoRepository.updatePosition(found.videoId,found.position,playlistId)
+                    videoRepository.updatePosition(changed.videoId,changed.position,playlistId)
                 }
-            }
+
         }
     }
 

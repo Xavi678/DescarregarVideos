@@ -1,9 +1,11 @@
 package com.ivax.descarregarvideos
 
+import android.content.ComponentName
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.View
 import android.widget.ImageButton
@@ -25,6 +27,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -44,6 +47,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,11 +55,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.media3.common.Player
+import androidx.media3.common.Timeline
 import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -68,9 +76,12 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.google.common.base.Objects
 import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.MoreExecutors
 import com.ivax.descarregarvideos.classes.RouteLabel
 import com.ivax.descarregarvideos.general.viewmodels.ModalSheetBottomMenuViewModel
+import com.ivax.descarregarvideos.services.PlaybackService
 import com.ivax.descarregarvideos.ui.composables.AddPlaylistMenu
+import com.ivax.descarregarvideos.ui.composables.MusicPlayer
 import com.ivax.descarregarvideos.ui.edit.playlist.EditPlaylistScreen
 import com.ivax.descarregarvideos.ui.edit.playlist.EditPlaylistViewModel
 import com.ivax.descarregarvideos.ui.routes.Route
@@ -98,7 +109,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnSkipForward: ImageButton
     private lateinit var btnMinimizePlayer: ImageButton
     private lateinit var btnDestroyPlayer: ImageButton
-    //private lateinit var controllerFuture: ListenableFuture<MediaController>
+
     private lateinit var tbxPlaylistName: TextView
 
 
@@ -439,6 +450,8 @@ class MainActivity : AppCompatActivity() {
 
     @Composable
     fun MainWrapper() {
+        val context=LocalContext.current
+
         val navController = rememberNavController()
         MainScaffold {
             navController.navigate(it)
@@ -468,7 +481,10 @@ class MainActivity : AppCompatActivity() {
                         Row {
                             if (ruta?.hasBackButton == true) {
                                 IconButton(onClick = {
-                                    navController.navigate(Route.Playlists)
+                                    navController.navigate(Route.Playlists){
+                                        restoreState=false
+
+                                    }
                                 }, modifier = Modifier.align(alignment = Alignment.CenterVertically)) {
                                     Icon(
                                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -497,7 +513,7 @@ class MainActivity : AppCompatActivity() {
                     startDestination = Route.Search,
                     navigateTo = navigateTo
                 )
-
+                MusicPlayer(modifier = Modifier.width(220.dp).height(220.dp))
             }
         }
     }
@@ -522,11 +538,11 @@ class MainActivity : AppCompatActivity() {
                 NavigationBarItem(
                     selected = currentBackStackEntry?.destination?.hasRoute(it::class)==true, onClick = {
                         navController.navigate(it) {
-                            popUpTo(navController.graph.findStartDestination().id) {
+                            /*popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }
                             restoreState = true
-                            launchSingleTop = true
+                            launchSingleTop = true*/
                         }
                     }, icon = {
                         Icon(

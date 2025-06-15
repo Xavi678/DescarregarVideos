@@ -24,6 +24,9 @@ class ModalSheetBottomMenuViewModel @Inject constructor(private val videoReposit
     val playlists=videoRepository.getAllPlaylistsWithVideos()
     private val _showCreatePlaylistMenu=MutableStateFlow(false)
     val showCreatePlaylistMenu=_showCreatePlaylistMenu.asStateFlow()
+    private val _closeMenu =MutableStateFlow(false)
+
+    val closeMenu=_closeMenu.asStateFlow()
 
     val changes= mutableListOf<PlaylistChange>()
 
@@ -34,8 +37,8 @@ class ModalSheetBottomMenuViewModel @Inject constructor(private val videoReposit
     fun deleteVideo(videoId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             videoRepository.deleteVideo(videoId)
+            close()
         }
-
     }
 
     fun createPlaylist(playlistName: String) {
@@ -93,6 +96,17 @@ class ModalSheetBottomMenuViewModel @Inject constructor(private val videoReposit
         }else{
             changes.add(PlaylistChange(playListId,videoId,checked))
         }
+    }
+
+    fun close() {
+        _closeMenu.value=true
+    }
+
+    fun deleteVideoFromPlaylist(selectedVideoId: String, playlistId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            videoRepository.deletePlaylistSavedVideo(playlistId,selectedVideoId)
+        }
+
     }
 
 }

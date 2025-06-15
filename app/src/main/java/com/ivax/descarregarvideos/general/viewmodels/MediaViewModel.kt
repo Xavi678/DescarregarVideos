@@ -8,6 +8,7 @@ import androidx.media3.session.MediaController
 import com.ivax.descarregarvideos.repository.MediaPlayerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
@@ -18,8 +19,10 @@ class MediaViewModel @Inject constructor(private val mediaPlayerRepository:Media
     val isMediaPlayerVisible = mediaPlayerRepository.getMediaPlayerVisibility()
     fun setMediaController(mediaController: MediaController){
         mediaPlayerRepository.setMediaController(mediaController)
+        _isMediaControllerReady.value=true
     }
-
+    private val _isMediaControllerReady=MutableStateFlow(false)
+    val isMediaControllerReady=_isMediaControllerReady.asStateFlow()
     val currentMedia=mediaPlayerRepository.getCurrentMedia()
     fun addItemMedia(mediaItem: MediaItem){
         mediaPlayerRepository.addItemMedia(mediaItem)

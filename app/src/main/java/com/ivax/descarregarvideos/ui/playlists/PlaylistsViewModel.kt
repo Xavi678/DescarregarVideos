@@ -104,6 +104,9 @@ class PlaylistsViewModel @Inject constructor(private val videoRepository: VideoR
     }
 
     fun deletePlaylist(playlistId: Int) {
-        videoRepository.deletePlaylist(playlistId = playlistId)
+        viewModelScope.launch(Dispatchers.IO) {
+            videoRepository.deletePlaylist(playlistId = playlistId)
+        }
+
     }
 }

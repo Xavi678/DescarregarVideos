@@ -60,7 +60,7 @@ fun SearchAudioScreen(savedVideosViewModel: SavedVideosViewModel = viewModel(),
     val selectedVideoId by
     savedVideosViewModel.bottomSheetParameter.collectAsStateWithLifecycle()
     if(selectedVideoId!=null) {
-        ModalSheetBottomMenu(selectedVideoId!!,modalSheetBottomMenuViewModel){
+        ModalSheetBottomMenu(selectedVideoId!!,null,modalSheetBottomMenuViewModel){
             savedVideosViewModel.resetSelectedVideo()
         }
     }

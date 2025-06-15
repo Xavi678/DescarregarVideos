@@ -65,8 +65,9 @@ fun EditPlaylistScreen(
     }
     val selectedVideoId by
     viewModel.bottomSheetParameter.collectAsStateWithLifecycle()
+    val selectedPlaylistId by viewModel.selectedPlaylistId.collectAsStateWithLifecycle()
     if (selectedVideoId != null) {
-        ModalSheetBottomMenu(selectedVideoId!!, modalSheetBottomMenuViewModel, onClose = fun() {
+        ModalSheetBottomMenu(selectedVideoId!!,selectedPlaylistId!!, modalSheetBottomMenuViewModel, onClose = fun() {
             viewModel.resetSelectedVideo()
 
         })
@@ -89,20 +90,35 @@ fun Top(viewModel: EditPlaylistViewModel) {
 @Composable
 fun Playlists(viewModel: EditPlaylistViewModel) {
     var playlistIdWithPositions by remember { mutableStateOf<List<VideosWithPositionFoo>>(emptyList()) }
-    LaunchedEffect(viewModel.playlistIdWithPositions.collectAsStateWithLifecycle()) {
+    val _playlistIdWithPositions by viewModel.playlistIdWithPositions.collectAsStateWithLifecycle()
+    if (_playlistIdWithPositions != null) {
+        playlistIdWithPositions = _playlistIdWithPositions!!
+    }
+    /*LaunchedEffect(viewModel.playlistIdWithPositions.collectAsStateWithLifecycle()) {
         val playlistIdWithPositions_ = viewModel.playlistIdWithPositions.value
         if (playlistIdWithPositions_ != null) {
             playlistIdWithPositions = playlistIdWithPositions_
         }
-    }
+    }*/
     var draggingItem by remember { mutableStateOf<LazyListItemInfo?>(null) }
     Log.d("DescarregarVideos", "Drag remember " + draggingItem?.key)
     val rememberLazyListState = rememberLazyListState()
     var currentDelta by remember { mutableFloatStateOf(0f) }
     var index by remember { mutableStateOf<Int?>(null) }
     fun changePosition(i: Int, j: Int) {
-        playlistIdWithPositions =
-            playlistIdWithPositions.toMutableList().apply { add(i, removeAt(j)) }
+        val tmp = playlistIdWithPositions.toMutableList().apply {
+
+            val removed = removeAt(j)
+            add(i, removed)
+        }
+        tmp.forEachIndexed {
+                           index, videosWithPositionFoo ->
+            videosWithPositionFoo.position=index
+        }
+
+        playlistIdWithPositions = tmp
+
+        Log.d("DescarregarVideos", i.toString())
     }
     LazyColumn(
         modifier = Modifier
@@ -131,7 +147,7 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
                         draggingItem = null
                         index = null
                         viewModel.detectChanges(playlistIdWithPositions = playlistIdWithPositions)
-                        //Log.d("DescarregarVideos", "Drag End ")
+                        Log.d("DescarregarVideos", "Drag End ")
                     },
                     onDragCancel = {
                         currentDelta = 0f
@@ -162,11 +178,11 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
                                         "DescarregarVideos",
                                         "Drag previousItem.offset  + (dragPreviousItemSize/2) ${(previousItem.offset + (dragPreviousItemSize / 2))}"
                                     )
-                                    if ((dragItemOffset + currentDelta)< (previousItem.offset + (dragPreviousItemSize / 2))) {
+                                    if ((dragItemOffset + currentDelta) < (previousItem.offset + (dragPreviousItemSize / 2))) {
                                         changePosition(index!!, previousItem.index)
                                         draggingItem = previousItem
                                         index = previousItem.index
-                                        currentDelta=0f
+                                        currentDelta = 0f
                                         //currentDelta += draggingItem!!.offset - previousItem.offset
                                     }
                                 }
@@ -181,17 +197,17 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
                                         val dragNextItemSize = nextItem.size
                                         Log.d(
                                             "DescarregarVideos",
-                                            "Drag (draggingItem!!.size+dragItemOffset) + Current delta ${(draggingItem!!.size+dragItemOffset) + currentDelta}"
+                                            "Drag (draggingItem!!.size+dragItemOffset) + Current delta ${(draggingItem!!.size + dragItemOffset) + currentDelta}"
                                         )
                                         Log.d(
                                             "DescarregarVideos",
                                             "Drag nextItem.offset  + (dragNextItemSize/2) ${(nextItem.offset + (dragNextItemSize / 2))}"
                                         )
-                                        if ((draggingItem!!.size+ dragItemOffset) + currentDelta > (nextItem.offset + (dragNextItemSize / 2))) {
+                                        if ((draggingItem!!.size + dragItemOffset) + currentDelta > (nextItem.offset + (dragNextItemSize / 2))) {
                                             changePosition(index!!, nextItem.index)
                                             draggingItem = nextItem
                                             index = nextItem.index
-                                            currentDelta=0f
+                                            currentDelta = 0f
                                             //currentDelta += draggingItem!!.offset - nextItem.offset
                                         }
                                     }
@@ -224,17 +240,6 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
                 rememberLazyListState,
                 viewModel,
                 modifier
-                /*setDraggingItem = fun(currentDraggingitem: LazyListItemInfo) {
-                    draggingItem = currentDraggingitem
-                },
-                onDragEnd = fun(){
-                    viewModel.detectChanges(playlistIdWithPositions)
-                },
-                getCurrentDraggingItem = fun(): LazyListItemInfo? { return draggingItem }
-            ) { i, j ->
-                playlistIdWithPositions =
-                    playlistIdWithPositions.toMutableList().apply { add(i, removeAt(j)) }
-            }*/
             )
         }
 
@@ -244,16 +249,11 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
 @Composable
 fun ListItem(
     videosWithPositionFoo: VideosWithPositionFoo,
-    //getCurrentDelta: ()->Float,
-    //setCurrentDelta:(delta: Float)->Unit,
+
     index: Int,
     state: LazyListState,
     viewModel: EditPlaylistViewModel,
     modifier: Modifier
-    /*getCurrentDraggingItem: () -> LazyListItemInfo?,
-    setDraggingItem: (draggingItem: LazyListItemInfo) -> Unit,
-    onDragEnd: ()->Unit,
-    changePosition: (i: Int, j: Int) -> Unit*/
 
 ) {
 

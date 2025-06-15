@@ -19,7 +19,7 @@ hilt = "2.50"
 composeVersion = "1.7.8"
 
 roomVersion = "2.6.1"
-exoplayerVersion="1.5.1"
+exoplayerVersion="1.7.1"
 splashVersion="1.0.0"
 
 activityComposeVersion="1.10.0"
@@ -54,6 +54,7 @@ android-composer-runtime={group="androidx.compose.runtime", name="runtime",versi
 android-exoplayer = {group="androidx.media3", name="media3-exoplayer",version.ref="exoplayerVersion"}
 android-exoplayer-dash = {group="androidx.media3", name="media3-exoplayer-dash",version.ref="exoplayerVersion"}
 android-exoplayer-ui={group="androidx.media3", name="media3-ui",version.ref="exoplayerVersion"}
+android-exoplayer-ui-compose={group="androidx.media3", name="media3-ui-compose",version.ref="exoplayerVersion"}
 android-exoplayer-session={group="androidx.media3", name="media3-session",version.ref="exoplayerVersion"}
 android-splash-screen={group="androidx.core", name="core-splashscreen", version.ref="splashVersion"}
 android-compose-ui={group="androidx.compose.ui",name="ui"}

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -28,15 +29,45 @@ import com.ivax.descarregarvideos.ui.saved.videos.SavedVideosViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShowBottomDialogVideoMenu(videoId: String,onClose:(deleteVideo: Boolean)->Unit,onShowPlayListMenu:()->Unit) {
+fun ShowBottomDialogVideoMenu(
+    playlistId: Int?,
+    onClose: (deleteVideo: Boolean, deleteVideoFromPlaylist: Boolean) -> Unit,
+    onShowPlayListMenu: () -> Unit
+) {
 
 
-        ModalBottomSheet(
-            onDismissRequest = {
-                onClose(false)
-            }, containerColor = Color(29, 27, 32, 255)
-        ) {
-            Column {
+    ModalBottomSheet(
+        onDismissRequest = {
+            onClose(false, false)
+        }, containerColor = Color(29, 27, 32, 255)
+    ) {
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .clickable(
+                        enabled = true,
+                        onClick = {
+                            onClose(true, false)
+                        },
+                        indication = ripple(color = MaterialTheme.colorScheme.primary),
+                        interactionSource = remember { MutableInteractionSource() }
+                    )
+                    .align(alignment = Alignment.CenterHorizontally)) {
+
+                Icon(
+                    imageVector = Icons.Default.DeleteForever,
+                    contentDescription = null,
+                    tint = Color.White
+                )
+
+                Text(
+                    text = "Borrar Audio", color = Color.White,
+                    modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                )
+            }
+            if (playlistId != null) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -44,7 +75,8 @@ fun ShowBottomDialogVideoMenu(videoId: String,onClose:(deleteVideo: Boolean)->Un
                         .clickable(
                             enabled = true,
                             onClick = {
-                                onClose(true)
+
+                                onClose(false, true)
                             },
                             indication = ripple(color = MaterialTheme.colorScheme.primary),
                             interactionSource = remember { MutableInteractionSource() }
@@ -52,43 +84,45 @@ fun ShowBottomDialogVideoMenu(videoId: String,onClose:(deleteVideo: Boolean)->Un
                         .align(alignment = Alignment.CenterHorizontally)) {
 
                     Icon(
-                        imageVector = Icons.Default.DeleteForever,
+                        imageVector = Icons.Default.Delete,
                         contentDescription = null,
                         tint = Color.White
                     )
 
                     Text(
-                        text = "Delete Audio", color = Color.White,
-                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
-                    )
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                        .clickable(
-                            enabled = true,
-                            onClick = {
-
-                                onShowPlayListMenu()
-                            },
-                            indication = ripple(color = MaterialTheme.colorScheme.primary),
-                            interactionSource = remember { MutableInteractionSource() }
-                        )
-                        .align(alignment = Alignment.CenterHorizontally)) {
-
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null,
-                        tint = Color.White
-                    )
-
-                    Text(
-                        text = "Afegir a la Playlist", color = Color.White,
+                        text = "Borrar de la Playlist", color = Color.White,
                         modifier = Modifier.align(alignment = Alignment.CenterVertically)
                     )
                 }
             }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .clickable(
+                        enabled = true,
+                        onClick = {
+
+                            onShowPlayListMenu()
+                        },
+                        indication = ripple(color = MaterialTheme.colorScheme.primary),
+                        interactionSource = remember { MutableInteractionSource() }
+                    )
+                    .align(alignment = Alignment.CenterHorizontally)) {
+
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    tint = Color.White
+                )
+
+                Text(
+                    text = "Afegir a la Playlist", color = Color.White,
+                    modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                )
+            }
+
+        }
 
     }
 
