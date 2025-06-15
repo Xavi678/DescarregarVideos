@@ -29,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -41,6 +42,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ivax.descarregarvideos.R
@@ -86,34 +88,143 @@ fun Top(viewModel: EditPlaylistViewModel) {
 
 @Composable
 fun Playlists(viewModel: EditPlaylistViewModel) {
-    var playlistIdWithPositions by remember { mutableStateOf<List<Pair<VideosWithPositionFoo,Float>>>(emptyList()) }
+    var playlistIdWithPositions by remember { mutableStateOf<List<VideosWithPositionFoo>>(emptyList()) }
     LaunchedEffect(viewModel.playlistIdWithPositions.collectAsStateWithLifecycle()) {
         val playlistIdWithPositions_ = viewModel.playlistIdWithPositions.value
         if (playlistIdWithPositions_ != null) {
-            playlistIdWithPositions = playlistIdWithPositions_.map { it.to(0f) }
+            playlistIdWithPositions = playlistIdWithPositions_
         }
     }
     var draggingItem by remember { mutableStateOf<LazyListItemInfo?>(null) }
     Log.d("DescarregarVideos", "Drag remember " + draggingItem?.key)
     val rememberLazyListState = rememberLazyListState()
-    LazyColumn(modifier = Modifier.fillMaxSize(), state = rememberLazyListState) {
+    var currentDelta by remember { mutableFloatStateOf(0f) }
+    var index by remember { mutableStateOf<Int?>(null) }
+    fun changePosition(i: Int, j: Int) {
+        playlistIdWithPositions =
+            playlistIdWithPositions.toMutableList().apply { add(i, removeAt(j)) }
+    }
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(
+                key1 = rememberLazyListState
+            ) {
+                detectDragGesturesAfterLongPress(
+                    onDragStart = { offset ->
+                        val found = rememberLazyListState.layoutInfo.visibleItemsInfo
+                            .firstOrNull { item -> item.offset <= offset.y.toInt() && offset.y.toInt() <= (item.offset + item.size) }
+                        found?.let {
+                            /*Log.d("DescarregarVideos", "Drag Start Offset= " + it.offset)
+                            Log.d(
+                                "DescarregarVideos",
+                                "Drag Start Offset+Size= " + (it.offset + it.size)
+                            )
+                            Log.d("DescarregarVideos", "Drag Start Y= " + offset.y.toInt())
+*/
+                            index = it.index
+                            draggingItem = it
+                        }
+                    },
+                    onDragEnd = {
+                        currentDelta = 0f
+                        draggingItem = null
+                        index = null
+                        viewModel.detectChanges(playlistIdWithPositions = playlistIdWithPositions)
+                        //Log.d("DescarregarVideos", "Drag End ")
+                    },
+                    onDragCancel = {
+                        currentDelta = 0f
+                        draggingItem = null
+                        index = null
+                        //Log.d("DescarregarVideos", "Drag Cancel ")
+                    },
+                    onDrag = { change, dragAmount ->
+                        change.consume()
+                        currentDelta += dragAmount.y.toInt()
+                        //Log.d("DescarregarVideos", "Drag onDrag current Item " + draggingItem?.key)
+                        if (draggingItem != null && index != null) {
+                            //Log.d("DescarregarVideos", "Drag onDrag Not Null")
+                            val dragItemOffset = draggingItem!!.offset
+                            if (currentDelta < 0) {
+                                Log.d("DescarregarVideos", "Drag Current delta $currentDelta")
+                                val previousItem =
+                                    rememberLazyListState.layoutInfo.visibleItemsInfo.getOrNull(
+                                        index!! - 1
+                                    )
+                                if (previousItem != null) {
+                                    val dragPreviousItemSize = previousItem.size
+                                    Log.d(
+                                        "DescarregarVideos",
+                                        "Drag dragItemOffset + Current delta ${dragItemOffset + currentDelta}"
+                                    )
+                                    Log.d(
+                                        "DescarregarVideos",
+                                        "Drag previousItem.offset  + (dragPreviousItemSize/2) ${(previousItem.offset + (dragPreviousItemSize / 2))}"
+                                    )
+                                    if ((dragItemOffset + currentDelta)< (previousItem.offset + (dragPreviousItemSize / 2))) {
+                                        changePosition(index!!, previousItem.index)
+                                        draggingItem = previousItem
+                                        index = previousItem.index
+                                        currentDelta=0f
+                                        //currentDelta += draggingItem!!.offset - previousItem.offset
+                                    }
+                                }
 
-        itemsIndexed(playlistIdWithPositions, key = { index, item ->
-            item.first.videoId
-        }) { index, item ->
+                            } else {
+                                if (rememberLazyListState.layoutInfo.totalItemsCount > index!! + 1) {
+                                    val nextItem =
+                                        rememberLazyListState.layoutInfo.visibleItemsInfo.getOrNull(
+                                            index!! + 1
+                                        )
+                                    if (nextItem != null) {
+                                        val dragNextItemSize = nextItem.size
+                                        Log.d(
+                                            "DescarregarVideos",
+                                            "Drag (draggingItem!!.size+dragItemOffset) + Current delta ${(draggingItem!!.size+dragItemOffset) + currentDelta}"
+                                        )
+                                        Log.d(
+                                            "DescarregarVideos",
+                                            "Drag nextItem.offset  + (dragNextItemSize/2) ${(nextItem.offset + (dragNextItemSize / 2))}"
+                                        )
+                                        if ((draggingItem!!.size+ dragItemOffset) + currentDelta > (nextItem.offset + (dragNextItemSize / 2))) {
+                                            changePosition(index!!, nextItem.index)
+                                            draggingItem = nextItem
+                                            index = nextItem.index
+                                            currentDelta=0f
+                                            //currentDelta += draggingItem!!.offset - nextItem.offset
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                )
+            }, state = rememberLazyListState
+    ) {
+
+        itemsIndexed(playlistIdWithPositions, key = { idx, item ->
+            item.videoId
+        }) { idx, item ->
+
+            val modifier = if (idx == index) {
+                //Log.d("DescarregarVideos", "Modifier Drag Index= " + index)
+                Modifier
+                    .zIndex(1f)
+                    .graphicsLayer {
+                        translationY = currentDelta
+                    }
+            } else {
+                Modifier
+            }
             ListItem(
-                item.first,
-                getCurrentDelta =  fun(): Float{
-                   return item.second
-                },
-                setCurrentDelta= fun(delta: Float){
-                        //item.second=delta
-                }
-                ,
-                index,
+                item,
+                idx,
                 rememberLazyListState,
                 viewModel,
-                setDraggingItem = fun(currentDraggingitem: LazyListItemInfo) {
+                modifier
+                /*setDraggingItem = fun(currentDraggingitem: LazyListItemInfo) {
                     draggingItem = currentDraggingitem
                 },
                 onDragEnd = fun(){
@@ -123,7 +234,8 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
             ) { i, j ->
                 playlistIdWithPositions =
                     playlistIdWithPositions.toMutableList().apply { add(i, removeAt(j)) }
-            }
+            }*/
+            )
         }
 
     }
@@ -132,27 +244,19 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
 @Composable
 fun ListItem(
     videosWithPositionFoo: VideosWithPositionFoo,
-    getCurrentDelta: ()->Float,
-    setCurrentDelta:(delta: Float)->Unit,
+    //getCurrentDelta: ()->Float,
+    //setCurrentDelta:(delta: Float)->Unit,
     index: Int,
     state: LazyListState,
     viewModel: EditPlaylistViewModel,
-    getCurrentDraggingItem: () -> LazyListItemInfo?,
+    modifier: Modifier
+    /*getCurrentDraggingItem: () -> LazyListItemInfo?,
     setDraggingItem: (draggingItem: LazyListItemInfo) -> Unit,
     onDragEnd: ()->Unit,
-    changePosition: (i: Int, j: Int) -> Unit
+    changePosition: (i: Int, j: Int) -> Unit*/
 
 ) {
-    //var currentDelta by remember { mutableFloatStateOf(0f) }
-    /*val offset by animateIntOffsetAsState(
-        targetValue = if (isMoving) {
-            Log.d("DescarregarVideos", "${currentDelta}")
-            IntOffset(0, currentDelta)
-        } else {
-            IntOffset.Zero
-        },
-        label = "offset"
-    )*/
+
     var bmp: Bitmap
     var fileInStream = FileInputStream(videosWithPositionFoo.imgUrl)
     fileInStream.use {
@@ -161,79 +265,9 @@ fun ListItem(
 
     fileInStream.close()
     Column(
-        modifier = Modifier
-            .graphicsLayer {
-                translationY=getCurrentDelta()
-            }
-            .pointerInput(
-                key1 = state
-            ) {
-                detectDragGesturesAfterLongPress(
-                    onDragStart = { offset ->
-                        //isMoving = true
-                        val item = state.layoutInfo.visibleItemsInfo[index]
-                        setDraggingItem(item)
+        modifier = modifier
 
-                        Log.d("DescarregarVideos", "Drag Start " + item.key)
-                    },
-                    onDragEnd = {
-                        setCurrentDelta(0f)
-                        onDragEnd()
-                        Log.d("DescarregarVideos", "Drag End ")
-                    },
-                    onDragCancel = {
-                        setCurrentDelta(0f)
-                        Log.d("DescarregarVideos", "Drag Cancel ")
-                    },
-                    onDrag = { change, dragAmount ->
-                        change.consume()
-                        var currentDelta=getCurrentDelta()
-                        currentDelta+=dragAmount.y.toInt()
-                        setCurrentDelta( currentDelta)
-                        val draggingItem = getCurrentDraggingItem()
-                        Log.d("DescarregarVideos","Drag onDrag current Item "+draggingItem?.key)
-                        if (draggingItem != null) {
-                            Log.d("DescarregarVideos", "Drag onDrag Not Null")
-                            val dragItemOffset = draggingItem.offset
-                            if (currentDelta < 0) {
-                                val previousItem =
-                                    state.layoutInfo.visibleItemsInfo.getOrNull(index - 1)
-                                if (previousItem != null) {
-                                    val dragPreviousItemSize = previousItem.size
-                                    Log.d(
-                                        "DescarregarVideos",
-                                        "Offset previous; " + (dragItemOffset - currentDelta).toString()
-                                    )
-                                    Log.d(
-                                        "DescarregarVideos",
-                                        "Width previous; " + (dragPreviousItemSize / 2).toString()
-                                    )
-                                    if (dragItemOffset + currentDelta < (dragPreviousItemSize / 2)) {
-                                        changePosition(index, previousItem.index)
-                                        setDraggingItem(state.layoutInfo.visibleItemsInfo[previousItem.index])
-                                        //change.consume()
-                                    }
-                                }
-
-                            } else {
-                                if (state.layoutInfo.totalItemsCount > index + 1) {
-                                    val nextItem =
-                                        state.layoutInfo.visibleItemsInfo.getOrNull(index + 1)
-                                    if (nextItem != null) {
-                                        val dragNextItemSize = nextItem.size
-                                        if (dragItemOffset + currentDelta > (dragNextItemSize / 2)) {
-                                            changePosition(index, nextItem.index)
-                                            setDraggingItem(state.layoutInfo.visibleItemsInfo[nextItem.index])
-
-                                        }
-                                    }
-
-                                }
-                            }
-                        }
-                    }
-                )
-            }) {
+    ) {
 
 
         Row() {

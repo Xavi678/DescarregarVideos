@@ -107,11 +107,11 @@ class EditPlaylistViewModel @Inject constructor(
 
     }
 
-    fun detectChanges(playlistIdWithPositions: List<Pair<VideosWithPositionFoo, Float>>) {
+    fun detectChanges(playlistIdWithPositions: List<VideosWithPositionFoo>) {
         for (changed in playlistIdWithPositions) {
             val found =
-                _playlistIdWithPositions.value?.firstOrNull { it.videoId == changed.first.videoId }
-            if (found != null && changed.first.position!=found.position) {
+                _playlistIdWithPositions.value?.firstOrNull { it.videoId == changed.videoId }
+            if (found != null && changed.position!=found.position) {
                 viewModelScope.launch(context = Dispatchers.IO) {
                     videoRepository.updatePosition(found.videoId,found.position,playlistId)
                 }
