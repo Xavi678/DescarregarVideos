@@ -12,45 +12,60 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
-class MediaViewModel @Inject constructor(private val mediaPlayerRepository:MediaPlayerRepository) : ViewModel() {
+class MediaViewModel @Inject constructor(private val mediaPlayerRepository: MediaPlayerRepository) :
+    ViewModel() {
 
     //val currentThumbnail=mediaPlayerRepository.getCurrentThumbnail()
-    val isMediaPlayerMaximized=mediaPlayerRepository.isMediaPlayerMaximized()
+    val isMediaPlayerMaximized = mediaPlayerRepository.isMediaPlayerMaximized()
     val isMediaPlayerVisible = mediaPlayerRepository.getMediaPlayerVisibility()
-    fun setMediaController(mediaController: MediaController){
+    fun setMediaController(mediaController: MediaController) {
         mediaPlayerRepository.setMediaController(mediaController)
-        _isMediaControllerReady.value=true
+        _isMediaControllerReady.value = true
     }
-    private val _isMediaControllerReady=MutableStateFlow(false)
-    val isMediaControllerReady=_isMediaControllerReady.asStateFlow()
-    val currentMedia=mediaPlayerRepository.getCurrentMedia()
-    fun addItemMedia(mediaItem: MediaItem){
+
+    private val _mediaStateUi = MutableStateFlow<MediaStateUi.MetaDataStateUi?>(null)
+    val mediaStateUi = _mediaStateUi.asStateFlow()
+    private val _isMediaControllerReady = MutableStateFlow(false)
+    val isMediaControllerReady = _isMediaControllerReady.asStateFlow()
+    val currentMedia = mediaPlayerRepository.getCurrentMedia()
+    fun addItemMedia(mediaItem: MediaItem) {
         mediaPlayerRepository.addItemMedia(mediaItem)
     }
-    private val _playlistHasPrevious : MutableStateFlow<Boolean> by lazy {
+
+    private val _playlistHasPrevious: MutableStateFlow<Boolean> by lazy {
         MutableStateFlow(false)
     }
-    private val _playlistHasNext : MutableStateFlow<Boolean> by lazy {
+    private val _playlistHasNext: MutableStateFlow<Boolean> by lazy {
         MutableStateFlow(false)
     }
-    private val _title : MutableStateFlow<String?> by lazy{
+    private val _title: MutableStateFlow<String?> by lazy {
         MutableStateFlow(null)
     }
-    private val _playlistName : MutableStateFlow<String?> by lazy{
+    private val _playlistName: MutableStateFlow<String?> by lazy {
         MutableStateFlow(null)
     }
-    private val _thumbnail : MutableStateFlow<Bitmap?> by lazy{
+    private val _thumbnail: MutableStateFlow<Bitmap?> by lazy {
         MutableStateFlow(null)
     }
 
-    fun getMediaPlayer() : MediaController{
+    fun getMediaPlayer(): MediaController {
 
-       return mediaPlayerRepository.getMediaPlayer()
+        return mediaPlayerRepository.getMediaPlayer()
     }
-    val playlistHasPrevious get() =_playlistHasPrevious
-    val playlistHasNext get() =_playlistHasNext
-    val title get()= _title
-    val thumbnail get()=_thumbnail
-    val playlistName get()=_playlistName
 
+    fun setMetaData(playlistName: String?, artwork: Bitmap, title: String?) {
+        _mediaStateUi.value = MediaStateUi.MetaDataStateUi(playlistName, artwork, title)
+    }
+
+    val playlistHasPrevious get() = _playlistHasPrevious
+    val playlistHasNext get() = _playlistHasNext
+    val title get() = _title
+    val thumbnail get() = _thumbnail
+    val playlistName get() = _playlistName
+
+}
+
+sealed class MediaStateUi {
+    data class MetaDataStateUi(val playlistName: String?, val artwork: Bitmap, val title: String?) :
+        MediaStateUi()
 }

@@ -513,7 +513,7 @@ class MainActivity : AppCompatActivity() {
                     startDestination = Route.Search,
                     navigateTo = navigateTo
                 )
-                MusicPlayer(modifier = Modifier.width(220.dp).height(220.dp))
+                MusicPlayer(modifier = Modifier.fillMaxWidth().height(200.dp).padding(start = 16.dp, end = 16.dp, bottom = 12.dp))
             }
         }
     }
