@@ -30,6 +30,7 @@ class MediaHelper @Inject constructor(private val appContext: Context) : IMediaH
     override fun play(){
         mediaController.prepare()
         mediaController.play()
+        isMediaPlayerVisible.value=true
     }
     override fun clear(){
         if(mediaController.mediaItemCount>0){

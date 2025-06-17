@@ -188,7 +188,7 @@ fun Item(playlistWithOrderedVideosFoo: PlaylistWithOrderedVideosFoo, function: (
             ) {
                 Text(playlistWithOrderedVideosFoo.playlist.name.toString())
                 PlayButton(onClickDelegate = fun() {
-
+                    playlistsViewModel.playAll(playlistWithOrderedVideosFoo)
                 })
 
             }

@@ -82,7 +82,7 @@ fun Top(viewModel: EditPlaylistViewModel) {
     Text(playlist?.name.toString())
     Spacer(modifier = Modifier.width(8.dp))
     PlayButton(onClickDelegate = {
-
+        viewModel.playAll()
     })
 }
 
@@ -94,12 +94,7 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
     if (_playlistIdWithPositions != null) {
         playlistIdWithPositions = _playlistIdWithPositions!!
     }
-    /*LaunchedEffect(viewModel.playlistIdWithPositions.collectAsStateWithLifecycle()) {
-        val playlistIdWithPositions_ = viewModel.playlistIdWithPositions.value
-        if (playlistIdWithPositions_ != null) {
-            playlistIdWithPositions = playlistIdWithPositions_
-        }
-    }*/
+
     var draggingItem by remember { mutableStateOf<LazyListItemInfo?>(null) }
     Log.d("DescarregarVideos", "Drag remember " + draggingItem?.key)
     val rememberLazyListState = rememberLazyListState()

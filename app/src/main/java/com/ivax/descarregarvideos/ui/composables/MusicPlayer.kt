@@ -22,6 +22,10 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -70,8 +74,8 @@ import java.io.FileInputStream
 
 @OptIn(UnstableApi::class)
 @Composable
-fun MusicPlayer(modifier: Modifier,mediaViewModel: MediaViewModel= hiltViewModel()) {
-    val context= LocalContext.current
+fun MusicPlayer(modifier: Modifier, mediaViewModel: MediaViewModel = hiltViewModel()) {
+    val context = LocalContext.current
     var player by remember { mutableStateOf<MediaController?>(null) }
     LaunchedEffect(Unit) {
         lateinit var controllerFuture: ListenableFuture<MediaController>
@@ -119,6 +123,7 @@ fun MusicPlayer(modifier: Modifier,mediaViewModel: MediaViewModel= hiltViewModel
 
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
                         //hasNextAndPreviousMedia()
+
                         super.onIsPlayingChanged(isPlaying)
                     }
 
@@ -138,7 +143,11 @@ fun MusicPlayer(modifier: Modifier,mediaViewModel: MediaViewModel= hiltViewModel
                             }
                             fileInStream.close()
 
-                            mediaViewModel.setMetaData(playlistName?.toString(),bmp,title.toString())
+                            mediaViewModel.setMetaData(
+                                playlistName?.toString(),
+                                bmp,
+                                title.toString()
+                            )
                             /*mediaViewModel.playlistName.update {
                                 playlistName?.toString()
                             }
@@ -165,21 +174,32 @@ fun MusicPlayer(modifier: Modifier,mediaViewModel: MediaViewModel= hiltViewModel
     }
 
     val ready by mediaViewModel.isMediaControllerReady.collectAsStateWithLifecycle()
-    if(ready) {
+    if (ready) {
         var showControls by remember { mutableStateOf(true) }
         val presentationState = rememberPresentationState(player!!)
 
         val metaDataUi by mediaViewModel.mediaStateUi.collectAsStateWithLifecycle()
-
-        Box(modifier = modifier.background(Color.Black).clip(RoundedCornerShape(12.dp)).shadow(1.dp)) {
-
-                Row(Modifier.align(alignment = Alignment.TopStart).zIndex(9999f).padding(top = 8.dp, start = 8.dp, end = 8.dp)) {
-                    if(metaDataUi!=null) {
+        val isMediaVisible by mediaViewModel.isMediaPlayerVisible.collectAsStateWithLifecycle()
+        if (isMediaVisible) {
+            Box(modifier = modifier.background(Color.Black)) {
+                IconButton(onClick = {
+                    mediaViewModel.minimize()
+                },modifier=Modifier.align(alignment = Alignment.TopEnd)) {
+                    Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = "Minimize/Maximize Player Button"
+                    , tint = Color.White)
+                }
+                Row(
+                    Modifier
+                        .align(alignment = Alignment.TopStart)
+                        .zIndex(9999f)
+                        .padding(top = 8.dp, start = 8.dp, end = 8.dp)
+                ) {
+                    if (metaDataUi != null) {
 
                         Image(
                             bitmap = metaDataUi!!.artwork.asImageBitmap(),
                             contentDescription = "Thumbnail Video",
-                            modifier=Modifier.width(86.dp)
+                            modifier = Modifier.width(86.dp)
                         )
                         Column {
                             Text(
@@ -188,7 +208,7 @@ fun MusicPlayer(modifier: Modifier,mediaViewModel: MediaViewModel= hiltViewModel
                                 modifier = Modifier.basicMarquee(),
                                 fontSize = 18.sp
                             )
-                            if(metaDataUi!!.playlistName!=null) {
+                            if (metaDataUi!!.playlistName != null) {
                                 Text(
                                     text = metaDataUi!!.playlistName.toString(),
                                     color = Color.White,
@@ -199,13 +219,20 @@ fun MusicPlayer(modifier: Modifier,mediaViewModel: MediaViewModel= hiltViewModel
                     }
                 }
                 AndroidView(
-                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).align(alignment = Alignment.BottomCenter).padding(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .align(alignment = Alignment.BottomCenter)
+                        .padding(16.dp),
                     factory = {
 
                         PlayerView(context).apply {
+                            this.player = player!!
                             controllerAutoShow = false
                             this.showController()
-                            this.player = player!!
+                            setShowNextButton(true)
+                            setShowPreviousButton(true)
+
                             useController = true
                             this.setShowSubtitleButton(false)
                             this.controllerHideOnTouch = false
@@ -214,42 +241,43 @@ fun MusicPlayer(modifier: Modifier,mediaViewModel: MediaViewModel= hiltViewModel
                     }
                 )
 
+            }
         }
     }
-        /*Box(modifier) {
-            PlayerSurface(
-                player = player!!,
-                surfaceType = SURFACE_TYPE_SURFACE_VIEW,
-                modifier = Modifier
-                    .resizeWithContentScale(
-                        ContentScale.Fit,
-                        presentationState.videoSizeDp
-                    )
-                    .clickable(
-                        interactionSource = remember {
-                            MutableInteractionSource()
-                        },
-                        indication = null,
-                    ) {
-                        showControls = !showControls
+    /*Box(modifier) {
+        PlayerSurface(
+            player = player!!,
+            surfaceType = SURFACE_TYPE_SURFACE_VIEW,
+            modifier = Modifier
+                .resizeWithContentScale(
+                    ContentScale.Fit,
+                    presentationState.videoSizeDp
+                )
+                .clickable(
+                    interactionSource = remember {
+                        MutableInteractionSource()
                     },
-            )
+                    indication = null,
+                ) {
+                    showControls = !showControls
+                },
+        )
 
 
-            Row(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(
-                        vertical = 8.dp,
-                        horizontal = 16.dp
-                    ),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                DefaultTimeBar(context).apply {
-                    setPosition(200L)
-                }
-
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(
+                    vertical = 8.dp,
+                    horizontal = 16.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            DefaultTimeBar(context).apply {
+                setPosition(200L)
             }
-        }*/
 
-    }
+        }
+    }*/
+
+}
