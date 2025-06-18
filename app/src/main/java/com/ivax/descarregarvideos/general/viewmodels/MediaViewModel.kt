@@ -16,11 +16,15 @@ class MediaViewModel @Inject constructor(private val mediaPlayerRepository: Medi
     ViewModel() {
 
     //val currentThumbnail=mediaPlayerRepository.getCurrentThumbnail()
-    val isMediaPlayerMaximized = mediaPlayerRepository.isMediaPlayerMaximized()
     //val isMediaPlayerVisible = mediaPlayerRepository.getMediaPlayerVisibility()
+    private val _isPlaying=MutableStateFlow(false)
+    val isPlaying=_isPlaying.asStateFlow()
+    private val _isMediaPlayerVisible = mediaPlayerRepository.getMediaPlayerVisibility()
+    val isMediaPlayerVisible = _isMediaPlayerVisible.asStateFlow()
 
-    private val _isMediaPlayerVisible=mediaPlayerRepository.getMediaPlayerVisibility()
-    val isMediaPlayerVisible=_isMediaPlayerVisible.asStateFlow()
+    private val _isMediaPlayerMaximized = mediaPlayerRepository.isMediaPlayerMaximized()
+    val isMediaPlayerMaximized = _isMediaPlayerMaximized.asStateFlow()
+
     private val _mediaStateUi = MutableStateFlow<MediaStateUi.MetaDataStateUi?>(null)
     val mediaStateUi = _mediaStateUi.asStateFlow()
     private val _isMediaControllerReady = MutableStateFlow(false)
@@ -36,6 +40,7 @@ class MediaViewModel @Inject constructor(private val mediaPlayerRepository: Medi
         mediaPlayerRepository.setMediaController(mediaController)
         _isMediaControllerReady.value = true
     }
+
     fun getMediaPlayer(): MediaController {
 
         return mediaPlayerRepository.getMediaPlayer()
@@ -46,11 +51,19 @@ class MediaViewModel @Inject constructor(private val mediaPlayerRepository: Medi
     }
 
     fun setVisibility(playing: Boolean) {
-        _isMediaPlayerVisible.value=playing
+        _isMediaPlayerVisible.value = playing
     }
 
     fun minimize() {
-        TODO("Not yet implemented")
+        _isMediaPlayerMaximized.value=false
+    }
+
+    fun maximize() {
+        _isMediaPlayerMaximized.value=true
+    }
+
+    fun setPlaying(playing: Boolean) {
+        _isPlaying.value=playing
     }
 }
 

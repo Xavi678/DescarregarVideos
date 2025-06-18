@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.util.AttributeSet
 import android.util.Log
 import androidx.annotation.OptIn
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -24,8 +25,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -36,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.focusRequester
@@ -50,6 +55,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -64,6 +70,7 @@ import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_SURFACE_VIEW
 import androidx.media3.ui.compose.SurfaceType
 import androidx.media3.ui.compose.modifiers.resizeWithContentScale
+import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.media3.ui.compose.state.rememberPresentationState
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
@@ -74,10 +81,10 @@ import java.io.FileInputStream
 
 @OptIn(UnstableApi::class)
 @Composable
-fun MusicPlayer(modifier: Modifier, mediaViewModel: MediaViewModel = hiltViewModel()) {
+fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
     val context = LocalContext.current
     var player by remember { mutableStateOf<MediaController?>(null) }
-    LaunchedEffect(Unit) {
+    LifecycleStartEffect (Unit) {
         lateinit var controllerFuture: ListenableFuture<MediaController>
         val sessionToken =
             SessionToken(context, ComponentName(context, PlaybackService::class.java))
@@ -92,7 +99,7 @@ fun MusicPlayer(modifier: Modifier, mediaViewModel: MediaViewModel = hiltViewMod
                 if (player!!.isPlaying) {
                     val mediaItem = player!!.currentMediaItem
                     if (mediaItem != null) {
-                        mediaViewModel.isMediaPlayerMaximized.postValue(true)
+                        //mediaViewModel.isMediaPlayerMaximized.postValue(true)
                         //setMetadata(mediaItem)
                     }
 
@@ -123,7 +130,7 @@ fun MusicPlayer(modifier: Modifier, mediaViewModel: MediaViewModel = hiltViewMod
 
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
                         //hasNextAndPreviousMedia()
-
+                        mediaViewModel.setPlaying(isPlaying)
                         super.onIsPlayingChanged(isPlaying)
                     }
 
@@ -171,6 +178,10 @@ fun MusicPlayer(modifier: Modifier, mediaViewModel: MediaViewModel = hiltViewMod
             //hasNextAndPreviousMedia()
 
         }
+        onStopOrDispose {
+            player?.release()
+            player=null
+        }
     }
 
     val ready by mediaViewModel.isMediaControllerReady.collectAsStateWithLifecycle()
@@ -180,18 +191,28 @@ fun MusicPlayer(modifier: Modifier, mediaViewModel: MediaViewModel = hiltViewMod
 
         val metaDataUi by mediaViewModel.mediaStateUi.collectAsStateWithLifecycle()
         val isMediaVisible by mediaViewModel.isMediaPlayerVisible.collectAsStateWithLifecycle()
+        val isMediaPlayerMaximized by mediaViewModel.isMediaPlayerMaximized.collectAsStateWithLifecycle()
+        val isPlaying = rememberPlayPauseButtonState(player!!)
         if (isMediaVisible) {
-            Box(modifier = modifier.background(Color.Black)) {
-                IconButton(onClick = {
-                    mediaViewModel.minimize()
-                },modifier=Modifier.align(alignment = Alignment.TopEnd)) {
-                    Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = "Minimize/Maximize Player Button"
-                    , tint = Color.White)
-                }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .animateContentSize()
+                    .height(if (isMediaPlayerMaximized) 200.dp else 100.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        mediaViewModel.maximize()
+                    }
+                    .padding(start = 16.dp, end = 16.dp, bottom = 12.dp, top = 0.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.Black)) {
+
                 Row(
                     Modifier
                         .align(alignment = Alignment.TopStart)
-                        .zIndex(9999f)
+                        .zIndex(100f)
                         .padding(top = 8.dp, start = 8.dp, end = 8.dp)
                 ) {
                     if (metaDataUi != null) {
@@ -199,9 +220,37 @@ fun MusicPlayer(modifier: Modifier, mediaViewModel: MediaViewModel = hiltViewMod
                         Image(
                             bitmap = metaDataUi!!.artwork.asImageBitmap(),
                             contentDescription = "Thumbnail Video",
-                            modifier = Modifier.width(86.dp)
+                            modifier = Modifier.width(86.dp).align(alignment = Alignment.CenterVertically)
                         )
-                        Column {
+                        /*val modifierColumn = if (isMediaPlayerMaximized) {
+                            Modifier.padding(top = 22.dp)
+
+                        } else {
+                            Modifier.padding(top = 0.dp)
+                        }*/
+
+                        Column() {
+                            if (isMediaPlayerMaximized) {
+                                Icon(
+                                    imageVector = Icons.Default.KeyboardArrowDown,
+                                    contentDescription = "Minimize/Maximize Player Button",
+                                    tint = Color.White,
+                                    modifier = Modifier.zIndex(101f)
+                                        .align(alignment = Alignment.End).clickable(interactionSource =
+                                            remember { MutableInteractionSource() }, indication = null){
+                                            mediaViewModel.minimize()
+                                        }
+                                )
+                                /*IconButton(
+                                    onClick = {
+                                        mediaViewModel.minimize()
+                                    }, colors = IconButtonDefaults.iconButtonColors(),
+                                    modifier = Modifier
+
+                                ) {
+
+                                }*/
+                            }
                             Text(
                                 text = metaDataUi!!.title.toString(),
                                 color = Color.White,
@@ -218,28 +267,33 @@ fun MusicPlayer(modifier: Modifier, mediaViewModel: MediaViewModel = hiltViewMod
                         }
                     }
                 }
-                AndroidView(
+                Row(modifier = Modifier.align(alignment = Alignment.TopCenter)) {
+                    IconButton(onClick = {
+                        if(player?.isPlaying == false) {
+                            player?.play()
+                        }else{
+                            player?.stop()
+                        }
+                    }) {
+                        Icon(imageVector = if(player?.isPlaying==false) Icons.Default.Pause else Icons.Default.PlayCircle,
+                            contentDescription = "Play/Pause Button", tint = Color.White)
+                    }
+
+                }
+                /*AndroidView(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
                         .align(alignment = Alignment.BottomCenter)
-                        .padding(16.dp),
+                        .padding(16.dp).alpha(0f),
+
                     factory = {
 
                         PlayerView(context).apply {
                             this.player = player!!
-                            controllerAutoShow = false
-                            this.showController()
-                            setShowNextButton(true)
-                            setShowPreviousButton(true)
-
-                            useController = true
-                            this.setShowSubtitleButton(false)
-                            this.controllerHideOnTouch = false
-                            this.controllerShowTimeoutMs = 0
                         }
                     }
-                )
+                )*/
 
             }
         }

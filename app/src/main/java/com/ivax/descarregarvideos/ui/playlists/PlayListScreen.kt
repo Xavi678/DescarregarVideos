@@ -118,15 +118,7 @@ fun ItemPreview(@PreviewParameter(PlaylistWithOrderedVideosFooPreviewParameterPr
 @Composable
 fun Item(playlistWithOrderedVideosFoo: PlaylistWithOrderedVideosFoo, function: (Int) -> Unit,playlistsViewModel: PlaylistsViewModel = viewModel()
 ){
-    Box(modifier = Modifier.dragAndDropTarget(shouldStartDragAndDrop = {
-        event ->
-        event.mimeTypes().contains(ClipDescription.MIMETYPE_UNKNOWN)
-    }, target = remember {
-        object : DragAndDropTarget{
-            override fun onDrop(event: DragAndDropEvent): Boolean {
-                TODO("Not yet implemented")
-            }
-        } })) {
+    Box() {
 
 
         Row(

@@ -66,7 +66,7 @@ constructor(
     }
 
     fun setMediaVisibility(visibility: Boolean) {
-        mediaPlayerRepository.isMediaPlayerMaximized().postValue(visibility)
+        mediaPlayerRepository.isMediaPlayerMaximized().value=visibility
     }
 
     fun filterSavedVideos(savedVideoName: String) {

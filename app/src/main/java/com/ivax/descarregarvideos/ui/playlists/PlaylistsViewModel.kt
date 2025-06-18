@@ -65,7 +65,7 @@ class PlaylistsViewModel @Inject constructor(private val videoRepository: VideoR
     }
     fun setMediaVisibility(visibility: Boolean){
 
-        mediaPlayerRepository.isMediaPlayerMaximized().postValue(visibility)
+        mediaPlayerRepository.isMediaPlayerMaximized().value=visibility
     }
 
     fun filterPlaylist(playlistName: String): List<PlaylistWithSavedVideos> {

@@ -18,8 +18,8 @@ class MediaHelper @Inject constructor(private val appContext: Context) : IMediaH
     private val actualVideo : MutableLiveData<SavedVideo> by lazy {
         MutableLiveData<SavedVideo>()
     }
-    private val isMaximized : MutableLiveData<Boolean> by lazy {
-        MutableLiveData<Boolean>()
+    private val isMaximized : MutableStateFlow<Boolean> by lazy {
+        MutableStateFlow<Boolean>(true)
     }
 
     private val isMediaPlayerVisible : MutableStateFlow<Boolean> by lazy {
@@ -65,7 +65,7 @@ class MediaHelper @Inject constructor(private val appContext: Context) : IMediaH
         actualVideo.postValue(video)
     }
 
-    override fun isMediaPlayerMaximized(): MutableLiveData<Boolean> {
+    override fun isMediaPlayerMaximized(): MutableStateFlow<Boolean> {
         return isMaximized
     }
 

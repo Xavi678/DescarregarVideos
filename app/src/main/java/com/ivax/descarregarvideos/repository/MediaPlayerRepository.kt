@@ -40,7 +40,7 @@ class MediaPlayerRepository @Inject constructor(private val mediaHelper: IMediaH
         mediaHelper.setSavedVideo(savedVideo)
     }
 
-    fun isMediaPlayerMaximized() : MutableLiveData<Boolean> {
+    fun isMediaPlayerMaximized() : MutableStateFlow<Boolean> {
         return mediaHelper.isMediaPlayerMaximized()
     }
     fun getMediaPlayerVisibility(): MutableStateFlow<Boolean> {

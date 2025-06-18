@@ -485,10 +485,7 @@ class MainActivity : AppCompatActivity() {
                     startDestination = Route.Search,
                     navigateTo = navigateTo
                 )
-                MusicPlayer(modifier = Modifier
-                    .fillMaxWidth().height(200.dp)
-                    .padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
-                    .clip(RoundedCornerShape(12.dp)))
+                MusicPlayer()
             }
         }
     }

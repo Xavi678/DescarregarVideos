@@ -17,7 +17,7 @@ interface IMediaHelper {
     //fun getCurrentThumbnail() : MutableLiveData<Bitmap>
     fun getCurrentMedia() : MutableLiveData<SavedVideo>
     fun setSavedVideo(video: com.ivax.descarregarvideos.entities.SavedVideo)
-    fun isMediaPlayerMaximized() : MutableLiveData<Boolean>
+    fun isMediaPlayerMaximized() : MutableStateFlow<Boolean>
     fun setMediaController(mediaController :MediaController)
     fun addMediaItemList(mediaItem: List<MediaItem>)
     fun setShuffle()
