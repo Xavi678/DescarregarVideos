@@ -3,23 +3,20 @@ package com.ivax.descarregarvideos.ui.composables
 import android.content.ComponentName
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.AttributeSet
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,32 +24,26 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleStartEffect
@@ -63,20 +54,14 @@ import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
-import androidx.media3.ui.DefaultTimeBar
-import androidx.media3.ui.PlayerControlView
-import androidx.media3.ui.PlayerView
-import androidx.media3.ui.compose.PlayerSurface
-import androidx.media3.ui.compose.SURFACE_TYPE_SURFACE_VIEW
-import androidx.media3.ui.compose.SurfaceType
-import androidx.media3.ui.compose.modifiers.resizeWithContentScale
+import androidx.media3.ui.compose.state.rememberNextButtonState
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.media3.ui.compose.state.rememberPresentationState
+import androidx.media3.ui.compose.state.rememberPreviousButtonState
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.ivax.descarregarvideos.general.viewmodels.MediaViewModel
 import com.ivax.descarregarvideos.services.PlaybackService
-import kotlinx.coroutines.flow.update
 import java.io.FileInputStream
 
 @OptIn(UnstableApi::class)
@@ -84,6 +69,8 @@ import java.io.FileInputStream
 fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
     val context = LocalContext.current
     var player by remember { mutableStateOf<MediaController?>(null) }
+    var sliderPosition by remember { mutableFloatStateOf(0f) }
+    var sliderTotalDuration by remember { mutableFloatStateOf(0f) }
     LifecycleStartEffect (Unit) {
         lateinit var controllerFuture: ListenableFuture<MediaController>
         val sessionToken =
@@ -104,9 +91,14 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
                     }
 
                 }
+                fun updateSlider(){
+                    val duration=player!!.duration.coerceAtLeast(1L)
+                    val currentPosition=player!!.currentPosition.coerceAtLeast(1L)
+                    sliderTotalDuration=duration.toFloat()
+                    sliderPosition=currentPosition.toFloat()
+                }
                 //val defaultTimeBar=binding.appBarMain.root.findViewById<DefaultTimeBar>(R.id.defaultTimeBar)
                 //defaultTimeBar.
-
                 player!!.addListener(object : Player.Listener {
                     override fun onPositionDiscontinuity(
                         oldPosition: Player.PositionInfo,
@@ -115,16 +107,19 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
                     ) {
                         Log.d("DescarregarVideos", "Old: ${oldPosition.positionMs}")
                         Log.d("DescarregarVideos", "New: ${newPosition.positionMs}")
+                        updateSlider()
                         super.onPositionDiscontinuity(oldPosition, newPosition, reason)
                     }
 
                     override fun onPlaybackStateChanged(playbackState: Int) {
                         Log.d("DescarregarVideos", "Playback Changed")
+                        updateSlider()
                         super.onPlaybackStateChanged(playbackState)
                     }
 
                     override fun onTimelineChanged(timeline: Timeline, reason: Int) {
                         Log.d("DescarregarVideos", "Timeline Chnaged")
+                        updateSlider()
                         super.onTimelineChanged(timeline, reason)
                     }
 
@@ -134,10 +129,15 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
                         super.onIsPlayingChanged(isPlaying)
                     }
 
+                    override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+                        updateSlider()
+                        super.onPlayWhenReadyChanged(playWhenReady, reason)
+                    }
                     override fun onMediaItemTransition(
                         mediaItem: MediaItem?,
                         @Player.MediaItemTransitionReason reason: Int
                     ) {
+                        updateSlider()
                         if (mediaItem != null) {
                             //setMetadata(mediaItem)
                             val title = mediaItem.mediaMetadata.title
@@ -193,6 +193,9 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
         val isMediaVisible by mediaViewModel.isMediaPlayerVisible.collectAsStateWithLifecycle()
         val isMediaPlayerMaximized by mediaViewModel.isMediaPlayerMaximized.collectAsStateWithLifecycle()
         val isPlaying = rememberPlayPauseButtonState(player!!)
+        val nextButton = rememberNextButtonState(player!!)
+        val previousButton= rememberPreviousButtonState(player!!)
+
         if (isMediaVisible) {
             Box(
                 modifier = Modifier
@@ -222,13 +225,7 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
                             contentDescription = "Thumbnail Video",
                             modifier = Modifier.width(86.dp).align(alignment = Alignment.CenterVertically)
                         )
-                        /*val modifierColumn = if (isMediaPlayerMaximized) {
-                            Modifier.padding(top = 22.dp)
-
-                        } else {
-                            Modifier.padding(top = 0.dp)
-                        }*/
-
+                        Spacer(modifier = Modifier.width(8.dp))
                         Column() {
                             if (isMediaPlayerMaximized) {
                                 Icon(
@@ -241,15 +238,6 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
                                             mediaViewModel.minimize()
                                         }
                                 )
-                                /*IconButton(
-                                    onClick = {
-                                        mediaViewModel.minimize()
-                                    }, colors = IconButtonDefaults.iconButtonColors(),
-                                    modifier = Modifier
-
-                                ) {
-
-                                }*/
                             }
                             Text(
                                 text = metaDataUi!!.title.toString(),
@@ -267,71 +255,41 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
                         }
                     }
                 }
-                Row(modifier = Modifier.align(alignment = Alignment.TopCenter)) {
+                Row(modifier = Modifier.align(alignment = Alignment.Center)) {
                     IconButton(onClick = {
-                        if(player?.isPlaying == false) {
-                            player?.play()
-                        }else{
+                        player?.seekToPreviousMediaItem()
+                    }, enabled = previousButton.isEnabled) {
+                        Icon(imageVector = Icons.Default.SkipPrevious,
+                            contentDescription = "Previous Audio Icon", tint = Color.White)
+                    }
+                    IconButton(onClick = {
+                        if(!isPlaying.showPlay) {
                             player?.stop()
+                        }else{
+
+                            player?.play()
                         }
                     }) {
-                        Icon(imageVector = if(player?.isPlaying==false) Icons.Default.Pause else Icons.Default.PlayCircle,
+                        Icon(imageVector = if(!isPlaying.showPlay) Icons.Default.Pause else Icons.Default.PlayCircle,
                             contentDescription = "Play/Pause Button", tint = Color.White)
+                    }
+                    IconButton(onClick = {
+                        player?.seekToNextMediaItem()
+                    }, enabled = nextButton.isEnabled) {
+                        Icon(imageVector = Icons.Default.SkipNext,
+                            contentDescription = "Next Audio Icon", tint = Color.White)
                     }
 
                 }
-                /*AndroidView(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .align(alignment = Alignment.BottomCenter)
-                        .padding(16.dp).alpha(0f),
-
-                    factory = {
-
-                        PlayerView(context).apply {
-                            this.player = player!!
-                        }
-                    }
-                )*/
+                Column(modifier = Modifier.align(alignment = Alignment.BottomCenter).padding(12.dp)) {
+                    Slider(value = sliderPosition, onValueChange = {
+                        sliderPosition=it
+                        player?.seekTo(it.toLong())
+                    }, valueRange = 0f..sliderTotalDuration)
+                }
 
             }
         }
     }
-    /*Box(modifier) {
-        PlayerSurface(
-            player = player!!,
-            surfaceType = SURFACE_TYPE_SURFACE_VIEW,
-            modifier = Modifier
-                .resizeWithContentScale(
-                    ContentScale.Fit,
-                    presentationState.videoSizeDp
-                )
-                .clickable(
-                    interactionSource = remember {
-                        MutableInteractionSource()
-                    },
-                    indication = null,
-                ) {
-                    showControls = !showControls
-                },
-        )
-
-
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(
-                    vertical = 8.dp,
-                    horizontal = 16.dp
-                ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            DefaultTimeBar(context).apply {
-                setPosition(200L)
-            }
-
-        }
-    }*/
 
 }
