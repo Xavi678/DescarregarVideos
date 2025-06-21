@@ -3,6 +3,8 @@ package com.ivax.descarregarvideos.ui.composables
 import android.content.ComponentName
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.compose.animation.animateContentSize
@@ -48,9 +50,12 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.media3.common.C.TIME_UNSET
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.Player.COMMAND_GET_CURRENT_MEDIA_ITEM
 import androidx.media3.common.Timeline
+import androidx.media3.common.util.HandlerWrapper
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
@@ -62,6 +67,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.ivax.descarregarvideos.general.viewmodels.MediaViewModel
 import com.ivax.descarregarvideos.services.PlaybackService
+import kotlinx.coroutines.Runnable
 import java.io.FileInputStream
 
 @OptIn(UnstableApi::class)
@@ -71,7 +77,8 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
     var player by remember { mutableStateOf<MediaController?>(null) }
     var sliderPosition by remember { mutableFloatStateOf(0f) }
     var sliderTotalDuration by remember { mutableFloatStateOf(0f) }
-    LifecycleStartEffect (Unit) {
+    var isSliderChanging by remember { mutableStateOf(false) }
+    LifecycleStartEffect(Unit) {
         lateinit var controllerFuture: ListenableFuture<MediaController>
         val sessionToken =
             SessionToken(context, ComponentName(context, PlaybackService::class.java))
@@ -83,23 +90,37 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
                 mediaViewModel.setMediaController(mediaController)
                 player = mediaViewModel.getMediaPlayer()
                 player!!.repeatMode = Player.REPEAT_MODE_ALL
-                if (player!!.isPlaying) {
-                    val mediaItem = player!!.currentMediaItem
-                    if (mediaItem != null) {
-                        //mediaViewModel.isMediaPlayerMaximized.postValue(true)
-                        //setMetadata(mediaItem)
-                    }
 
-                }
-                fun updateSlider(){
-                    val duration=player!!.duration.coerceAtLeast(1L)
-                    val currentPosition=player!!.currentPosition.coerceAtLeast(1L)
-                    sliderTotalDuration=duration.toFloat()
-                    sliderPosition=currentPosition.toFloat()
-                }
+
                 //val defaultTimeBar=binding.appBarMain.root.findViewById<DefaultTimeBar>(R.id.defaultTimeBar)
                 //defaultTimeBar.
                 player!!.addListener(object : Player.Listener {
+                    init {
+                        val handler=Handler(Looper.myLooper()!!)
+                        val runnable = object : Runnable {
+                            override fun run() {
+                                updateSlider()
+                                handler.postDelayed(this,1000)
+                            }
+                        }
+                        handler.post(runnable)
+                    }
+                    fun updateSlider() {
+                        if(!isSliderChanging) {
+                            val commands = player?.availableCommands
+                            if (commands?.contains(COMMAND_GET_CURRENT_MEDIA_ITEM) == true) {
+                                val durationMs = player!!.duration
+
+                                if (durationMs != TIME_UNSET) {
+                                    val durationParsed = durationMs / 1000f
+                                    val currentPosition = player!!.currentPosition
+                                    val currentPositionParsed = currentPosition / 1000f
+                                    sliderTotalDuration = durationParsed
+                                    sliderPosition = currentPositionParsed
+                                }
+                            }
+                        }
+                    }
                     override fun onPositionDiscontinuity(
                         oldPosition: Player.PositionInfo,
                         newPosition: Player.PositionInfo,
@@ -133,6 +154,7 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
                         updateSlider()
                         super.onPlayWhenReadyChanged(playWhenReady, reason)
                     }
+
                     override fun onMediaItemTransition(
                         mediaItem: MediaItem?,
                         @Player.MediaItemTransitionReason reason: Int
@@ -180,7 +202,7 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
         }
         onStopOrDispose {
             player?.release()
-            player=null
+            player = null
         }
     }
 
@@ -194,7 +216,7 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
         val isMediaPlayerMaximized by mediaViewModel.isMediaPlayerMaximized.collectAsStateWithLifecycle()
         val isPlaying = rememberPlayPauseButtonState(player!!)
         val nextButton = rememberNextButtonState(player!!)
-        val previousButton= rememberPreviousButtonState(player!!)
+        val previousButton = rememberPreviousButtonState(player!!)
 
         if (isMediaVisible) {
             Box(
@@ -223,7 +245,9 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
                         Image(
                             bitmap = metaDataUi!!.artwork.asImageBitmap(),
                             contentDescription = "Thumbnail Video",
-                            modifier = Modifier.width(86.dp).align(alignment = Alignment.CenterVertically)
+                            modifier = Modifier
+                                .width(86.dp)
+                                .align(alignment = Alignment.CenterVertically)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Column() {
@@ -232,9 +256,14 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
                                     imageVector = Icons.Default.KeyboardArrowDown,
                                     contentDescription = "Minimize/Maximize Player Button",
                                     tint = Color.White,
-                                    modifier = Modifier.zIndex(101f)
-                                        .align(alignment = Alignment.End).clickable(interactionSource =
-                                            remember { MutableInteractionSource() }, indication = null){
+                                    modifier = Modifier
+                                        .zIndex(101f)
+                                        .align(alignment = Alignment.End)
+                                        .clickable(
+                                            interactionSource =
+                                                remember { MutableInteractionSource() },
+                                            indication = null
+                                        ) {
                                             mediaViewModel.minimize()
                                         }
                                 )
@@ -259,33 +288,51 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
                     IconButton(onClick = {
                         player?.seekToPreviousMediaItem()
                     }, enabled = previousButton.isEnabled) {
-                        Icon(imageVector = Icons.Default.SkipPrevious,
-                            contentDescription = "Previous Audio Icon", tint = Color.White)
+                        Icon(
+                            imageVector = Icons.Default.SkipPrevious,
+                            contentDescription = "Previous Audio Icon", tint = Color.White
+                        )
                     }
                     IconButton(onClick = {
-                        if(!isPlaying.showPlay) {
+                        if (!isPlaying.showPlay) {
                             player?.stop()
-                        }else{
+                        } else {
 
                             player?.play()
                         }
                     }) {
-                        Icon(imageVector = if(!isPlaying.showPlay) Icons.Default.Pause else Icons.Default.PlayCircle,
-                            contentDescription = "Play/Pause Button", tint = Color.White)
+                        Icon(
+                            imageVector = if (!isPlaying.showPlay) Icons.Default.Pause else Icons.Default.PlayCircle,
+                            contentDescription = "Play/Pause Button", tint = Color.White
+                        )
                     }
                     IconButton(onClick = {
                         player?.seekToNextMediaItem()
                     }, enabled = nextButton.isEnabled) {
-                        Icon(imageVector = Icons.Default.SkipNext,
-                            contentDescription = "Next Audio Icon", tint = Color.White)
+                        Icon(
+                            imageVector = Icons.Default.SkipNext,
+                            contentDescription = "Next Audio Icon", tint = Color.White
+                        )
                     }
 
                 }
-                Column(modifier = Modifier.align(alignment = Alignment.BottomCenter).padding(12.dp)) {
-                    Slider(value = sliderPosition, onValueChange = {
+                var sliderTemporalPosition by remember { mutableFloatStateOf(0f) }
+                Column(
+                    modifier = Modifier
+                        .align(alignment = Alignment.BottomCenter)
+                        .padding(12.dp)
+                ) {
+                    Slider(value = sliderPosition, onValueChangeFinished = {
+                        player?.seekTo(sliderTemporalPosition.toLong())
+                        isSliderChanging=false
+                    }, onValueChange = {
+                        isSliderChanging=true
                         sliderPosition=it
-                        player?.seekTo(it.toLong())
-                    }, valueRange = 0f..sliderTotalDuration)
+                        sliderTemporalPosition=it
+
+
+                    }
+                        , valueRange = 0f..sliderTotalDuration)
                 }
 
             }
