@@ -325,6 +325,7 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
                     Slider(value = sliderPosition, onValueChangeFinished = {
                         player?.seekTo(sliderTemporalPosition.toLong())
                         isSliderChanging=false
+
                     }, onValueChange = {
                         isSliderChanging=true
                         sliderPosition=it
