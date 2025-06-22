@@ -2,7 +2,11 @@ package com.ivax.descarregarvideos.classes
 
 class MathExtensions {
     companion object {
-        fun toTime(seconds: Int): String {
+        fun toTime(seconds: Float): String {
+            return toTime(seconds.toLong())
+        }
+
+        fun toTime(seconds: Long): String {
             if (seconds < 60) {
 
                 return "0:${padSeconds(seconds)}"
@@ -20,7 +24,7 @@ class MathExtensions {
 
             }
         }
-        private fun padSeconds(seconds: Int):String{
+        private fun padSeconds(seconds: Long):String{
             return seconds.toString().padStart(2,'0')
         }
     }

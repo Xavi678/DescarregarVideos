@@ -20,7 +20,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -28,11 +30,16 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderColors
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +51,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -55,7 +63,6 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.Player.COMMAND_GET_CURRENT_MEDIA_ITEM
 import androidx.media3.common.Timeline
-import androidx.media3.common.util.HandlerWrapper
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
@@ -65,12 +72,15 @@ import androidx.media3.ui.compose.state.rememberPresentationState
 import androidx.media3.ui.compose.state.rememberPreviousButtonState
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
+import com.ivax.descarregarvideos.classes.MathExtensions
 import com.ivax.descarregarvideos.general.viewmodels.MediaViewModel
 import com.ivax.descarregarvideos.services.PlaybackService
 import kotlinx.coroutines.Runnable
 import java.io.FileInputStream
 
+
 @OptIn(UnstableApi::class)
+@kotlin.OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
     val context = LocalContext.current
@@ -96,17 +106,19 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
                 //defaultTimeBar.
                 player!!.addListener(object : Player.Listener {
                     init {
-                        val handler=Handler(Looper.myLooper()!!)
+                        val handler = Handler(Looper.myLooper()!!)
                         val runnable = object : Runnable {
                             override fun run() {
                                 updateSlider()
-                                handler.postDelayed(this,1000)
+                                handler.postDelayed(this, 1000)
                             }
                         }
                         handler.post(runnable)
                     }
+
                     fun updateSlider() {
-                        if(!isSliderChanging) {
+                        if (!isSliderChanging) {
+
                             val commands = player?.availableCommands
                             if (commands?.contains(COMMAND_GET_CURRENT_MEDIA_ITEM) == true) {
                                 val durationMs = player!!.duration
@@ -121,6 +133,7 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
                             }
                         }
                     }
+
                     override fun onPositionDiscontinuity(
                         oldPosition: Player.PositionInfo,
                         newPosition: Player.PositionInfo,
@@ -218,21 +231,26 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
         val nextButton = rememberNextButtonState(player!!)
         val previousButton = rememberPreviousButtonState(player!!)
 
+
+        val modifierBox = Modifier
+            .fillMaxWidth()
+            .animateContentSize()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(color = Color.White),
+                enabled = !isMediaPlayerMaximized
+            ) {
+                mediaViewModel.maximize()
+            }
+            .height(if (isMediaPlayerMaximized) 200.dp else 100.dp)
+
+            .padding(start = 16.dp, end = 16.dp, bottom = 12.dp, top = 0.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color.Black)
         if (isMediaVisible) {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .animateContentSize()
-                    .height(if (isMediaPlayerMaximized) 200.dp else 100.dp)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) {
-                        mediaViewModel.maximize()
-                    }
-                    .padding(start = 16.dp, end = 16.dp, bottom = 12.dp, top = 0.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.Black)) {
+                modifier = modifierBox
+            ) {
 
                 Row(
                     Modifier
@@ -248,9 +266,10 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
                             modifier = Modifier
                                 .width(86.dp)
                                 .align(alignment = Alignment.CenterVertically)
+
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Column() {
+                        Column {
                             if (isMediaPlayerMaximized) {
                                 Icon(
                                     imageVector = Icons.Default.KeyboardArrowDown,
@@ -316,24 +335,100 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
                     }
 
                 }
-                var sliderTemporalPosition by remember { mutableFloatStateOf(0f) }
+                val modifierTimeBar = if (isMediaPlayerMaximized) {
+                    Modifier.padding(12.dp)
+                } else {
+                    Modifier.padding(start = 12.dp, end = 12.dp, bottom = 0.dp)
+                }
+
                 Column(
                     modifier = Modifier
                         .align(alignment = Alignment.BottomCenter)
-                        .padding(12.dp)
+                        .then(modifierTimeBar)
+
                 ) {
-                    Slider(value = sliderPosition, onValueChangeFinished = {
-                        player?.seekTo(sliderTemporalPosition.toLong())
-                        isSliderChanging=false
+                    if (isMediaPlayerMaximized) {
+                        Row(
+                            modifier = Modifier
+                                .align(alignment = Alignment.End)
+                                .padding(8.dp)
+                        ) {
+                            Text(
+                                text = MathExtensions.toTime(sliderPosition),
+                                color = Color.White
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(text = "/", color = Color.White)
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = MathExtensions.toTime(sliderTotalDuration),
+                                color = Color.White
+                            )
+                        }
+                    }
+                    Slider(
+                        modifier = Modifier, value = sliderPosition, onValueChangeFinished = {
+                        player?.seekTo((sliderPosition.toLong() * 1000))
+                        isSliderChanging = false
 
                     }, onValueChange = {
-                        isSliderChanging=true
-                        sliderPosition=it
-                        sliderTemporalPosition=it
+                        isSliderChanging = true
+                        sliderPosition = it
 
 
-                    }
-                        , valueRange = 0f..sliderTotalDuration)
+                    },
+                        valueRange = 0f..sliderTotalDuration,
+                        colors = SliderColors(
+                            thumbColor = Color.White,
+                            activeTrackColor = Color.White,
+                            activeTickColor = Color.White,
+                            inactiveTrackColor = Color.LightGray,
+                            inactiveTickColor = Color.LightGray,
+                            disabledThumbColor = Color.LightGray,
+                            disabledActiveTrackColor = Color.LightGray,
+                            disabledActiveTickColor = Color.LightGray,
+                            disabledInactiveTrackColor = Color.LightGray,
+                            disabledInactiveTickColor = Color.LightGray
+                        )
+                        , thumb = {
+                            Box(Modifier
+                                .size(24.dp)
+                                .padding(4.dp)
+                                .background(Color.White, CircleShape)
+                            ) {
+
+                            }
+                        }
+                        , track = { sliderState ->
+
+                            val fraction by remember {
+                                derivedStateOf {
+                                    (sliderState.value - sliderState.valueRange.start) / (sliderState.valueRange.endInclusive - sliderState.valueRange.start)
+                                }
+                            }
+
+                            Box(Modifier
+                                .fillMaxWidth()
+                                .background(Color.White)) {
+                                Box(
+                                    Modifier
+                                        .fillMaxWidth(fraction)
+                                        .align(Alignment.CenterStart)
+                                        .height(2.dp)
+                                        .padding(end = 16.dp)
+                                        .background(Color.Yellow, CircleShape)
+                                )
+                                Box(
+                                    Modifier
+                                        .fillMaxWidth(1f - fraction)
+                                        .align(Alignment.CenterEnd)
+                                        .height(1.dp)
+                                        .padding(start = 16.dp)
+                                        .background(Color.White, CircleShape)
+                                )
+                            }
+                        })
+
                 }
 
             }
