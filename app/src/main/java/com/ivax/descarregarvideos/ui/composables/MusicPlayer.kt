@@ -231,7 +231,7 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
         val nextButton = rememberNextButtonState(player!!)
         val previousButton = rememberPreviousButtonState(player!!)
 
-
+        val bottomPadding=if(isMediaPlayerMaximized) 12.dp else 2.dp
         val modifierBox = Modifier
             .fillMaxWidth()
             .animateContentSize()
@@ -244,7 +244,7 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
             }
             .height(if (isMediaPlayerMaximized) 200.dp else 100.dp)
 
-            .padding(start = 16.dp, end = 16.dp, bottom = 12.dp, top = 0.dp)
+            .padding(start = 16.dp, end = 16.dp, bottom = bottomPadding, top = 0.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(Color.Black)
         if (isMediaVisible) {
@@ -281,7 +281,7 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
                                         .clickable(
                                             interactionSource =
                                                 remember { MutableInteractionSource() },
-                                            indication = null
+                                            indication = ripple(color = Color.White)
                                         ) {
                                             mediaViewModel.minimize()
                                         }

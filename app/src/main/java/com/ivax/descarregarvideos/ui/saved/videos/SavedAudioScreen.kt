@@ -10,6 +10,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -108,9 +109,6 @@ fun ListItem(
             Modifier
                 .width(86.dp)
                 .padding(top = 8.dp, start = 8.dp)
-                .background(
-                    Color.Blue
-                )
         ) {
             Image(
                 bitmap = bmp.asImageBitmap(),
@@ -136,10 +134,11 @@ fun ListItem(
             )
             Text(
                 text = data.duration,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.surface,
                 modifier = Modifier
                     .align(alignment = Alignment.BottomStart)
-                    .background(Color.Black)
+                    .background(Color.Black),
+                fontSize =  12.sp,
             )
         }
 
@@ -150,17 +149,22 @@ fun ListItem(
                 .weight(1f)
         ) {
             Text(
-                text = data.title
+                text = data.title,
+                color = MaterialTheme.colorScheme.surface,
+                fontSize = 16.sp,
             )
             Row {
                 Icon(
                     painter = painterResource(id = R.drawable.download_rounded_base),
-                    contentDescription = "Download Icon"
+                    contentDescription = "Download Icon",
+                    tint = MaterialTheme.colorScheme.surface
                 )
+                Spacer(modifier=Modifier.width(8.dp))
                 Text(
                     text = data.downloadDateFormatted,
-                    fontSize = 11.sp,
-                    modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                    fontSize = 14.sp,
+                    modifier = Modifier.align(alignment = Alignment.CenterVertically),
+                    color = MaterialTheme.colorScheme.surface
                 )
             }
 
@@ -172,7 +176,7 @@ fun ListItem(
             Icon(
                 painter = painterResource(id = R.drawable.three_dots),
                 contentDescription = null,
-
+                tint=MaterialTheme.colorScheme.surface,
                 modifier = Modifier
                     .animateContentSize()
                     .align(alignment = Alignment.CenterVertically)
@@ -180,6 +184,6 @@ fun ListItem(
         }
 
     }
-    HorizontalDivider(Modifier.padding(4.dp), color = Color.LightGray)
+    //HorizontalDivider(Modifier.padding(4.dp), color = MaterialTheme.colorScheme.surface)
 }
 

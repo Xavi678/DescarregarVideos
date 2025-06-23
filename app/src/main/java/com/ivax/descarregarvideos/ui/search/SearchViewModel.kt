@@ -1,6 +1,7 @@
 package com.ivax.descarregarvideos.ui.search
 
 import android.util.Log
+import androidx.collection.emptyObjectList
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -34,7 +35,7 @@ class SearchViewModel @Inject constructor(
     }
     private val _formats = MutableStateFlow<List<AdaptiveFormats>>(emptyList())
     val formats = _formats.asStateFlow()
-    private val _videos = MutableStateFlow<List<VideoItem>>(emptyList())
+    private val _videos = MutableStateFlow<MutableList<VideoItem>>(mutableListOf())
     val continuationToken = MutableStateFlow<String?>(null)
     private val _isLoading = MutableStateFlow<Boolean>(false)
     val isLoading = _isLoading.asStateFlow()
@@ -148,7 +149,7 @@ class SearchViewModel @Inject constructor(
     }
 
     fun resetDialog() {
-        _videos.value = emptyList()
+        //_videos.value = emptyList()
         _currentVideo.value = null
     }
 
@@ -160,7 +161,10 @@ class SearchViewModel @Inject constructor(
         val tmpVideos = _videos.value
         tmpVideos.firstOrNull { it.videoId == currentVideo.videoId }?.videoDownloaded =
             downloadState
-        _videos.value = tmpVideos
+        _videos.update {
+         ArrayList<VideoItem>(tmpVideos)
+        }
+
     }
 
 }

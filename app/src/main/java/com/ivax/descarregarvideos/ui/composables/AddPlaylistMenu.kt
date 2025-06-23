@@ -20,8 +20,11 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LibraryAdd
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxColors
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -38,6 +41,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ivax.descarregarvideos.entities.relationships.PlaylistWithSavedVideos
 import com.ivax.descarregarvideos.general.viewmodels.ModalSheetBottomMenuViewModel
+import com.ivax.descarregarvideos.ui.theme.CustomInputColors
 
 
 @Composable
@@ -63,7 +67,6 @@ fun AddPlaylistMenu(
                 CrearPlaylistButton()
                 Column(
                     modifier = Modifier
-                        .padding(start = 8.dp)
                         .weight(1f)
                         .wrapContentHeight(align = Alignment.Top)
                 ) {
@@ -74,14 +77,15 @@ fun AddPlaylistMenu(
                         }) {
                         Icon(
                             imageVector = Icons.Default.LibraryAdd,
-                            contentDescription = "Create Playlist"
+                            contentDescription = "Create Playlist",
+                           tint= MaterialTheme.colorScheme.surface
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Crear Playlist")
+                        Text("Crear Playlist",color =  MaterialTheme.colorScheme.surface)
                     }
                     HorizontalDivider(
                         modifier = Modifier
-                            .height(4.dp)
+                            .height(4.dp).fillMaxWidth(), color =  MaterialTheme.colorScheme.surface
                     )
                 }
 
@@ -96,7 +100,8 @@ fun AddPlaylistMenu(
                         ListItem(it, videoId, modalSheetBottomMenuViewModel)
                     }
                 }
-                HorizontalDivider(modifier = Modifier.height(4.dp))
+                HorizontalDivider(modifier = Modifier.height(4.dp).fillMaxWidth(),
+                    color =  MaterialTheme.colorScheme.surface)
                 TextButton(
                     onClick = {
                         modalSheetBottomMenuViewModel.saveChanges()
@@ -105,10 +110,11 @@ fun AddPlaylistMenu(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = "Check"
+                        contentDescription = "Check",
+                        tint =  MaterialTheme.colorScheme.surface
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Guardar")
+                    Text("Guardar", color = MaterialTheme.colorScheme.surface)
                 }
 
             }
@@ -142,10 +148,10 @@ fun CreatePlaylistDialog(
                 shape = RoundedCornerShape(16.dp),
             ) {
                 Column(modifier = Modifier.padding(8.dp)) {
-                    OutlinedTextField(value = playlistName, onValueChange = {
+                    OutlinedTextField(colors = CustomInputColors(),value = playlistName, onValueChange = {
                         playlistName = it
                     }, isError = isError, label = {
-                        Text("Nom")
+                        Text("Nom", color = MaterialTheme.colorScheme.surface)
                     }, modifier = Modifier.fillMaxWidth())
                     Row(
                         modifier = Modifier
@@ -156,7 +162,7 @@ fun CreatePlaylistDialog(
                         TextButton(onClick = {
                             modalSheetBottomMenuViewModel.dismissCreatePlaylistMenu()
                         }, modifier = Modifier) {
-                            Text("Cancel·lar")
+                            Text("Cancel·lar", color = MaterialTheme.colorScheme.surface)
                         }
                         TextButton(onClick = {
                             if (playlistName.isBlank()) {
@@ -167,7 +173,7 @@ fun CreatePlaylistDialog(
                             }
 
                         }, modifier = Modifier) {
-                            Text("Ok")
+                            Text("Ok", color = MaterialTheme.colorScheme.surface)
                         }
                     }
                 }
@@ -202,7 +208,10 @@ fun ListItem(
                 .weight(1f)
                 .padding(end = 8.dp)
                 .wrapContentWidth(align = Alignment.End)
-                .align(alignment = Alignment.CenterVertically)
+                .align(alignment = Alignment.CenterVertically),
+            colors =
+                CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.surface,
+                    uncheckedColor = MaterialTheme.colorScheme.surface,)
         )
     }
 }

@@ -13,7 +13,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -62,13 +64,13 @@ fun FormatsDialog(formats: List<AdaptiveFormats>,onClose: (format: AdaptiveForma
                     TextButton(onClick = {
                         onClose(null)
                     }, modifier = Modifier) {
-                        Text("Cancel·lar")
+                        Text("Cancel·lar", color = MaterialTheme.colorScheme.surface)
                     }
                     TextButton(onClick = {
                         onClose(selectedFormat)
 
                     }, modifier = Modifier) {
-                        Text("Ok")
+                        Text("Ok", color = MaterialTheme.colorScheme.surface)
                     }
                 }
             }
@@ -92,7 +94,9 @@ fun AdaptiveFormatItem(adaptiveFormat: AdaptiveFormats,idx: Int,selectedFormat: 
         Text(adaptiveFormat.mimeType, modifier = Modifier.weight(1f).align(alignment = Alignment.CenterVertically))
         RadioButton(selected = if(selectedFormat==null) idx==1 else selectedFormat.url==adaptiveFormat.url, onClick = {
             onSelected(adaptiveFormat)
-        } , modifier = Modifier.align(alignment = Alignment.CenterVertically).padding(end = 0.dp).wrapContentWidth(align = Alignment.End)
+        } , modifier = Modifier.align(alignment = Alignment.CenterVertically).padding(end = 0.dp).wrapContentWidth(align = Alignment.End),
+            colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.surface,
+                unselectedColor = MaterialTheme.colorScheme.surface)
             )
     }
 

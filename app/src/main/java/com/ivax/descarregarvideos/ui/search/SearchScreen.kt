@@ -119,9 +119,6 @@ fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
                 Modifier
                     .width(86.dp)
                     .padding(top = 8.dp, start = 8.dp)
-                    .background(
-                        Color.Blue
-                    )
             ) {
                 Image(
                     bitmap = video.imgUrl!!.asImageBitmap(),
@@ -130,6 +127,7 @@ fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
                 Text(
                     text = video.duration,
                     color = Color.White,
+                    fontSize = 12.sp,
                     modifier = Modifier
                         .align(alignment = Alignment.BottomStart)
                         .background(Color.Black)
@@ -144,7 +142,8 @@ fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
             ) {
                 Text(
                     text = video.title,
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    color=MaterialTheme.colorScheme.surface
                 )
                 Row {
                     if (video.channelThumbnail != null) {
@@ -157,13 +156,14 @@ fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
                     Text(
                         text = video.author.toString(),
                         fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.surface,
                         modifier = Modifier.align(alignment = Alignment.CenterVertically)
                     )
                 }
                 Text(
                     text = video.viewCount,
                     fontSize = 11.sp,
-                    color = Color.LightGray
+                    color = MaterialTheme.colorScheme.surface
                 )
 
 
@@ -190,7 +190,7 @@ fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
                         }
                     ),
                     contentDescription = null,
-
+                    tint = MaterialTheme.colorScheme.surface,
                     modifier = Modifier
                         .animateContentSize()
                         .align(alignment = Alignment.CenterVertically)
@@ -198,7 +198,7 @@ fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
             }
 
         }
-        HorizontalDivider(Modifier.padding(4.dp), color = Color.LightGray)
+        //HorizontalDivider(Modifier.padding(4.dp), color = Color.LightGray)
     }
 }
 @Composable

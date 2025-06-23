@@ -88,21 +88,7 @@ fun ColumnPlaylists(playlistsViewModel: PlaylistsViewModel = viewModel(), functi
     val playlists by playlistsViewModel.playlists.collectAsStateWithLifecycle(listOf<Playlist>())
     val orderedPlaylist by playlistsViewModel.orderedPlaylist.collectAsStateWithLifecycle()
     LazyColumn(modifier = Modifier.fillMaxSize()
-        /*.pointerInput(
-        key1 = orderedPlaylist
-    ) {
-        detectDragGesturesAfterLongPress(
-            onDragStart = { offset ->
-                Log.d("DescarregarVideos", offset.x.toString())
-            },
-            onDragEnd = {  },
-            onDragCancel = {},
-            onDrag = {
-                    change,dragAmount ->
-                Log.d("DescarregarVideos", change.toString())
-            }
-        )
-    }*/) {
+        ) {
         items(orderedPlaylist) {
             item ->
             Item(item,function)
@@ -160,12 +146,12 @@ fun Item(playlistWithOrderedVideosFoo: PlaylistWithOrderedVideosFoo, function: (
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.playlist),
-                            contentDescription = "Collection Icon", tint = Color.White,
+                            contentDescription = "Collection Icon", tint = MaterialTheme.colorScheme.surface,
                             modifier = Modifier.align(alignment = Alignment.CenterVertically)
                         )
                         Text(
                             text = "${playlistWithOrderedVideosFoo.orderedVideos.count()}",
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.surface,
                             fontSize = 11.sp,
                             modifier = Modifier.align(alignment = Alignment.CenterVertically)
                         )
@@ -178,7 +164,8 @@ fun Item(playlistWithOrderedVideosFoo: PlaylistWithOrderedVideosFoo, function: (
                     .padding(8.dp)
                     .weight(1f)
             ) {
-                Text(playlistWithOrderedVideosFoo.playlist.name.toString())
+                Text(playlistWithOrderedVideosFoo.playlist.name.toString(),
+                    color = MaterialTheme.colorScheme.surface)
                 PlayButton(onClickDelegate = fun() {
                     playlistsViewModel.playAll(playlistWithOrderedVideosFoo)
                 })
@@ -191,6 +178,7 @@ fun Item(playlistWithOrderedVideosFoo: PlaylistWithOrderedVideosFoo, function: (
                 Icon(
                     painter = painterResource(R.drawable.three_dots),
                     contentDescription = "Menu Icon",
+                    tint = MaterialTheme.colorScheme.surface,
                     modifier = Modifier
                         .animateContentSize()
                         .align(alignment = Alignment.CenterVertically)

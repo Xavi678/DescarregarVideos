@@ -39,7 +39,7 @@ fun ShowBottomDialogVideoMenu(
     ModalBottomSheet(
         onDismissRequest = {
             onClose(false, false)
-        }, containerColor = Color(29, 27, 32, 255)
+        }, containerColor = MaterialTheme.colorScheme.primary
     ) {
         Column {
             Row(
@@ -51,7 +51,7 @@ fun ShowBottomDialogVideoMenu(
                         onClick = {
                             onClose(true, false)
                         },
-                        indication = ripple(color = MaterialTheme.colorScheme.primary),
+                        indication = ripple(color = MaterialTheme.colorScheme.surface),
                         interactionSource = remember { MutableInteractionSource() }
                     )
                     .align(alignment = Alignment.CenterHorizontally)) {
@@ -59,11 +59,11 @@ fun ShowBottomDialogVideoMenu(
                 Icon(
                     imageVector = Icons.Default.DeleteForever,
                     contentDescription = null,
-                    tint = Color.White
+                    tint = MaterialTheme.colorScheme.surface
                 )
 
                 Text(
-                    text = "Borrar Audio", color = Color.White,
+                    text = "Borrar Audio", color =MaterialTheme.colorScheme.surface,
                     modifier = Modifier.align(alignment = Alignment.CenterVertically)
                 )
             }
@@ -78,7 +78,7 @@ fun ShowBottomDialogVideoMenu(
 
                                 onClose(false, true)
                             },
-                            indication = ripple(color = MaterialTheme.colorScheme.primary),
+                            indication = ripple(color = MaterialTheme.colorScheme.surface),
                             interactionSource = remember { MutableInteractionSource() }
                         )
                         .align(alignment = Alignment.CenterHorizontally)) {
@@ -86,11 +86,11 @@ fun ShowBottomDialogVideoMenu(
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = null,
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.surface
                     )
 
                     Text(
-                        text = "Borrar de la Playlist", color = Color.White,
+                        text = "Borrar de la Playlist", color = MaterialTheme.colorScheme.surface,
                         modifier = Modifier.align(alignment = Alignment.CenterVertically)
                     )
                 }
@@ -105,7 +105,7 @@ fun ShowBottomDialogVideoMenu(
 
                             onShowPlayListMenu()
                         },
-                        indication = ripple(color = MaterialTheme.colorScheme.primary),
+                        indication = ripple(color = MaterialTheme.colorScheme.surface),
                         interactionSource = remember { MutableInteractionSource() }
                     )
                     .align(alignment = Alignment.CenterHorizontally)) {
@@ -113,11 +113,11 @@ fun ShowBottomDialogVideoMenu(
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = null,
-                    tint = Color.White
+                    tint = MaterialTheme.colorScheme.surface
                 )
 
                 Text(
-                    text = "Afegir a la Playlist", color = Color.White,
+                    text = "Afegir a la Playlist", color = MaterialTheme.colorScheme.surface,
                     modifier = Modifier.align(alignment = Alignment.CenterVertically)
                 )
             }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,6 +24,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,6 +42,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -60,7 +63,7 @@ fun EditPlaylistScreen(
 ) {
     Column(modifier = Modifier.padding(8.dp)) {
         Top(viewModel)
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Playlists(viewModel)
     }
     val selectedVideoId by
@@ -79,8 +82,9 @@ fun EditPlaylistScreen(
 fun Top(viewModel: EditPlaylistViewModel) {
 
     val playlist by viewModel.playlist.collectAsState()
-    Text(playlist?.name.toString())
-    Spacer(modifier = Modifier.width(8.dp))
+    Text(playlist?.name.toString(), color = MaterialTheme.colorScheme.surface, fontSize = 22.sp,
+        fontWeight = FontWeight.Bold)
+    Spacer(modifier = Modifier.height(16.dp))
     PlayButton(onClickDelegate = {
         viewModel.playAll()
     })
@@ -222,7 +226,8 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
             val modifier = if (idx == index) {
                 //Log.d("DescarregarVideos", "Modifier Drag Index= " + index)
                 Modifier
-                    .zIndex(1f)
+                    .zIndex(100f).
+                    background(MaterialTheme.colorScheme.primary)
                     .graphicsLayer {
                         translationY = currentDelta
                     }
@@ -271,9 +276,6 @@ fun ListItem(
                 Modifier
                     .width(86.dp)
                     .padding(top = 8.dp, start = 8.dp)
-                    .background(
-                        Color.Blue
-                    )
             ) {
                 Image(
                     bitmap = bmp.asImageBitmap(),
@@ -299,10 +301,11 @@ fun ListItem(
                 )
                 Text(
                     text = videosWithPositionFoo.duration,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.surface,
                     modifier = Modifier
                         .align(alignment = Alignment.BottomStart)
-                        .background(Color.Black)
+                        .background(Color.Black),
+                    fontSize =  12.sp,
                 )
             }
 
@@ -313,17 +316,23 @@ fun ListItem(
                     .weight(1f)
             ) {
                 Text(
-                    text = videosWithPositionFoo.title
+                    text = videosWithPositionFoo.title,
+                    color = MaterialTheme.colorScheme.surface,
+                    fontSize = 16.sp
                 )
                 Row {
                     Icon(
                         painter = painterResource(id = R.drawable.download_rounded_base),
-                        contentDescription = "Download Icon"
+                        contentDescription = "Download Icon",
+                        tint = MaterialTheme.colorScheme.surface
                     )
+                    Spacer(modifier=Modifier.width(8.dp))
                     Text(
-                        text = videosWithPositionFoo.downloadDateFormatted.toString(),
-                        fontSize = 11.sp,
-                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                        text = videosWithPositionFoo.downloadDateFormatted,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.surface,
+                        modifier = Modifier.align(alignment = Alignment.CenterVertically,
+                            )
                     )
                 }
 
@@ -334,7 +343,7 @@ fun ListItem(
                 Icon(
                     painter = painterResource(id = R.drawable.three_dots),
                     contentDescription = null,
-
+                    tint = MaterialTheme.colorScheme.surface,
                     modifier = Modifier
                         .animateContentSize()
                         .align(alignment = Alignment.CenterVertically)
@@ -342,6 +351,6 @@ fun ListItem(
             }
 
         }
-        HorizontalDivider(Modifier.padding(4.dp), color = Color.LightGray)
+        //HorizontalDivider(Modifier.padding(4.dp), color = Color.LightGray)
     }
 }

@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.ivax.descarregarvideos.R
+import com.ivax.descarregarvideos.ui.theme.CustomInputColors
 
 @Composable
 fun SearchComposable(onClickInvoker: (text: String) -> Unit) {
@@ -60,7 +61,7 @@ fun SearchComposable(onClickInvoker: (text: String) -> Unit) {
                 }) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "Search Icon", tint = MaterialTheme.colorScheme.primary
+                        contentDescription = "Search Icon", tint = MaterialTheme.colorScheme.surface
                     )
                 }
             },
@@ -69,7 +70,8 @@ fun SearchComposable(onClickInvoker: (text: String) -> Unit) {
                     Icon(
                         imageVector = Icons.Default.Clear,
                         contentDescription = "Clear Icon",
-                        Modifier.clickable(
+                        tint = MaterialTheme.colorScheme.surface,
+                       modifier =  Modifier.clickable(
                             enabled = true,
                             onClick = {
                                 text = ""
@@ -80,29 +82,8 @@ fun SearchComposable(onClickInvoker: (text: String) -> Unit) {
                 }
             },
             modifier = Modifier
-                /*.border(
-                    4.dp,
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(12.dp, 0.dp, 0.dp, 12.dp)
-                )*/
-                .weight(1f), shape = RoundedCornerShape(12.dp)
+                .weight(1f), shape = RoundedCornerShape(12.dp),
+            colors =CustomInputColors()
         )
-        /*Button(
-            onClick = {
-                onClickInvoker(text)
-            }, shape = RoundedCornerShape(0.dp, 12.dp, 12.dp, 0.dp), colors =
-                ButtonColors(
-                    Color(29, 27, 32, 255),
-                    Color(29, 27, 32, 255),
-                    Color.LightGray,
-                    Color.LightGray
-                ),
-            modifier = Modifier.fillMaxHeight()//.weight(0.5f)
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_menu_search),
-                contentDescription = "Search Icon", tint = Color.White
-            )
-        }*/
     }
 }
