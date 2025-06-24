@@ -182,9 +182,9 @@ class ApiClient : IApiClient {
                     setBody(playerRequest)
                 }
             val txt = response.bodyAsText()
-            Log.d("DescarregarVideos", txt)
+            //Log.d("DescarregarVideos", txt)
             val playerResponse: PlayerResponse = response.body()
-            Log.d("DescarregarVideos", playerResponse.toString())
+            //Log.d("DescarregarVideos", playerResponse.toString())
 
             return playerResponse
         } catch (e: Exception) {

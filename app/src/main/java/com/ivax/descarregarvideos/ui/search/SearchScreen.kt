@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -29,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +44,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ivax.descarregarvideos.R
@@ -84,7 +87,7 @@ fun Loading(searchViewModel: SearchViewModel = viewModel()) {
 
 @Composable
 fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
-    var downloadState by remember { mutableStateOf(video.videoDownloaded) }
+    //var downloadState by remember { mutableStateOf(video.videoDownloaded) }
 
     val context = LocalContext.current
     var savedVideo by remember { mutableStateOf<SavedVideo?>(null) }
@@ -176,10 +179,13 @@ fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
                         searchViewModel.setFormats(savedVideo!!,formats)
                     })
             }) {
+                Log.d("DescarregarVideos","${video.title} State: ${video.videoDownloaded}")
                 Icon(
+
                     painter = painterResource(
                         id = when
-                                     (downloadState) {
+                                     (video.videoDownloaded) {
+
                             DownloadState.NotDownloaded
                                 -> R.drawable.download_button
 
@@ -210,12 +216,24 @@ fun SearchVideos(
     val currentVideo by searchViewModel.currentVideo.collectAsStateWithLifecycle()
     val formats by searchViewModel.formats.collectAsStateWithLifecycle()
     val context=LocalContext.current
-
+    var reload by remember { mutableStateOf(false) }
 
 
 
     var offset by remember { mutableFloatStateOf(0f) }
-    var listState = rememberLazyListState()
+    val listState = rememberLazyListState()
+    /*val loadMoreVideos: Boolean by remember {
+        derivedStateOf {
+            val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
+            lastVisibleItem?.index != 0 && lastVisibleItem?.index == listState.layoutInfo.totalItemsCount - 1
+        }
+    }
+    LaunchedEffect(loadMoreVideos) {
+        if(loadMoreVideos && !isLoading && !reload){
+            reload=true
+            searchViewModel.loadMoreVideos()
+        }
+    }*/
     LazyColumn(
         state = listState,
         modifier = Modifier
@@ -231,8 +249,12 @@ fun SearchVideos(
                         "Can Scroll Forward: ${listState.canScrollForward} " +
                                 "Last Scroll Forward: ${listState.lastScrolledForward}"
                     )
-                    if (!listState.canScrollForward && !isLoading) {
+                    val last = listState.layoutInfo.visibleItemsInfo.lastOrNull()
+                        //.firstOrNull { item -> item.offset <= offset.toInt() && offset.toInt() <= (item.offset + item.size) }
+                    Log.d("DescarregarVideos","${last?.offset}")
+                    if (last?.index==listState.layoutInfo.totalItemsCount-1 && !isLoading && !reload) {
                         searchViewModel.loadMoreVideos()
+                        reload=true
                     }
                     delta
 
@@ -240,7 +262,8 @@ fun SearchVideos(
             )
     ) {
         Log.d("DescarregarVideos","Total Videos: ${videos.count()}")
-        items(videos,key = {it.videoId}) {
+        items(videos
+            ,key = {it.videoId}) {
 
             Item(it)
         }
@@ -250,14 +273,21 @@ fun SearchVideos(
         FormatsDialog(formats, onClose = fun(selectedFormat: AdaptiveFormats?) {
             if (selectedFormat != null) {
                 searchViewModel.setDownloading(currentVideo!!)
-                searchViewModel.downloadVideo(selectedFormat, currentVideo!!, finished = fun() {
-                    searchViewModel.setDownloaded(currentVideo!!)
-                    //Handler(Looper.getMainLooper()).post {
+                searchViewModel.downloadVideo(selectedFormat, currentVideo!!, finished = fun(success: Boolean) {
+                    if(success) {
+                        searchViewModel.setDownloaded(currentVideo!!)
+
                         Toast.makeText(
                             context, "Video \"${currentVideo!!.title}\" Descarregat Correctament",
                             Toast.LENGTH_LONG
                         ).show()
-                    //}
+                    }else {
+                        searchViewModel.setNotDownloaded(currentVideo!!)
+                        Toast.makeText(
+                            context, "Video \"${currentVideo!!.title}\" Error: No s'ha pogut Descarregat Correctament",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 })
             }
             searchViewModel.resetDialog()

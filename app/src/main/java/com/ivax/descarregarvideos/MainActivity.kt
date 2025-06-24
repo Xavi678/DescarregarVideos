@@ -534,12 +534,13 @@ class MainActivity : AppCompatActivity() {
                 NavigationBarItem(
                     selected = currentBackStackEntry?.destination?.hasRoute(it::class) == true,
                     onClick = {
-                        navController.navigate(it) {
-                            /*popUpTo(navController.graph.findStartDestination().id) {
+                        navController.navigate(it)
+                        {
+                            popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }
                             restoreState = true
-                            launchSingleTop = true*/
+                            launchSingleTop = true
                         }
                     },
                     icon = {

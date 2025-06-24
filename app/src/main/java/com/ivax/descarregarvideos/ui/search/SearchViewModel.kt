@@ -1,7 +1,8 @@
 package com.ivax.descarregarvideos.ui.search
 
 import android.util.Log
-import androidx.collection.emptyObjectList
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,7 +22,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.core.net.toUri
 import com.ivax.descarregarvideos.classes.DownloadState
-import kotlinx.coroutines.flow.firstOrNull
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
@@ -35,7 +35,7 @@ class SearchViewModel @Inject constructor(
     }
     private val _formats = MutableStateFlow<List<AdaptiveFormats>>(emptyList())
     val formats = _formats.asStateFlow()
-    private val _videos = MutableStateFlow<MutableList<VideoItem>>(mutableListOf())
+    private val _videos = MutableStateFlow<SnapshotStateList<VideoItem>>(mutableStateListOf())
     val continuationToken = MutableStateFlow<String?>(null)
     private val _isLoading = MutableStateFlow<Boolean>(false)
     val isLoading = _isLoading.asStateFlow()
@@ -62,7 +62,12 @@ class SearchViewModel @Inject constructor(
                 result.videos.forEach {
                     it.videoDownloaded = IsDownloaded(it.videoId)
                 }
-                _videos.update { result.videos }
+                _videos.update {
+                    it.clear()
+                    it.addAll(result.videos)
+                    it
+                    //result.videos
+                }
                 continuationToken.value = result.nextToken
             } catch (e: Exception) {
                 Log.d("DescarregarVideos", e.message.toString())
@@ -82,7 +87,10 @@ class SearchViewModel @Inject constructor(
                     it.videoDownloaded = IsDownloaded(it.videoId)
                 }
 
-                _videos.value += result.videos
+                _videos.update {
+                    it.addAll(result.videos)
+                    it
+                }
                 continuationToken.value = result.nextToken
             } catch (e: Exception) {
                 Log.d("DescarregarVideos", e.message.toString())
@@ -117,26 +125,33 @@ class SearchViewModel @Inject constructor(
     fun downloadVideo(
         selectedFormat: AdaptiveFormats,
         savedVideo: SavedVideo,
-        finished: () -> Unit
+        finished: (success: Boolean) -> Unit
     ) {
         this.viewModelScope.launch(Dispatchers.IO) {
-            val uri = selectedFormat.url.toUri()
-            val segmentLength = if (uri.getQueryParameter("ratebypass") == "yes") 9898989L
-            else {
-                if (selectedFormat.contentLength == null) {
-                    uri.getQueryParameter("clen")!!.toLong()
-                } else {
-                    selectedFormat.contentLength.toLong()
-                }
+            var downloadSuccess=false
+            try {
+                val uri = selectedFormat.url.toUri()
+                val segmentLength = if (uri.getQueryParameter("ratebypass") == "yes") 9898989L
+                else {
+                    if (selectedFormat.contentLength == null) {
+                        uri.getQueryParameter("clen")!!.toLong()
+                    } else {
+                        selectedFormat.contentLength.toLong()
+                    }
 
+                }
+                val bytes =
+                    youtubeRepository.DownloadVideoStream("${selectedFormat.url}&range=0-${segmentLength}")
+                val videoUrl = fileRepository.saveFile(savedVideo.videoId, bytes)
+                savedVideo.videoUrl = videoUrl
+                videoRepository.insetVideo(savedVideo)
+                downloadSuccess=true
+            }catch (e: Exception){
+                Log.d("DescarregarVideos","Error al descarregar el video")
             }
-            val bytes =
-                youtubeRepository.DownloadVideoStream("${selectedFormat.url}&range=0-${segmentLength}")
-            val videoUrl = fileRepository.saveFile(savedVideo.videoId, bytes)
-            savedVideo.videoUrl = videoUrl
-            videoRepository.insetVideo(savedVideo)
+            finished(downloadSuccess)
         }
-        finished()
+
     }
 
     fun setFormats(currentVideo: SavedVideo, formats: List<AdaptiveFormats>) {
@@ -158,13 +173,35 @@ class SearchViewModel @Inject constructor(
     }
 
     private fun setDownloadStatus(currentVideo: SavedVideo, downloadState: DownloadState) {
-        val tmpVideos = _videos.value
-        tmpVideos.firstOrNull { it.videoId == currentVideo.videoId }?.videoDownloaded =
-            downloadState
         _videos.update {
-         ArrayList<VideoItem>(tmpVideos)
+            val idx=it.indexOfFirst { it.videoId == currentVideo.videoId }
+            if(idx!=-1) {
+                it[idx] = it[idx].copy(videoDownloaded = downloadState)
+            }
+            it
         }
 
+    }
+
+    fun canviarVideos() {
+        val tmpVideos = _videos.value
+        tmpVideos.firstOrNull()?.videoDownloaded =
+            DownloadState.Downloaded
+        val new = ArrayList<VideoItem>()
+        new.add(
+            VideoItem(
+                "eeee", "eeee", null, "32432423", "3:56", "eeeeeeeee",
+                author = "autor",
+                channelThumbnail = null,
+                videoDownloaded = DownloadState.Downloaded
+            )
+        )
+        //_videos.update {  new}
+    }
+
+    fun setNotDownloaded(currentVideo: SavedVideo) {
+
+        setDownloadStatus(currentVideo,DownloadState.NotDownloaded)
     }
 
 }

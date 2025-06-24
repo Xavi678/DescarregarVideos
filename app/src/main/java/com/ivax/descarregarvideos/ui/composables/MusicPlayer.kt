@@ -293,7 +293,7 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
                                 modifier = Modifier.basicMarquee(),
                                 fontSize = 18.sp
                             )
-                            if (metaDataUi!!.playlistName != null) {
+                            if (metaDataUi!!.playlistName != null && isMediaPlayerMaximized) {
                                 Text(
                                     text = metaDataUi!!.playlistName.toString(),
                                     color = Color.White,
