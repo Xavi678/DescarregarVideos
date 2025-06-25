@@ -2,6 +2,7 @@ package com.ivax.descarregarvideos.general.viewmodels
 
 
 import android.graphics.Bitmap
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.session.MediaController
@@ -46,7 +47,7 @@ class MediaViewModel @Inject constructor(private val mediaPlayerRepository: Medi
         return mediaPlayerRepository.getMediaPlayer()
     }
 
-    fun setMetaData(playlistName: String?, artwork: Bitmap, title: String?) {
+    fun setMetaData(playlistName: String?, artwork: Uri, title: String?) {
         _mediaStateUi.value = MediaStateUi.MetaDataStateUi(playlistName, artwork, title)
     }
 
@@ -68,6 +69,6 @@ class MediaViewModel @Inject constructor(private val mediaPlayerRepository: Medi
 }
 
 sealed class MediaStateUi {
-    data class MetaDataStateUi(val playlistName: String?, val artwork: Bitmap, val title: String?) :
+    data class MetaDataStateUi(val playlistName: String?, val artwork: Uri, val title: String?) :
         MediaStateUi()
 }

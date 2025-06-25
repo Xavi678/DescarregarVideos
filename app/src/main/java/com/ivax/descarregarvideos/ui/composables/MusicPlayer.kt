@@ -7,7 +7,14 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.annotation.OptIn
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -25,6 +32,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayCircle
@@ -39,6 +47,7 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -57,6 +66,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -75,6 +85,8 @@ import androidx.media3.ui.compose.state.rememberNextButtonState
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.media3.ui.compose.state.rememberPresentationState
 import androidx.media3.ui.compose.state.rememberPreviousButtonState
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.ivax.descarregarvideos.classes.MathExtensions
@@ -87,17 +99,18 @@ import java.io.FileInputStream
 @OptIn(UnstableApi::class)
 @kotlin.OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel(),shouldShow: Boolean) {
+fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel(), shouldShow: Boolean,setHeight: (height: Float)->Unit) {
     val context = LocalContext.current
     var player by remember { mutableStateOf<MediaController?>(null) }
     var sliderPosition by remember { mutableFloatStateOf(0f) }
     var sliderTotalDuration by remember { mutableFloatStateOf(0f) }
     var isSliderChanging by remember { mutableStateOf(false) }
+    val metaDataUi by mediaViewModel.mediaStateUi.collectAsStateWithLifecycle()
 
 
 
+    LaunchedEffect(Unit) {
 
-    LifecycleStartEffect(Unit) {
         lateinit var controllerFuture: ListenableFuture<MediaController>
         val sessionToken =
             SessionToken(context, ComponentName(context, PlaybackService::class.java))
@@ -123,6 +136,10 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel(),shouldShow: Boo
                             }
                         }
                         handler.post(runnable)
+                        val currentMediaItem = player?.currentMediaItem
+                        if (currentMediaItem != null && metaDataUi == null) {
+                            updateMetadata(currentMediaItem)
+                        }
                     }
 
                     fun updateSlider() {
@@ -177,11 +194,7 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel(),shouldShow: Boo
                         super.onPlayWhenReadyChanged(playWhenReady, reason)
                     }
 
-                    override fun onMediaItemTransition(
-                        mediaItem: MediaItem?,
-                        @Player.MediaItemTransitionReason reason: Int
-                    ) {
-                        updateSlider()
+                    fun updateMetadata(mediaItem: MediaItem?) {
                         if (mediaItem != null) {
                             //setMetadata(mediaItem)
                             val title = mediaItem.mediaMetadata.title
@@ -196,19 +209,18 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel(),shouldShow: Boo
 
                             mediaViewModel.setMetaData(
                                 playlistName?.toString(),
-                                bmp,
+                                uri!!,
                                 title.toString()
                             )
-                            /*mediaViewModel.playlistName.update {
-                                playlistName?.toString()
-                            }
-                            mediaViewModel.thumbnail.update {
-                                bmp
-                            }
-                            mediaViewModel.title.update {
-                                title.toString()
-                            }*/
                         }
+                    }
+
+                    override fun onMediaItemTransition(
+                        mediaItem: MediaItem?,
+                        @Player.MediaItemTransitionReason reason: Int
+                    ) {
+                        updateSlider()
+                        updateMetadata(mediaItem)
                     }
 
 
@@ -216,24 +228,19 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel(),shouldShow: Boo
             } catch (e: Exception) {
                 Log.d("DescarregarVideos", e.message.toString())
             }
-            // MediaController is available here with controllerFuture.get()
         }, MoreExecutors.directExecutor())
-        fun setMetadata(mediaItem: MediaItem) {
-            //hasNextAndPreviousMedia()
-
-        }
-        onStopOrDispose {
-            player?.release()
-            player = null
-        }
+        /* onStopOrDispose {
+             player?.release()
+             player = null
+         }*/
     }
 
     val ready by mediaViewModel.isMediaControllerReady.collectAsStateWithLifecycle()
-    if (ready) {
+    if (ready && player != null) {
         var showControls by remember { mutableStateOf(true) }
         val presentationState = rememberPresentationState(player!!)
 
-        val metaDataUi by mediaViewModel.mediaStateUi.collectAsStateWithLifecycle()
+
         val isMediaVisible by mediaViewModel.isMediaPlayerVisible.collectAsStateWithLifecycle()
         val isMediaPlayerMaximized by mediaViewModel.isMediaPlayerMaximized.collectAsStateWithLifecycle()
         val isPlaying = rememberPlayPauseButtonState(player!!)
@@ -241,12 +248,12 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel(),shouldShow: Boo
         val previousButton = rememberPreviousButtonState(player!!)
 
 
-
-        val bottomPadding=if(isMediaPlayerMaximized) 12.dp else 2.dp
+        val bottomPadding = if (isMediaPlayerMaximized) 12.dp else 2.dp
         val modifierBox = Modifier
             .fillMaxWidth()
             .onGloballyPositioned {
-                Log.d("DescarregarVideos","Offset Scroll Player ${it.size.height.toFloat()}")
+                setHeight(it.size.height.toFloat())
+                Log.d("DescarregarVideos", "Offset Scroll Player ${it.size.height.toFloat()}")
             }
             //.nestedScroll(nestedScrollConnection)
             .animateContentSize()
@@ -262,7 +269,14 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel(),shouldShow: Boo
             .padding(start = 16.dp, end = 16.dp, bottom = bottomPadding, top = 0.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(Color.Black)
-        if (isMediaVisible && shouldShow) {
+
+        AnimatedVisibility(visible = isMediaVisible && shouldShow
+        , enter = slideInVertically(tween(100, easing = LinearOutSlowInEasing)) {
+                return@slideInVertically it*2
+            }, exit = slideOutVertically(tween(100, easing = LinearOutSlowInEasing)) {
+                return@slideOutVertically it*2
+            }
+        ) {
             Box(
                 modifier = modifierBox
             ) {
@@ -274,17 +288,23 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel(),shouldShow: Boo
                         .padding(top = 8.dp, start = 8.dp, end = 8.dp)
                 ) {
                     if (metaDataUi != null) {
-
-                        Image(
+                        AsyncImage(
+                            model = ImageRequest.Builder(context).data(metaDataUi!!.artwork)
+                                .build(),
+                            contentDescription = "ArtWork Image", modifier = Modifier
+                                .width(86.dp)
+                                .align(alignment = Alignment.CenterVertically)
+                        )
+                        /*Image(
                             bitmap = metaDataUi!!.artwork.asImageBitmap(),
                             contentDescription = "Thumbnail Video",
                             modifier = Modifier
                                 .width(86.dp)
                                 .align(alignment = Alignment.CenterVertically)
 
-                        )
+                        )*/
                         Spacer(modifier = Modifier.width(8.dp))
-                        Column {
+                        Column(modifier = Modifier.fillMaxWidth()) {
                             if (isMediaPlayerMaximized) {
                                 Icon(
                                     imageVector = Icons.Default.KeyboardArrowDown,
@@ -350,6 +370,22 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel(),shouldShow: Boo
                     }
 
                 }
+                Row(modifier = Modifier.align(alignment = if (isMediaPlayerMaximized) Alignment.CenterStart else Alignment.CenterEnd)) {
+                    IconButton(
+                        onClick = {
+                            player?.clearMediaItems()
+                            player?.stop()
+                            mediaViewModel.setVisibility(false)
+                        },
+                        interactionSource = remember { MutableInteractionSource() },
+
+                        ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Destroy Player", tint = Color.White
+                        )
+                    }
+                }
                 val modifierTimeBar = if (isMediaPlayerMaximized) {
                     Modifier.padding(12.dp)
                 } else {
@@ -383,15 +419,15 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel(),shouldShow: Boo
                     }
                     Slider(
                         modifier = Modifier, value = sliderPosition, onValueChangeFinished = {
-                        player?.seekTo((sliderPosition.toLong() * 1000))
-                        isSliderChanging = false
+                            player?.seekTo((sliderPosition.toLong() * 1000))
+                            isSliderChanging = false
 
-                    }, onValueChange = {
-                        isSliderChanging = true
-                        sliderPosition = it
+                        }, onValueChange = {
+                            isSliderChanging = true
+                            sliderPosition = it
 
 
-                    },
+                        },
                         valueRange = 0f..sliderTotalDuration,
                         colors = SliderColors(
                             thumbColor = Color.White,
@@ -404,17 +440,16 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel(),shouldShow: Boo
                             disabledActiveTickColor = Color.LightGray,
                             disabledInactiveTrackColor = Color.LightGray,
                             disabledInactiveTickColor = Color.LightGray
-                        )
-                        , thumb = {
-                            Box(Modifier
-                                .size(24.dp)
-                                .padding(4.dp)
-                                .background(Color.White, CircleShape)
+                        ), thumb = {
+                            Box(
+                                Modifier
+                                    .size(24.dp)
+                                    .padding(4.dp)
+                                    .background(Color.White, CircleShape)
                             ) {
 
                             }
-                        }
-                        , track = { sliderState ->
+                        }, track = { sliderState ->
 
                             val fraction by remember {
                                 derivedStateOf {
@@ -422,16 +457,18 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel(),shouldShow: Boo
                                 }
                             }
 
-                            Box(Modifier
-                                .fillMaxWidth()
-                                .background(Color.White)) {
+                            Box(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .background(Color.White)
+                            ) {
                                 Box(
                                     Modifier
                                         .fillMaxWidth(fraction)
                                         .align(Alignment.CenterStart)
                                         .height(2.dp)
                                         .padding(end = 16.dp)
-                                        .background(Color.Yellow, CircleShape)
+                                        .background(Color.White, CircleShape)
                                 )
                                 Box(
                                     Modifier
@@ -439,7 +476,7 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel(),shouldShow: Boo
                                         .align(Alignment.CenterEnd)
                                         .height(1.dp)
                                         .padding(start = 16.dp)
-                                        .background(Color.White, CircleShape)
+                                        .background(Color.LightGray, CircleShape)
                                 )
                             }
                         })

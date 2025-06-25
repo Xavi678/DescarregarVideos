@@ -257,23 +257,33 @@ fun SearchVideos(
             if (selectedFormat != null) {
                 searchViewModel.setDownloading(currentVideo!!)
                 searchViewModel.downloadVideo(selectedFormat, currentVideo!!, finished = fun(success: Boolean) {
+                    val handler=Handler(Looper.getMainLooper()!!)
                     if(success) {
                         searchViewModel.setDownloaded(currentVideo!!)
 
-                        Toast.makeText(
-                            context, "Video \"${currentVideo!!.title}\" Descarregat Correctament",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        handler.post {
+                            Toast.makeText(
+                                context, "Video \"${currentVideo!!.title}\" Descarregat Correctament",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            searchViewModel.resetDialog()
+                        }
+
                     }else {
                         searchViewModel.setNotDownloaded(currentVideo!!)
-                        Toast.makeText(
-                            context, "Video \"${currentVideo!!.title}\" Error: No s'ha pogut Descarregat Correctament",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        handler.post {
+                            Toast.makeText(
+                                context, "Video \"${currentVideo!!.title}\" Error: No s'ha pogut Descarregat Correctament",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            searchViewModel.resetDialog()
+                        }
+
                     }
+
                 })
             }
-            searchViewModel.resetDialog()
+            searchViewModel.resetFormats()
         })
     }
 

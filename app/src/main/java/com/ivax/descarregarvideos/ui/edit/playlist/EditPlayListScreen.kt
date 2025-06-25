@@ -29,6 +29,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -113,9 +114,13 @@ fun Top(viewModel: EditPlaylistViewModel) {
 fun Playlists(viewModel: EditPlaylistViewModel) {
     var playlistIdWithPositions by remember { mutableStateOf<List<VideosWithPositionFoo>>(emptyList()) }
     val _playlistIdWithPositions by viewModel.playlistIdWithPositions.collectAsStateWithLifecycle()
-    if (_playlistIdWithPositions != null) {
-        playlistIdWithPositions = _playlistIdWithPositions!!
+    LaunchedEffect(Unit) {
+
+        if (_playlistIdWithPositions != null) {
+            playlistIdWithPositions = _playlistIdWithPositions!!
+        }
     }
+
 
     var draggingItem by remember { mutableStateOf<LazyListItemInfo?>(null) }
     Log.d("DescarregarVideos", "Drag remember " + draggingItem?.key)
@@ -193,9 +198,9 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
                                     )
                                     Log.d(
                                         "DescarregarVideos",
-                                        "Drag previousItem.offset  + (dragPreviousItemSize/2) ${(previousItem.offset + (dragPreviousItemSize / 2))}"
+                                        "Drag previousItem.offset  + (dragPreviousItemSize/2) ${(previousItem.offset + (dragPreviousItemSize * 0.75))}"
                                     )
-                                    if ((dragItemOffset + currentDelta) < (previousItem.offset + (dragPreviousItemSize / 2))) {
+                                    if ((dragItemOffset + currentDelta) < (previousItem.offset + (dragPreviousItemSize *0.75))) {
                                         changePosition(index!!, previousItem.index)
                                         draggingItem = previousItem
                                         index = previousItem.index
@@ -218,9 +223,9 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
                                         )
                                         Log.d(
                                             "DescarregarVideos",
-                                            "Drag nextItem.offset  + (dragNextItemSize/2) ${(nextItem.offset + (dragNextItemSize / 2))}"
+                                            "Drag nextItem.offset  + (dragNextItemSize/2) ${(nextItem.offset + (dragNextItemSize * 0.75))}"
                                         )
-                                        if ((draggingItem!!.size + dragItemOffset) + currentDelta > (nextItem.offset + (dragNextItemSize / 2))) {
+                                        if ((draggingItem!!.size + dragItemOffset) + currentDelta > (nextItem.offset + (dragNextItemSize *0.75))) {
                                             changePosition(index!!, nextItem.index)
                                             draggingItem = nextItem
                                             index = nextItem.index

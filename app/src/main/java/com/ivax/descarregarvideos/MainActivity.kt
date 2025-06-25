@@ -1,13 +1,9 @@
 package com.ivax.descarregarvideos
 
-import android.content.ComponentName
 import android.content.res.Configuration
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
-import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.navigation.findNavController
@@ -15,50 +11,34 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import androidx.media3.common.MediaItem
 import com.ivax.descarregarvideos.databinding.ActivityMainBinding
 import com.ivax.descarregarvideos.general.viewmodels.MediaViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.FileInputStream
-import android.widget.LinearLayout
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -69,10 +49,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.media3.common.Player
-import androidx.media3.common.Timeline
 import androidx.media3.session.MediaController
-import androidx.media3.session.SessionToken
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -83,13 +60,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.google.common.base.Objects
-import com.google.common.util.concurrent.ListenableFuture
-import com.google.common.util.concurrent.MoreExecutors
-import com.ivax.descarregarvideos.classes.RouteLabel
 import com.ivax.descarregarvideos.general.viewmodels.ModalSheetBottomMenuViewModel
-import com.ivax.descarregarvideos.services.PlaybackService
-import com.ivax.descarregarvideos.ui.composables.AddPlaylistMenu
 import com.ivax.descarregarvideos.ui.composables.MusicPlayer
 import com.ivax.descarregarvideos.ui.edit.playlist.EditPlaylistScreen
 import com.ivax.descarregarvideos.ui.edit.playlist.EditPlaylistViewModel
@@ -97,13 +68,11 @@ import com.ivax.descarregarvideos.ui.routes.Route
 import com.ivax.descarregarvideos.ui.routes.Route.Playlists
 import com.ivax.descarregarvideos.ui.playlists.PlaylistScreen
 import com.ivax.descarregarvideos.ui.playlists.PlaylistsViewModel
-import com.ivax.descarregarvideos.ui.routes.Route.EditPlaylist.*
 import com.ivax.descarregarvideos.ui.saved.videos.SavedVideosViewModel
 import com.ivax.descarregarvideos.ui.saved.videos.SearchAudioScreen
 import com.ivax.descarregarvideos.ui.search.SearchScreen
 import com.ivax.descarregarvideos.ui.search.SearchViewModel
 import com.ivax.descarregarvideos.ui.theme.MainAppTheme
-import kotlinx.coroutines.flow.update
 
 
 @AndroidEntryPoint
@@ -217,6 +186,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         installSplashScreen()
         enableEdgeToEdge()
+
         setContent {
             MainAppTheme {
                 MainWrapper()
@@ -299,15 +269,21 @@ class MainActivity : AppCompatActivity() {
     ) {
         val navController = rememberNavController()
         var showMusicPLayer by remember { mutableStateOf(true) }
+        var heightMusicPLayerOffset by remember { mutableFloatStateOf(0f) }
+        var heightMusicPlayer by remember { mutableFloatStateOf(0f) }
         val nestedScrollConnection = remember {
             object : NestedScrollConnection {
                 override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                     val delta = available.y
-                    Log.d("DescarregarVideos","Offset Scroll ${delta}")
-                    //val newOffset = bottomBarOffsetHeightPx.value + delta
-                    //bottomBarOffsetHeightPx.value = newOffset.coerceIn(-bottomBarHeight.value, 0f)
-                    //showBottomBar.value = newOffset >= 0f
-                    showMusicPLayer = delta >= 0
+                    //Log.d("DescarregarVideos","Offset Scroll ${delta} source: ${source} Height Offset: ${heightMusicPLayerOffset}")
+                    val newOffset = heightMusicPLayerOffset + delta
+
+                    heightMusicPLayerOffset= newOffset.coerceIn(-heightMusicPlayer,0f)
+
+                    Log.d("DescarregarVideos","Scroll heightMusicPLayerOffset ${heightMusicPLayerOffset}")
+                    //heightOffset = newOffset.coerceIn(-heightOffset, 0f)
+                    showMusicPLayer = newOffset >= 0f
+                    //showMusicPLayer = delta >= 0
                     return Offset.Zero
                 }
 
@@ -316,7 +292,8 @@ class MainActivity : AppCompatActivity() {
                     available: Offset,
                     source: NestedScrollSource
                 ): Offset {
-                    Log.d("DescarregarVideos","Offset Scroll Finished")
+                    Log.d("DescarregarVideos","Offset Scroll Finished Available: " +
+                            "${available.y} Consumed: ${consumed.y} source: ${source}")
                     return super.onPostScroll(consumed, available, source)
                 }
             }
@@ -326,8 +303,10 @@ class MainActivity : AppCompatActivity() {
         val ruta = currentBackState.getRoute()
 
 
-        Scaffold(modifier = Modifier.nestedScroll(nestedScrollConnection).padding(top = 22.dp),
+        Scaffold(modifier = Modifier.nestedScroll(nestedScrollConnection),
+            contentWindowInsets = WindowInsets.safeContent,
             containerColor =MaterialTheme.colorScheme.secondary ,
+            contentColor =MaterialTheme.colorScheme.secondary,
             /*topBar = {
 
                 Row {
@@ -377,6 +356,7 @@ class MainActivity : AppCompatActivity() {
                 )*/
             },*/
             bottomBar = {
+
                 NavBar(navController)
             }) { innerPadding ->
             Column(
@@ -393,7 +373,9 @@ class MainActivity : AppCompatActivity() {
                     navigateTo = navigateTo
                 )
 
-                    MusicPlayer(shouldShow = showMusicPLayer)
+                MusicPlayer(shouldShow = showMusicPLayer){
+                    heightMusicPlayer=it
+                }
 
             }
         }

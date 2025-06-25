@@ -236,4 +236,8 @@ class SearchViewModel @Inject constructor(
         setDownloadStatus(currentVideo,DownloadState.NotDownloaded)
     }
 
+    fun resetFormats() {
+        _formats.value= emptyList()
+    }
+
 }
