@@ -35,12 +35,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.ui.composables.SearchComposable
 import com.ivax.descarregarvideos.ui.composables.bounceClick
@@ -110,11 +113,9 @@ fun ListItem(
                 .width(86.dp)
                 .padding(top = 8.dp, start = 8.dp)
         ) {
-            Image(
-                bitmap = bmp.asImageBitmap(),
-                contentDescription = null,
-            )
-
+            AsyncImage(model = ImageRequest.Builder(LocalContext.current)
+                .data(bmp).build(),
+                contentDescription = null,)
             Image(
                 painter = painterResource(id = R.drawable.play_button_rect_mod),
                 contentDescription = null,
@@ -184,6 +185,5 @@ fun ListItem(
         }
 
     }
-    //HorizontalDivider(Modifier.padding(4.dp), color = MaterialTheme.colorScheme.surface)
 }
 

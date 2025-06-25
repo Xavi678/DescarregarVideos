@@ -117,7 +117,7 @@ fun Item(playlistWithOrderedVideosFoo: PlaylistWithOrderedVideosFoo, function: (
                         function(playlistWithOrderedVideosFoo.playlist.playListId)
                     },
                     interactionSource = remember { MutableInteractionSource() },
-                    indication = null
+                    indication = ripple(color = MaterialTheme.colorScheme.surface)
                 )
         ) {
 

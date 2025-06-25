@@ -1,8 +1,11 @@
 package com.ivax.descarregarvideos.ui.search
 
+import android.content.Context
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -22,9 +25,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.core.net.toUri
 import com.ivax.descarregarvideos.classes.DownloadState
+import dagger.hilt.android.qualifiers.ApplicationContext
+import java.io.File
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
+    @ApplicationContext val context: Context,
     private val fileRepository: FileRepository,
     private val videoRepository: VideoRepository,
     private val youtubeRepository: YoutubeRepository
@@ -43,7 +49,7 @@ class SearchViewModel @Inject constructor(
     val videoExists: MutableStateFlow<Boolean> by lazy {
         MutableStateFlow<Boolean>(false)
     }
-    private val _currentVideo = MutableStateFlow<SavedVideo?>(null)
+    private val _currentVideo = MutableStateFlow<VideoItem?>(null)
 
     val currentVideo = _currentVideo.asStateFlow()
     var searchQuery: String? = null
@@ -88,8 +94,9 @@ class SearchViewModel @Inject constructor(
                 }
 
                 _videos.update {
-                    it.addAll(result.videos)
-                    it
+                    stateList ->
+                    stateList.addAll(result.videos)
+                    stateList
                 }
                 continuationToken.value = result.nextToken
             } catch (e: Exception) {
@@ -107,7 +114,7 @@ class SearchViewModel @Inject constructor(
             DownloadState.NotDownloaded
         }
 
-    fun getAudioUrlsResponse(savedVideo: SavedVideo, callback: (List<AdaptiveFormats>) -> Unit) {
+    fun getAudioUrlsResponse(savedVideo: VideoItem, callback: (List<AdaptiveFormats>) -> Unit) {
         this.viewModelScope.launch(Dispatchers.IO) {
 
             val playerResponse: PlayerResponse =
@@ -124,10 +131,11 @@ class SearchViewModel @Inject constructor(
 
     fun downloadVideo(
         selectedFormat: AdaptiveFormats,
-        savedVideo: SavedVideo,
+        video: VideoItem,
         finished: (success: Boolean) -> Unit
     ) {
         this.viewModelScope.launch(Dispatchers.IO) {
+            val savedVideo =toSavedVideo(video)
             var downloadSuccess=false
             try {
                 val uri = selectedFormat.url.toUri()
@@ -154,12 +162,36 @@ class SearchViewModel @Inject constructor(
 
     }
 
-    fun setFormats(currentVideo: SavedVideo, formats: List<AdaptiveFormats>) {
+    fun toSavedVideo(video: VideoItem) : SavedVideo{
+
+        val imgPath = "${video.videoId}_thumbnail.bmp"
+
+        var dir = File("${context.filesDir}/fotos")
+        var d = dir.mkdir()
+        var f = File("${dir}/${imgPath}")
+
+        if (f.exists()) {
+            f.delete()
+        }
+        f.createNewFile()
+        f.outputStream().use {
+            video.imgUrl?.compress(Bitmap.CompressFormat.PNG, 100, it)
+        }
+        return SavedVideo(
+            video.videoId,
+            video.title,
+            imgUrl = "${dir}/${imgPath}",
+            video.duration,
+            video.viewCount,
+            author = video.author
+        )
+    }
+    fun setFormats(currentVideo: VideoItem, formats: List<AdaptiveFormats>) {
         _currentVideo.value = currentVideo
         _formats.value = formats
     }
 
-    fun setDownloaded(currentVideo: SavedVideo) {
+    fun setDownloaded(currentVideo: VideoItem) {
         setDownloadStatus(currentVideo, DownloadState.Downloaded)
     }
 
@@ -168,11 +200,11 @@ class SearchViewModel @Inject constructor(
         _currentVideo.value = null
     }
 
-    fun setDownloading(currentVideo: SavedVideo) {
+    fun setDownloading(currentVideo: VideoItem) {
         setDownloadStatus(currentVideo, DownloadState.Downloading)
     }
 
-    private fun setDownloadStatus(currentVideo: SavedVideo, downloadState: DownloadState) {
+    private fun setDownloadStatus(currentVideo: VideoItem, downloadState: DownloadState) {
         _videos.update {
             val idx=it.indexOfFirst { it.videoId == currentVideo.videoId }
             if(idx!=-1) {
@@ -199,7 +231,7 @@ class SearchViewModel @Inject constructor(
         //_videos.update {  new}
     }
 
-    fun setNotDownloaded(currentVideo: SavedVideo) {
+    fun setNotDownloaded(currentVideo: VideoItem) {
 
         setDownloadStatus(currentVideo,DownloadState.NotDownloaded)
     }

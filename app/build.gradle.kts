@@ -91,6 +91,7 @@ dependencies {
     implementation(libs.android.compose.material3)
     implementation(libs.android.activity.compose)
     implementation(libs.android.lifecycle.viewmodel.compose)
+    implementation(libs.coil.compose)
     implementation(libs.android.livedata.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.fragment.compose)

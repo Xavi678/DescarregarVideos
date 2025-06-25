@@ -27,6 +27,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,6 +48,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.exoplayer.source.ExternalLoader.LoadRequest
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.classes.DownloadState
 import com.ivax.descarregarvideos.classes.VideoItem
@@ -63,6 +67,11 @@ fun SearchScreen(searchViewModel: SearchViewModel = viewModel()){
         SearchComposable(onClickInvoker = fun(text: String) {
             searchViewModel.SearchVideos(text)
         })
+        /*Button(onClick = {
+            searchViewModel.loadMoreVideos()
+        }) {
+            Text("Load More Videos", color = MaterialTheme.colorScheme.surface)
+        }*/
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Loading()
             SearchVideos()
@@ -75,10 +84,14 @@ fun SearchScreen(searchViewModel: SearchViewModel = viewModel()){
 fun Loading(searchViewModel: SearchViewModel = viewModel()) {
     val isLoading by searchViewModel.isLoading.collectAsStateWithLifecycle()
     if (isLoading) {
+
         CircularProgressIndicator(
             modifier = Modifier.width(64.dp),
-            color = MaterialTheme.colorScheme.secondary,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            color = MaterialTheme.colorScheme.surface,
+            strokeWidth = 16.dp,
+            strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
+            trackColor = MaterialTheme.colorScheme.secondary,
+
         )
     }
 }
@@ -87,34 +100,6 @@ fun Loading(searchViewModel: SearchViewModel = viewModel()) {
 
 @Composable
 fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
-    //var downloadState by remember { mutableStateOf(video.videoDownloaded) }
-
-    val context = LocalContext.current
-    var savedVideo by remember { mutableStateOf<SavedVideo?>(null) }
-    LaunchedEffect(Unit) {
-        val imgPath = "${video.videoId}_thumbnail.bmp"
-        var dir = File("${context.filesDir}/fotos")
-        var d = dir.mkdir()
-        var f = File("${dir}/${imgPath}")
-
-        if (f.exists()) {
-            f.delete()
-        }
-        f.createNewFile()
-        f.outputStream().use {
-            video.imgUrl?.compress(Bitmap.CompressFormat.PNG, 100, it)
-        }
-        val saveVideo = SavedVideo(
-            video.videoId,
-            video.title,
-            "${dir}/${imgPath}",
-            video.duration,
-            video.viewCount,
-            author = video.author
-        )
-        savedVideo=saveVideo
-    }
-    if (savedVideo!=null) {
 
         Row() {
 
@@ -123,10 +108,9 @@ fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
                     .width(86.dp)
                     .padding(top = 8.dp, start = 8.dp)
             ) {
-                Image(
-                    bitmap = video.imgUrl!!.asImageBitmap(),
-                    contentDescription = null,
-                )
+                AsyncImage(model = ImageRequest.Builder(LocalContext.current)
+                    .data(video.imgUrl).build(),
+                    contentDescription = null,)
                 Text(
                     text = video.duration,
                     color = Color.White,
@@ -174,9 +158,9 @@ fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
 
             IconButton(onClick = {
                 searchViewModel.getAudioUrlsResponse(
-                    savedVideo!!,
+                    video,
                     callback = fun(formats: List<AdaptiveFormats>, ) {
-                        searchViewModel.setFormats(savedVideo!!,formats)
+                        searchViewModel.setFormats(video,formats)
                     })
             }) {
                 Log.d("DescarregarVideos","${video.title} State: ${video.videoDownloaded}")
@@ -204,8 +188,7 @@ fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
             }
 
         }
-        //HorizontalDivider(Modifier.padding(4.dp), color = Color.LightGray)
-    }
+    //}
 }
 @Composable
 fun SearchVideos(

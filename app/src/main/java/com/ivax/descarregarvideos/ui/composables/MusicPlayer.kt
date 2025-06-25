@@ -48,8 +48,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -82,12 +87,16 @@ import java.io.FileInputStream
 @OptIn(UnstableApi::class)
 @kotlin.OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
+fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel(),shouldShow: Boolean) {
     val context = LocalContext.current
     var player by remember { mutableStateOf<MediaController?>(null) }
     var sliderPosition by remember { mutableFloatStateOf(0f) }
     var sliderTotalDuration by remember { mutableFloatStateOf(0f) }
     var isSliderChanging by remember { mutableStateOf(false) }
+
+
+
+
     LifecycleStartEffect(Unit) {
         lateinit var controllerFuture: ListenableFuture<MediaController>
         val sessionToken =
@@ -231,9 +240,15 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
         val nextButton = rememberNextButtonState(player!!)
         val previousButton = rememberPreviousButtonState(player!!)
 
+
+
         val bottomPadding=if(isMediaPlayerMaximized) 12.dp else 2.dp
         val modifierBox = Modifier
             .fillMaxWidth()
+            .onGloballyPositioned {
+                Log.d("DescarregarVideos","Offset Scroll Player ${it.size.height.toFloat()}")
+            }
+            //.nestedScroll(nestedScrollConnection)
             .animateContentSize()
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
@@ -247,7 +262,7 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel()) {
             .padding(start = 16.dp, end = 16.dp, bottom = bottomPadding, top = 0.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(Color.Black)
-        if (isMediaVisible) {
+        if (isMediaVisible && shouldShow) {
             Box(
                 modifier = modifierBox
             ) {

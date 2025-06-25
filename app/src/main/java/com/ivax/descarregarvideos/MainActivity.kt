@@ -22,6 +22,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.io.FileInputStream
 import android.widget.LinearLayout
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
@@ -58,7 +59,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -211,163 +216,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen()
+        enableEdgeToEdge()
         setContent {
             MainAppTheme {
                 MainWrapper()
 
             }
         }
-        //binding = ActivityMainBinding.inflate(layoutInflater)
-        //setContentView(binding.root)
-
-
-        /*var playButton =
-            binding.appBarMain.root.findViewById<ImageButton>(R.id.mediaPlayerPlayButton)
-        var thumbnailPlayer =
-            binding.appBarMain.root.findViewById<ImageView>(R.id.mediaPlayerThumbnail)
-        var playerSongTextView =
-            binding.appBarMain.root.findViewById<TextView>(R.id.playerSongTextView)
-        btnSkipBackward = binding.appBarMain.root.findViewById<ImageButton>(R.id.skipBackward)
-        btnSkipForward = binding.appBarMain.root.findViewById<ImageButton>(R.id.skipBForward)
-        btnMinimizePlayer =
-            binding.appBarMain.root.findViewById<ImageButton>(R.id.imageButtonMinimizePlayer)
-        btnDestroyPlayer =
-            binding.appBarMain.root.findViewById<ImageButton>(R.id.imageButtonDestroyPlayer)
-        tbxPlaylistName = binding.appBarMain.root.findViewById<TextView>(R.id.tbxCurrentPlaylist)
-        playlistLayout =
-            binding.appBarMain.root.findViewById<LinearLayout>(R.id.layoutCurrentPlaylist)
-        mediaViewModel.isMediaPlayerMaximized.observe(this) {
-
-            binding.appBarMain.mediaPlayer.visibility = if (it) View.VISIBLE else View.GONE
-            binding.appBarMain.fab.visibility = if (it) View.GONE else View.VISIBLE
-        }
-        lifecycleScope.launch {
-            mediaViewModel.isMediaPlayerVisible.collectLatest {
-                if (!it) {
-                    binding.appBarMain.fab.visibility = View.GONE
-                    binding.appBarMain.mediaPlayer.visibility = View.GONE
-                }
-            }
-        }
-
-        btnSkipBackward.setOnClickListener {
-            player.seekToPreviousMediaItem()
-        }
-
-        btnSkipForward.setOnClickListener {
-            player.seekToNextMediaItem()
-        }
-
-        lifecycleScope.launch {
-            mediaViewModel.title.collectLatest {
-                Log.d(
-                    "DescarregarVideos",
-                    "Visibilitat Player: ${binding.appBarMain.playerView.visibility}"
-                )
-
-                playerSongTextView.text = it
-                playerSongTextView.isSelected = true
-            }
-        }
-        lifecycleScope.launch {
-            mediaViewModel.thumbnail.collectLatest {
-                if (it != null) {
-                    thumbnailPlayer.setImageBitmap(it)
-                }
-            }
-        }
-        lifecycleScope.launch {
-            mediaViewModel.playlistName.collectLatest {
-
-                if (playlistLayout != null) {
-                    if (it != null) {
-                        playlistLayout!!.visibility = View.VISIBLE
-                        tbxPlaylistName.text = it
-                    } else {
-
-                        playlistLayout!!.visibility = View.INVISIBLE
-                    }
-                }
-            }
-        }
-        lifecycleScope.launch {
-            mediaViewModel.playlistHasPrevious.collectLatest {
-                hasPreviousMedia(it)
-            }
-        }
-
-        lifecycleScope.launch {
-            mediaViewModel.playlistHasNext.collectLatest {
-                hasNextMedia(it)
-            }
-        }
-        btnMinimizePlayer.setOnClickListener {
-            mediaViewModel.isMediaPlayerMaximized.postValue(false)
-        }
-        btnDestroyPlayer.setOnClickListener {
-            player.stop()
-            player.clearMediaItems()
-            player.release()
-            mediaViewModel.isMediaPlayerVisible.update {
-                false
-            }
-
-        }
-
-
-
-        playButton.setOnClickListener { view ->
-            var playPause = (view as ImageButton)
-            if (player.isPlaying) {
-                //playPause.context.resources
-                player.stop()
-                playPause.setImageDrawable(
-                    ResourcesCompat.getDrawable(
-                        view.context.resources,
-                        R.drawable.play_button_round,
-                        null
-                    )
-                )
-            } else {
-                player.prepare()
-                player.play()
-                playPause.setImageDrawable(
-                    ResourcesCompat.getDrawable(
-                        view.context.resources,
-                        R.drawable.pause_button_white,
-                        null
-                    )
-                )
-            }
-            Log.d("DescarregarVideos", "")
-        }
-
-        binding.appBarMain.fab.setOnClickListener {
-
-            mediaViewModel.isMediaPlayerMaximized.postValue(true)
-        }
-
-        val drawerLayout: DrawerLayout = binding.drawerLayout
-        val navView: NavigationView = binding.navView
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.nav_search,
-                R.id.nav_saved_videos, R.id.nav_playlists
-            ), drawerLayout
-        )
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)*/
-    }
-
-    private fun hasNextMedia(it: Boolean) {
-        btnSkipForward.visibility = if (it) View.VISIBLE
-        else View.INVISIBLE
-    }
-
-    private fun hasPreviousMedia(it: Boolean) {
-        btnSkipBackward.visibility = if (it) View.VISIBLE
-        else View.INVISIBLE
     }
 
 
@@ -416,7 +271,12 @@ class MainActivity : AppCompatActivity() {
                     "playlistId",
                     arg.playlistId
                 )
-                EditPlaylistScreen(viewModel)
+                EditPlaylistScreen(viewModel){
+                    navController.navigate(Route.Playlists) {
+                        restoreState = false
+
+                    }
+                }
             }
 
         }
@@ -438,14 +298,37 @@ class MainActivity : AppCompatActivity() {
         navigateTo: (route: String) -> Unit
     ) {
         val navController = rememberNavController()
+        var showMusicPLayer by remember { mutableStateOf(true) }
+        val nestedScrollConnection = remember {
+            object : NestedScrollConnection {
+                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                    val delta = available.y
+                    Log.d("DescarregarVideos","Offset Scroll ${delta}")
+                    //val newOffset = bottomBarOffsetHeightPx.value + delta
+                    //bottomBarOffsetHeightPx.value = newOffset.coerceIn(-bottomBarHeight.value, 0f)
+                    //showBottomBar.value = newOffset >= 0f
+                    showMusicPLayer = delta >= 0
+                    return Offset.Zero
+                }
 
+                override fun onPostScroll(
+                    consumed: Offset,
+                    available: Offset,
+                    source: NestedScrollSource
+                ): Offset {
+                    Log.d("DescarregarVideos","Offset Scroll Finished")
+                    return super.onPostScroll(consumed, available, source)
+                }
+            }
+        }
 
         val currentBackState by navController.currentBackStackEntryAsState()
         val ruta = currentBackState.getRoute()
 
 
-        Scaffold(modifier = Modifier.padding(top = 22.dp),
-            containerColor =MaterialTheme.colorScheme.secondary , topBar = {
+        Scaffold(modifier = Modifier.nestedScroll(nestedScrollConnection).padding(top = 22.dp),
+            containerColor =MaterialTheme.colorScheme.secondary ,
+            /*topBar = {
 
                 Row {
                     if (ruta?.hasBackButton == true) {
@@ -492,7 +375,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 )*/
-            },
+            },*/
             bottomBar = {
                 NavBar(navController)
             }) { innerPadding ->
@@ -509,7 +392,9 @@ class MainActivity : AppCompatActivity() {
                     startDestination = Route.Search,
                     navigateTo = navigateTo
                 )
-                MusicPlayer()
+
+                    MusicPlayer(shouldShow = showMusicPLayer)
+
             }
         }
     }
