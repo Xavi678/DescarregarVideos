@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -47,11 +48,14 @@ import androidx.compose.ui.draganddrop.mimeTypes
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.classes.PlaylistWithOrderedVideosFoo
 import com.ivax.descarregarvideos.ui.composables.ModalSheetBottomMenu
@@ -65,7 +69,7 @@ import java.io.FileInputStream
 fun PlaylistScreen(
     playlistsViewModel: PlaylistsViewModel = viewModel(),
     function: (Int) -> Unit
-){
+) {
     MainAppTheme {
         Column {
             SearchContentWrapper()
@@ -77,33 +81,38 @@ fun PlaylistScreen(
 }
 
 @Composable
-fun SearchContentWrapper(playlistsViewModel: PlaylistsViewModel = viewModel()){
-    SearchComposable(onClickInvoker = fun (text: String) {
+fun SearchContentWrapper(playlistsViewModel: PlaylistsViewModel = viewModel()) {
+    SearchComposable(onClickInvoker = fun(text: String) {
         playlistsViewModel.filterPlaylist(text)
     })
 }
 
 @Composable
-fun ColumnPlaylists(playlistsViewModel: PlaylistsViewModel = viewModel(), function: (Int) -> Unit){
+fun ColumnPlaylists(playlistsViewModel: PlaylistsViewModel = viewModel(), function: (Int) -> Unit) {
     val playlists by playlistsViewModel.playlists.collectAsStateWithLifecycle(listOf<Playlist>())
     val orderedPlaylist by playlistsViewModel.orderedPlaylist.collectAsStateWithLifecycle()
-    LazyColumn(modifier = Modifier.fillMaxSize()
-        ) {
-        items(orderedPlaylist) {
-            item ->
-            Item(item,function)
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        items(orderedPlaylist) { item ->
+            Item(item, function)
         }
     }
 }
 
 @Preview
 @Composable
-fun ItemPreview(@PreviewParameter(PlaylistWithOrderedVideosFooPreviewParameterProvider::class) playlistWithOrderedVideosFoo: PlaylistWithOrderedVideosFoo){
+fun ItemPreview(@PreviewParameter(PlaylistWithOrderedVideosFooPreviewParameterProvider::class) playlistWithOrderedVideosFoo: PlaylistWithOrderedVideosFoo) {
     //Item(playlistWithOrderedVideosFoo)
 }
+
 @Composable
-fun Item(playlistWithOrderedVideosFoo: PlaylistWithOrderedVideosFoo, function: (Int) -> Unit,playlistsViewModel: PlaylistsViewModel = viewModel()
-){
+fun Item(
+    playlistWithOrderedVideosFoo: PlaylistWithOrderedVideosFoo,
+    function: (Int) -> Unit,
+    playlistsViewModel: PlaylistsViewModel = viewModel()
+) {
+    val context = LocalContext.current
     Box() {
 
 
@@ -128,35 +137,30 @@ fun Item(playlistWithOrderedVideosFoo: PlaylistWithOrderedVideosFoo, function: (
             ) {
                 val firstVideo = playlistWithOrderedVideosFoo.orderedVideos.firstOrNull()
                 if (firstVideo != null) {
-                    var bmp: Bitmap
-                    var fileInStream = FileInputStream(firstVideo.imgUrl)
-                    fileInStream.use {
-                        bmp = BitmapFactory.decodeStream(it)
-                    }
-                    fileInStream.close()
-
-                    Image(
-                        bitmap = bmp.asImageBitmap(),
+                    AsyncImage(
+                        model = ImageRequest.Builder(context).data(firstVideo.imgUrl).build(),
                         contentDescription = "First Video Thumbnail"
                     )
-                    Row(
-                        modifier = Modifier
-                            .align(alignment = Alignment.BottomEnd)
-                            .background(Color.Black)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.playlist),
-                            contentDescription = "Collection Icon", tint = MaterialTheme.colorScheme.surface,
-                            modifier = Modifier.align(alignment = Alignment.CenterVertically)
-                        )
-                        Text(
-                            text = "${playlistWithOrderedVideosFoo.orderedVideos.count()}",
-                            color = MaterialTheme.colorScheme.surface,
-                            fontSize = 11.sp,
-                            modifier = Modifier.align(alignment = Alignment.CenterVertically)
-                        )
-                    }
                 }
+                Row(
+                    modifier = Modifier
+                        .align(alignment = Alignment.BottomEnd)
+                        .background(Color.Black)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.playlist),
+                        contentDescription = "Collection Icon",
+                        tint = MaterialTheme.colorScheme.surface,
+                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                    )
+                    Text(
+                        text = "${playlistWithOrderedVideosFoo.orderedVideos.count()}",
+                        color = MaterialTheme.colorScheme.surface,
+                        fontSize = 11.sp,
+                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                    )
+                }
+
             }
             Column(
                 modifier = Modifier
@@ -164,8 +168,10 @@ fun Item(playlistWithOrderedVideosFoo: PlaylistWithOrderedVideosFoo, function: (
                     .padding(8.dp)
                     .weight(1f)
             ) {
-                Text(playlistWithOrderedVideosFoo.playlist.name.toString(),
-                    color = MaterialTheme.colorScheme.surface)
+                Text(
+                    playlistWithOrderedVideosFoo.playlist.name.toString(),
+                    color = MaterialTheme.colorScheme.surface
+                )
                 PlayButton(onClickDelegate = fun() {
                     playlistsViewModel.playAll(playlistWithOrderedVideosFoo)
                 })
@@ -191,8 +197,8 @@ fun Item(playlistWithOrderedVideosFoo: PlaylistWithOrderedVideosFoo, function: (
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlaylistBottomDialog(playlistsViewModel: PlaylistsViewModel = viewModel()) {
-    val  playlistId by playlistsViewModel.selectedPlaylist.collectAsStateWithLifecycle()
-    if (playlistsViewModel.isBottomSheetVisible.collectAsStateWithLifecycle().value && playlistId!=null) {
+    val playlistId by playlistsViewModel.selectedPlaylist.collectAsStateWithLifecycle()
+    if (playlistsViewModel.isBottomSheetVisible.collectAsStateWithLifecycle().value && playlistId != null) {
         ModalBottomSheet(
             onDismissRequest = {
                 playlistsViewModel.setBottomSheetVisibility(false)

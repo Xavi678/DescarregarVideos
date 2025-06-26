@@ -1,5 +1,7 @@
 package com.ivax.descarregarvideos.ui.theme
 
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -23,3 +25,10 @@ fun CustomInputColors() : TextFieldColors{
         )
 }
 
+@Composable
+fun CustomCardColors() : CardColors {
+   return CardDefaults.cardColors(containerColor =  MaterialTheme.colorScheme.primary,
+      disabledContentColor =  MaterialTheme.colorScheme.surface,
+      contentColor =  MaterialTheme.colorScheme.surface,
+      disabledContainerColor =  MaterialTheme.colorScheme.primary)
+}

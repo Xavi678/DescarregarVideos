@@ -185,22 +185,38 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
                             //Log.d("DescarregarVideos", "Drag onDrag Not Null")
                             val dragItemOffset = draggingItem!!.offset
                             if (currentDelta < 0) {
-                                Log.d("DescarregarVideos", "Drag Current delta $currentDelta")
+
                                 val previousItem =
                                     rememberLazyListState.layoutInfo.visibleItemsInfo.getOrNull(
                                         index!! - 1
                                     )
                                 if (previousItem != null) {
                                     val dragPreviousItemSize = previousItem.size
+
                                     Log.d(
                                         "DescarregarVideos",
-                                        "Drag dragItemOffset + Current delta ${dragItemOffset + currentDelta}"
+                                        "Drag draggingItem!!.offset " +
+                                                "${draggingItem!!.offset}"
+                                    )
+                                    Log.d("DescarregarVideos", "Drag Current delta $currentDelta")
+                                    Log.d(
+                                        "DescarregarVideos",
+                                        "Drag draggingItem!!.size " +
+                                                "${draggingItem!!.size}"
                                     )
                                     Log.d(
                                         "DescarregarVideos",
-                                        "Drag previousItem.offset  + (dragPreviousItemSize/2) ${(previousItem.offset + (dragPreviousItemSize * 0.75))}"
+                                        "Drag ((draggingItem!!.offset +draggingItem!!.size) + currentDelta) " +
+                                                "${((draggingItem!!.offset +draggingItem!!.size) + currentDelta)}"
                                     )
-                                    if ((dragItemOffset + currentDelta) < (previousItem.offset + (dragPreviousItemSize *0.75))) {
+                                    Log.d("DescarregarVideos","Drag previous Item offset ${previousItem.offset}")
+                                    Log.d(
+                                        "DescarregarVideos",
+                                        "Drag (previousItem.offset + (dragPreviousItemSize /2)) " +
+                                                "${dragPreviousItemSize}"
+                                    )
+
+                                    if (((draggingItem!!.offset +(draggingItem!!.size/2)) + currentDelta) < (previousItem.offset + (dragPreviousItemSize /2))) {
                                         changePosition(index!!, previousItem.index)
                                         draggingItem = previousItem
                                         index = previousItem.index
@@ -223,9 +239,9 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
                                         )
                                         Log.d(
                                             "DescarregarVideos",
-                                            "Drag nextItem.offset  + (dragNextItemSize/2) ${(nextItem.offset + (dragNextItemSize * 0.75))}"
+                                            "Drag nextItem.offset  + (dragNextItemSize/2) ${(nextItem.offset + (dragNextItemSize/2))}"
                                         )
-                                        if ((draggingItem!!.size + dragItemOffset) + currentDelta > (nextItem.offset + (dragNextItemSize *0.75))) {
+                                        if ((draggingItem!!.offset +(draggingItem!!.size/2)) + currentDelta > (nextItem.offset + (dragNextItemSize /2))) {
                                             changePosition(index!!, nextItem.index)
                                             draggingItem = nextItem
                                             index = nextItem.index
