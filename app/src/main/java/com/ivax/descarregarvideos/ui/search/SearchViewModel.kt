@@ -89,13 +89,16 @@ class SearchViewModel @Inject constructor(
                 _isLoading.value = true
                 val result =
                     youtubeRepository.SearchMore(token = continuationToken.value.toString())
-                result.videos.forEach {
-                    it.videoDownloaded = IsDownloaded(it.videoId)
-                }
+
 
                 _videos.update {
                     stateList ->
-                    stateList.addAll(result.videos)
+                    result.videos.forEach {
+                        if(stateList.firstOrNull { x -> x.videoId==it.videoId }==null) {
+                            it.videoDownloaded = IsDownloaded(it.videoId)
+                            stateList.add(it)
+                        }
+                    }
                     stateList
                 }
                 continuationToken.value = result.nextToken
@@ -213,22 +216,6 @@ class SearchViewModel @Inject constructor(
             it
         }
 
-    }
-
-    fun canviarVideos() {
-        val tmpVideos = _videos.value
-        tmpVideos.firstOrNull()?.videoDownloaded =
-            DownloadState.Downloaded
-        val new = ArrayList<VideoItem>()
-        new.add(
-            VideoItem(
-                "eeee", "eeee", null, "32432423", "3:56", "eeeeeeeee",
-                author = "autor",
-                channelThumbnail = null,
-                videoDownloaded = DownloadState.Downloaded
-            )
-        )
-        //_videos.update {  new}
     }
 
     fun setNotDownloaded(currentVideo: VideoItem) {

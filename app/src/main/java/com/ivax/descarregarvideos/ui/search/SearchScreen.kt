@@ -88,7 +88,7 @@ fun Loading(searchViewModel: SearchViewModel = viewModel()) {
         CircularProgressIndicator(
             modifier = Modifier.width(64.dp),
             color = MaterialTheme.colorScheme.surface,
-            strokeWidth = 16.dp,
+            strokeWidth = 8.dp,
             strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
             trackColor = MaterialTheme.colorScheme.secondary,
 
@@ -101,7 +101,7 @@ fun Loading(searchViewModel: SearchViewModel = viewModel()) {
 @Composable
 fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
 
-        Row() {
+        Row{
 
             Box(
                 Modifier

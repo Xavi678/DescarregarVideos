@@ -1,6 +1,8 @@
 package com.ivax.descarregarvideos
 
 import android.content.res.Configuration
+import android.graphics.Color.WHITE
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -186,7 +188,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         installSplashScreen()
         enableEdgeToEdge()
-
+        StatusBraConfig()
         setContent {
             MainAppTheme {
                 MainWrapper()
@@ -195,16 +197,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun StatusBraConfig(){
+        val color=WHITE
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) { // Android 15+
+            window.decorView.setOnApplyWindowInsetsListener { view, insets ->
+                val statusBarInsets = insets.getInsets(android.view.WindowInsets.Type.statusBars())
+                view.setBackgroundColor(color)
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.main, menu)
-        return true
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+                // Adjust padding to avoid overlap
+                view.setPadding(0, statusBarInsets.top, 0, 0)
+                insets
+            }
+        } else {
+            // For Android 14 and below
+            window.statusBarColor = color
+        }
     }
 
     @Composable
@@ -304,7 +311,7 @@ class MainActivity : AppCompatActivity() {
 
 
         Scaffold(modifier = Modifier.nestedScroll(nestedScrollConnection),
-            contentWindowInsets = WindowInsets.safeContent,
+            //contentWindowInsets = WindowInsets.safeContent,
             containerColor =MaterialTheme.colorScheme.secondary ,
             contentColor =MaterialTheme.colorScheme.secondary,
             /*topBar = {
