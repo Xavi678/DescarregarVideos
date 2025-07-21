@@ -15,6 +15,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -60,6 +61,7 @@ import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.classes.PlaylistWithOrderedVideosFoo
 import com.ivax.descarregarvideos.ui.composables.ModalSheetBottomMenu
 import com.ivax.descarregarvideos.ui.composables.PlayButton
+import com.ivax.descarregarvideos.ui.composables.PlayShuffle
 import com.ivax.descarregarvideos.ui.preview.providers.PlaylistWithOrderedVideosFooPreviewParameterProvider
 import com.ivax.descarregarvideos.ui.theme.MainAppTheme
 import java.io.FileInputStream
@@ -172,9 +174,16 @@ fun Item(
                     playlistWithOrderedVideosFoo.playlist.name.toString(),
                     color = MaterialTheme.colorScheme.surface
                 )
-                PlayButton(onClickDelegate = fun() {
-                    playlistsViewModel.playAll(playlistWithOrderedVideosFoo)
-                })
+                Row{
+                    PlayButton(onClickDelegate = fun() {
+                        playlistsViewModel.playAll(playlistWithOrderedVideosFoo)
+                    })
+                    Spacer(modifier = Modifier.width(4.dp))
+                    PlayShuffle(onClickDelegate = fun(){
+                        playlistsViewModel.shuffle(playlistWithOrderedVideosFoo)
+                    })
+                }
+
 
             }
             IconButton(onClick = {

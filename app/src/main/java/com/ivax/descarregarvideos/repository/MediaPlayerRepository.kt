@@ -95,21 +95,23 @@ class MediaPlayerRepository @Inject constructor(private val mediaHelper: IMediaH
 
     fun addPlaylistShuffle(playlist: PlaylistWithOrderedVideosFoo,playlistName: String?=null) {
         mediaHelper.clear()
+        mediaHelper.setShuffle()
+
         playlist.orderedVideos.forEach {
             mediaHelper.addMediaItem(SavedVideoToMediaItem(it,playlistName))
         }
 
-        mediaHelper.setShuffle()
+
         mediaHelper.play()
     }
     fun addPlaylistShuffle(videosWithPositionFoo: List<VideosWithPositionFoo>,playlistName: String?=null) {
         mediaHelper.clear()
-
+        mediaHelper.setShuffle()
         videosWithPositionFoo.forEach {
             mediaHelper.addMediaItem(SavedVideoToMediaItem(it,playlistName))
         }
 
-        mediaHelper.setShuffle()
+
         mediaHelper.play()
     }
 

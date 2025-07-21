@@ -54,6 +54,7 @@ import com.ivax.descarregarvideos.classes.VideosWithPositionFoo
 import com.ivax.descarregarvideos.general.viewmodels.ModalSheetBottomMenuViewModel
 import com.ivax.descarregarvideos.ui.composables.ModalSheetBottomMenu
 import com.ivax.descarregarvideos.ui.composables.PlayButton
+import com.ivax.descarregarvideos.ui.composables.PlayShuffle
 import com.ivax.descarregarvideos.ui.composables.bounceClick
 import java.io.FileInputStream
 
@@ -104,9 +105,18 @@ fun Top(viewModel: EditPlaylistViewModel) {
     Text(playlist?.name.toString(), color = MaterialTheme.colorScheme.surface, fontSize = 22.sp,
         fontWeight = FontWeight.Bold)
     Spacer(modifier = Modifier.height(16.dp))
-    PlayButton(onClickDelegate = {
-        viewModel.playAll()
-    })
+    Row {
+
+        PlayButton(onClickDelegate = {
+            viewModel.playAll()
+        })
+
+        Spacer(modifier = Modifier.width(4.dp))
+
+        PlayShuffle(onClickDelegate = fun() {
+            viewModel.shuffle()
+        })
+    }
 }
 
 

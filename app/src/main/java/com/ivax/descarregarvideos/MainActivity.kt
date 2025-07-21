@@ -307,7 +307,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         val currentBackState by navController.currentBackStackEntryAsState()
-        val ruta = currentBackState.getRoute()
 
 
         Scaffold(modifier = Modifier.nestedScroll(nestedScrollConnection),
@@ -408,14 +407,7 @@ class MainActivity : AppCompatActivity() {
                 NavigationBarItem(
                     selected = currentBackStackEntry?.destination?.hasRoute(it::class) == true,
                     onClick = {
-                        navController.navigate(it)
-                        {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            restoreState = true
-                            launchSingleTop = true
-                        }
+                        it.navigate(navController)
                     },
                     icon = {
                         Icon(
@@ -437,59 +429,7 @@ class MainActivity : AppCompatActivity() {
                     )
                 )
             }
-
-            /*NavigationBarItem(
-                selected = false, onClick = {
-                    navController.navigate(Route.SavedAudio) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
-                        }
-                        restoreState = true
-                        launchSingleTop = true
-                    }
-                }, icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.download_rounded_base),
-                        contentDescription = null,
-                    )
-                },
-                label = {
-                    Text("Saved Audio")
-                }
-            )
-            NavigationBarItem(
-                selected = false, onClick = {
-                    navController.navigate(Route.Playlists) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
-                        }
-                        restoreState = true
-                        launchSingleTop = true
-                    }
-                }, icon = {
-                    Icon(
-                        painter = painterResource(R.drawable.collection_fill),
-                        contentDescription = null,
-                    )
-                },
-                label = {
-                    Text("Playlists")
-                }
-            )*/
-
-
         }
     }
 }
 
-private fun NavBackStackEntry?.getRoute(): Route? {
-    return this?.let {
-        when {
-            destination.hasRoute<Route.Search>() -> Route.Search
-            destination.hasRoute<Route.SavedAudio>() -> Route.SavedAudio
-            destination.hasRoute<Route.Playlists>() -> Route.Playlists
-            destination.hasRoute<Route.EditPlaylist>() -> Route.EditPlaylist.Companion.get()
-            else -> null
-        }
-    }
-}
