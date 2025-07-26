@@ -35,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +57,8 @@ import com.ivax.descarregarvideos.ui.composables.ModalSheetBottomMenu
 import com.ivax.descarregarvideos.ui.composables.PlayButton
 import com.ivax.descarregarvideos.ui.composables.PlayShuffle
 import com.ivax.descarregarvideos.ui.composables.bounceClick
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.io.FileInputStream
 
 @Composable
@@ -122,6 +125,9 @@ fun Top(viewModel: EditPlaylistViewModel) {
 
 @Composable
 fun Playlists(viewModel: EditPlaylistViewModel) {
+    val coroutineScope = rememberCoroutineScope()
+    var scrollJob by remember { mutableStateOf<Job?>(null) }
+
     var playlistIdWithPositions by remember { mutableStateOf<List<VideosWithPositionFoo>>(emptyList()) }
     val _playlistIdWithPositions by viewModel.playlistIdWithPositions.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
@@ -130,7 +136,7 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
             playlistIdWithPositions = _playlistIdWithPositions!!
         }
     }
-
+    Log.d("DescarregarVideos","Changed: ${playlistIdWithPositions.count()}")
 
     var draggingItem by remember { mutableStateOf<LazyListItemInfo?>(null) }
     Log.d("DescarregarVideos", "Drag remember " + draggingItem?.key)
@@ -156,7 +162,7 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .pointerInput(
-                key1 = rememberLazyListState
+               Unit
             ) {
                 detectDragGesturesAfterLongPress(
                     onDragStart = { offset ->
@@ -231,6 +237,11 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
                                         draggingItem = previousItem
                                         index = previousItem.index
                                         currentDelta = 0f
+                                        if(index==0){
+                                            scrollJob=coroutineScope.launch {
+                                                rememberLazyListState.scrollToItem(0,0)
+                                            }
+                                        }
                                         //currentDelta += draggingItem!!.offset - previousItem.offset
                                     }
                                 }
@@ -256,6 +267,11 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
                                             draggingItem = nextItem
                                             index = nextItem.index
                                             currentDelta = 0f
+                                            if(index==1){
+                                                scrollJob=coroutineScope.launch {
+                                                    rememberLazyListState.scrollToItem(0,0)
+                                                }
+                                            }
                                             //currentDelta += draggingItem!!.offset - nextItem.offset
                                         }
                                     }
@@ -293,7 +309,10 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
         }
 
     }
+
+
 }
+
 
 @Composable
 fun ListItem(
