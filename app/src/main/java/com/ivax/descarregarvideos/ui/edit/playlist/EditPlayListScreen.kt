@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -196,16 +197,20 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
                     onDrag = { change, dragAmount ->
                         change.consume()
                         currentDelta += dragAmount.y.toInt()
+                        Log.d("DescarregarVideos","Drag Amount ${currentDelta}")
                         //Log.d("DescarregarVideos", "Drag onDrag current Item " + draggingItem?.key)
                         if (draggingItem != null && index != null) {
                             //Log.d("DescarregarVideos", "Drag onDrag Not Null")
                             val dragItemOffset = draggingItem!!.offset
+                            val startOffset = dragItemOffset + dragAmount.y
+                            val endOffset = (dragItemOffset+draggingItem!!.size) + dragAmount.y
                             if (currentDelta < 0) {
-
                                 val previousItem =
                                     rememberLazyListState.layoutInfo.visibleItemsInfo.getOrNull(
                                         index!! - 1
                                     )
+
+
                                 if (previousItem != null) {
                                     val dragPreviousItemSize = previousItem.size
 
@@ -248,10 +253,32 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
 
                             } else {
                                 if (rememberLazyListState.layoutInfo.totalItemsCount > index!! + 1) {
+
+                                    val firstVisible=rememberLazyListState.firstVisibleItemIndex
+                                    Log.d("DescarregarVideos","First Visible ${firstVisible}")
                                     val nextItem =
                                         rememberLazyListState.layoutInfo.visibleItemsInfo.getOrNull(
-                                            index!! + 1
+                                            (index!! + 1)-firstVisible
                                         )
+                                    /*val scroll=(endOffset - rememberLazyListState.layoutInfo.viewportStartOffset).takeIf { diff ->
+                                        Log.d("DescarregarVideos","Scroll ViewPort Diff: ${diff}")
+                                        diff < 0
+                                    }*/
+                                    if(endOffset>rememberLazyListState.layoutInfo.viewportEndOffset){
+                                       val scroll= endOffset-rememberLazyListState.layoutInfo.viewportEndOffset
+                                        Log.d("DescarregarVideos","ScrollJob Active: ${scrollJob?.isActive}")
+                                        if (scrollJob?.isActive != true){
+                                            scrollJob = coroutineScope.launch {
+
+                                                rememberLazyListState.scrollBy(scroll)
+
+                                            }
+                                        }
+                                        Log.d("DescarregarVideos","Scroll ViewPort: ${scroll} End Offset VP:" +
+                                                " ${rememberLazyListState.layoutInfo.viewportEndOffset}" +
+                                                " Start Offset VP: ${rememberLazyListState.layoutInfo.viewportStartOffset}")
+                                    }
+
                                     if (nextItem != null) {
                                         val dragNextItemSize = nextItem.size
                                         Log.d(
@@ -278,6 +305,7 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
 
                                 }
                             }
+
                         }
                     }
                 )
