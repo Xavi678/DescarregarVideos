@@ -81,6 +81,8 @@ fun EditPlaylistScreen(
         ModalSheetBottomMenu(selectedVideoId!!,selectedPlaylistId!!, modalSheetBottomMenuViewModel, onClose = fun() {
             viewModel.resetSelectedVideo()
 
+        }, updated = fun(){
+            viewModel.refresh()
         })
     }
 
@@ -131,12 +133,14 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
 
     var playlistIdWithPositions by remember { mutableStateOf<List<VideosWithPositionFoo>>(emptyList()) }
     val _playlistIdWithPositions by viewModel.playlistIdWithPositions.collectAsStateWithLifecycle()
-    LaunchedEffect(Unit) {
+    Log.d("DescarregarVideosBorrats", "Valors Actuals ${playlistIdWithPositions.size} ${_playlistIdWithPositions?.size}")
+    //playlistIdWithPositions = _playlistIdWithPositions!!
+    //LaunchedEffect(Unit) {
 
-        if (_playlistIdWithPositions != null) {
-            playlistIdWithPositions = _playlistIdWithPositions!!
-        }
+    if (_playlistIdWithPositions != null && playlistIdWithPositions.size!=_playlistIdWithPositions!!.size) {
+        playlistIdWithPositions = _playlistIdWithPositions!!
     }
+    //}
     Log.d("DescarregarVideos","Changed: ${playlistIdWithPositions.count()}")
 
     var draggingItem by remember { mutableStateOf<LazyListItemInfo?>(null) }
@@ -385,12 +389,7 @@ fun ListItem(
                         .bounceClick()
                         .clickable(
                             enabled = true,
-                            onClick = {
-                                /*viewModel.addSingleItemMedia(data)
-                                viewModel.setSavedVideo(data)
-                                viewModel.play()
-                                viewModel.setMediaVisibility(true)*/
-                            },
+                            onClick = {},
 
                             )
                 )

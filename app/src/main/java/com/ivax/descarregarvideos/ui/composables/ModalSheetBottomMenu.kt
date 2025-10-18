@@ -1,5 +1,6 @@
 package com.ivax.descarregarvideos.ui.composables
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -13,7 +14,8 @@ fun ModalSheetBottomMenu(
     selectedVideoId: String,
     playlistId: Int?,
     modalSheetBottomMenuViewModel: ModalSheetBottomMenuViewModel = hiltViewModel(),
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    updated: ()->Unit
 ) {
     /*val closeMenu by modalSheetBottomMenuViewModel.closeMenu.collectAsStateWithLifecycle()
 
@@ -23,10 +25,15 @@ fun ModalSheetBottomMenu(
 
     ShowBottomDialogVideoMenu(playlistId, onClose = fun(deleteVideo: Boolean,deleteVideoFromPlaylist: Boolean) {
         if (deleteVideo) {
-            modalSheetBottomMenuViewModel.deleteVideo(selectedVideoId)
+            modalSheetBottomMenuViewModel.deleteVideo(selectedVideoId){
+                updated()
+            }
         }
         if(deleteVideoFromPlaylist){
-            modalSheetBottomMenuViewModel.deleteVideoFromPlaylist(selectedVideoId,playlistId!!)
+            Log.d("DescarregarVideosBorrats", "Borrar Video de la Playlist $selectedVideoId")
+            modalSheetBottomMenuViewModel.deleteVideoFromPlaylist(selectedVideoId,playlistId!!,fun(){
+                updated()
+            })
         }
         modalSheetBottomMenuViewModel.setBottomSheetVisibility(false)
         onClose()

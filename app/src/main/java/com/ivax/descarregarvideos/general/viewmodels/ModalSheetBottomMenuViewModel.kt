@@ -34,10 +34,11 @@ class ModalSheetBottomMenuViewModel @Inject constructor(private val videoReposit
     val showPlaylistMenu=_showPlaylistMenu.asStateFlow()
     val selectedVideoId=_selectedVideoId.asStateFlow()
 
-    fun deleteVideo(videoId: String) {
+    fun deleteVideo(videoId: String,callback: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            videoRepository.deleteVideo(videoId)
+            val deletedVideo=videoRepository.deleteVideo(videoId)
             close()
+            callback()
         }
     }
 
@@ -102,9 +103,10 @@ class ModalSheetBottomMenuViewModel @Inject constructor(private val videoReposit
         _closeMenu.value=true
     }
 
-    fun deleteVideoFromPlaylist(selectedVideoId: String, playlistId: Int) {
+    fun deleteVideoFromPlaylist(selectedVideoId: String, playlistId: Int,callback:()->Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             videoRepository.deletePlaylistSavedVideo(playlistId,selectedVideoId)
+            callback()
         }
 
     }

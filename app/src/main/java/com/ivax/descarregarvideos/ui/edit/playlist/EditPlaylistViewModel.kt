@@ -47,7 +47,9 @@ class EditPlaylistViewModel @Inject constructor(
 
     fun updatePlaylist(playlistId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
+            Log.d("DescarregarVideosBorrats", "Updating Playlist $playlistId")
             val list=videoRepository.getByPlaylistIdWithPositions(playlistId)
+            Log.d("DescarregarVideosBorrats", "Size _playlistIdWithPositions ${list.size}")
             _playlistIdWithPositions.update {
                 list
             }
@@ -55,10 +57,12 @@ class EditPlaylistViewModel @Inject constructor(
             _playlist.update {
                 videoRepository.firstPlaylist(playlistId)
             }
-
-
         }
 
+    }
+
+    fun refresh(){
+        updatePlaylist(playlistId);
     }
 
     fun UpdatePlaylistSavedVideoCrossRef(videosWithPositionFoo: VideosWithPositionFoo) {

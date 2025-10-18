@@ -38,11 +38,11 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun videoDao(): VideoDao
     abstract fun playlistDao(): PlayListDao
     abstract fun playlistSavedVideoCrossRefDao(): PlaylistSavedVideoCrossRefDao
-    companion object {
+    /* companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-        fun getDatabase(
+       fun getDatabase(
             context: Context
         ): AppDatabase {
             // if the INSTANCE is not null, then return it,
@@ -60,6 +60,6 @@ abstract class AppDatabase : RoomDatabase() {
                 instance
             }
         }
-    }
+    }*/
 }
 

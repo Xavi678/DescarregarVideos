@@ -38,7 +38,7 @@ interface PlaylistSavedVideoCrossRefDao {
     fun updatePlaylistSavedVideoCrossRef(playlistSavedVideoCrossRef: PlaylistSavedVideoCrossRef)
 
     @Query("DELETE FROM playlistsavedvideocrossref WHERE videoId=:videoId")
-    fun deleteVideo(videoId: String)
+    fun deleteVideo(videoId: String): Int
 
     @Query("SELECT * FROM playlistsavedvideocrossref order by position")
     fun getAll(): Flow<List<PlaylistSavedVideoCrossRef>>

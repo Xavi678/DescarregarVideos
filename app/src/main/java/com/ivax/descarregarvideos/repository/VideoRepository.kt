@@ -109,9 +109,9 @@ class VideoRepository @Inject constructor(
         )
     }
 
-    fun deleteVideo(videoId: String) {
+    fun deleteVideo(videoId: String) : Int {
         val resDel = videoDao.delete(videoId)
-        playlistSavedVideoCrossRefDao.deleteVideo(videoId = videoId)
+       return playlistSavedVideoCrossRefDao.deleteVideo(videoId = videoId)
     }
 
     fun firstVideo(videoId: String): SavedVideo? {
@@ -127,9 +127,10 @@ class VideoRepository @Inject constructor(
 
     }
 
-    fun deletePlaylistSavedVideo(playlistId: Int, videoId: String) {
+    fun deletePlaylistSavedVideo(playlistId: Int, videoId: String):Int {
         val deleted = videoDao.deletePlaylistSavedVideo(playlistId, videoId)
-        Log.d("DescarregarVideos", "Borrats $deleted")
+        Log.d("DescarregarVideosBorrats", "Borrats $deleted")
+        return deleted
     }
 
     fun updatePosition(videoId: String, position: Int, playlistId: Int) {
