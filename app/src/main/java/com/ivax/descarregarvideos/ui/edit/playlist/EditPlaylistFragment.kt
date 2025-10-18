@@ -57,10 +57,6 @@ class EditPlaylistFragment : Fragment() {
             }
         }
 
-/*        binding.imageButtonEditPlaylistGoBack.setOnClickListener {
-            val navController = requireActivity(). findNavController(R.id.nav_host_fragment_content_main)
-            navController.navigate(R.id.nav_playlists)
-        }*/
         setupUI()
 
         return root

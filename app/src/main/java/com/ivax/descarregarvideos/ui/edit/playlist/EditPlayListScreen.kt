@@ -247,7 +247,6 @@ fun Playlists(viewModel: EditPlaylistViewModel) {
                                                 rememberLazyListState.scrollToItem(0,0)
                                             }
                                         }
-                                        //currentDelta += draggingItem!!.offset - previousItem.offset
                                     }
                                 }
 
