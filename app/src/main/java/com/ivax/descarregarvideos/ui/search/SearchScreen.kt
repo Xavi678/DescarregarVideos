@@ -256,7 +256,7 @@ fun SearchVideos(
         FormatsDialog(formats, onClose = fun(selectedFormat: AdaptiveFormats?) {
             if (selectedFormat != null) {
                 searchViewModel.setDownloading(currentVideo!!)
-                searchViewModel.downloadVideo(selectedFormat, currentVideo!!, finished = fun(success: Boolean) {
+                searchViewModel.downloadVideo(selectedFormat, currentVideo!!, finished = fun(success: Boolean,errorMessage: String?) {
                     val handler=Handler(Looper.getMainLooper()!!)
                     if(success) {
                         searchViewModel.setDownloaded(currentVideo!!)
@@ -273,7 +273,7 @@ fun SearchVideos(
                         searchViewModel.setNotDownloaded(currentVideo!!)
                         handler.post {
                             Toast.makeText(
-                                context, "Video \"${currentVideo!!.title}\" Error: No s'ha pogut Descarregat Correctament",
+                                context, "Video \"${currentVideo!!.title}\" Error: $errorMessage",
                                 Toast.LENGTH_LONG
                             ).show()
                             searchViewModel.resetDialog()

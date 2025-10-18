@@ -202,6 +202,9 @@ class ApiClient : IApiClient {
             }
             httpClientFile.prepareGet(urlString = urlString).execute {
                     response ->
+                if(response.status.value!=200){
+                    throw Exception("No s'ha pogut descarregar el video")
+                }
                 val length = response.contentLength()?.toFloat() ?: 0F
                 var readBytes = 0
                 var progress = 0

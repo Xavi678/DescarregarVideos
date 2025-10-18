@@ -135,11 +135,10 @@ class SearchViewModel @Inject constructor(
     fun downloadVideo(
         selectedFormat: AdaptiveFormats,
         video: VideoItem,
-        finished: (success: Boolean) -> Unit
+        finished: (success: Boolean,errorMessage: String?) -> Unit
     ) {
         this.viewModelScope.launch(Dispatchers.IO) {
             val savedVideo =toSavedVideo(video)
-            var downloadSuccess=false
             try {
                 val uri = selectedFormat.url.toUri()
                 val segmentLength = if (uri.getQueryParameter("ratebypass") == "yes") 9898989L
@@ -156,11 +155,12 @@ class SearchViewModel @Inject constructor(
                 val videoUrl = fileRepository.saveFile(savedVideo.videoId, bytes)
                 savedVideo.videoUrl = videoUrl
                 videoRepository.insetVideo(savedVideo)
-                downloadSuccess=true
+                finished(true,null)
             }catch (e: Exception){
                 Log.d("DescarregarVideos","Error al descarregar el video")
+                finished(false,"No s'ha pogut descarregar el video")
             }
-            finished(downloadSuccess)
+
         }
 
     }
