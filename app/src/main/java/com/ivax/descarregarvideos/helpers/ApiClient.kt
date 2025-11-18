@@ -175,7 +175,7 @@ class ApiClient : IApiClient {
                     headers {
                         append(
                             HttpHeaders.UserAgent,
-                            "com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_0 like Mac OS X; US)"
+                            "com.google.android.youtube/20.10.38 (Linux; U; ANDROID 11) gzip"
                         )
                     }
                     contentType(ContentType.Application.Json)
@@ -207,7 +207,6 @@ class ApiClient : IApiClient {
                 }
                 val length = response.contentLength()?.toFloat() ?: 0F
                 var readBytes = 0
-                var progress = 0
                 val channel: ByteReadChannel = response.body()
                 while (!channel.isClosedForRead) {
                     val packet = channel.readRemaining()
