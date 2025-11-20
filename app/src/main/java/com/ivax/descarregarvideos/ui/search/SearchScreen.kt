@@ -51,6 +51,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.exoplayer.source.ExternalLoader.LoadRequest
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.ivax.descarregarvideos.R
 import com.ivax.descarregarvideos.classes.DownloadState
 import com.ivax.descarregarvideos.classes.VideoItem
@@ -61,8 +64,15 @@ import com.ivax.descarregarvideos.ui.composables.AddPlaylistMenu
 import com.ivax.descarregarvideos.ui.composables.FormatsDialog
 import java.io.File
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun SearchScreen(searchViewModel: SearchViewModel = viewModel()){
+    val writeExternalStoragePermission=rememberPermissionState(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    if(!writeExternalStoragePermission.status.isGranted){
+        LaunchedEffect(Unit) {
+            writeExternalStoragePermission.launchPermissionRequest()
+        }
+    }
     Column {
         SearchComposable(onClickInvoker = fun(text: String) {
             searchViewModel.SearchVideos(text)
@@ -98,6 +108,7 @@ fun Loading(searchViewModel: SearchViewModel = viewModel()) {
 
 
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
 
@@ -157,11 +168,13 @@ fun Item(video: VideoItem,searchViewModel: SearchViewModel = viewModel()) {
             }
 
             IconButton(onClick = {
-                searchViewModel.getAudioUrlsResponse(
-                    video,
-                    callback = fun(formats: List<AdaptiveFormats>, ) {
-                        searchViewModel.setFormats(video,formats)
-                    })
+                    searchViewModel.getAudioUrlsResponse(
+                        video,
+                        callback = fun(formats: List<AdaptiveFormats>, ) {
+                            searchViewModel.setFormats(video,formats)
+                        })
+
+
             }) {
                 Log.d("DescarregarVideos","${video.title} State: ${video.videoDownloaded}")
                 Icon(
