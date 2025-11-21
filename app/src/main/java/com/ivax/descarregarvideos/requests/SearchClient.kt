@@ -11,7 +11,7 @@ data class SearchClient(
     val platform: String = "DESKTOP",
     val osName: String = "Windows",
     val osVersion: String = "10.03",
-    val visitorData: String = "CgtDLVlyd0FVYUlPcyjg3Ly-BjIiCgJFUxIcEhgSFhMLFBUWFwwYGRobHB0eHw4PIBAREiEgJw%3D%3D",
+    var visitorData: String="",
     val hl: String = "en",
     val gl: String = "US",
     val utcOffsetMinutes: String = "0",

@@ -16,6 +16,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.prepareGet
 import io.ktor.client.request.setBody
@@ -33,6 +34,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.io.readByteArray
 import kotlinx.serialization.json.Json
+import org.json.JSONArray
+import org.json.JSONObject
 import java.net.URL
 import kotlin.String
 
@@ -46,12 +49,16 @@ class ApiClient : IApiClient {
             })
         }
         engine {
-            requestTimeout=0
+            requestTimeout = 0
         }
     }
-    override suspend fun SearchMoreVideos(continuationToken: String) : SearchResponseFoo{
-        val searchContext= SearchContext()
-        var searchRequest = SearchRequest(context = searchContext,continuation = continuationToken)
+
+    val userAgent="com.google.android.youtube/20.10.38 (Linux; U; ANDROID 11) gzip"
+    val userAgentSearch= "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0"
+
+    override suspend fun SearchMoreVideos(continuationToken: String): SearchResponseFoo {
+        val searchContext = SearchContext()
+        var searchRequest = SearchRequest(context = searchContext, continuation = continuationToken)
         var rsp = httpClient.post("https://www.youtube.com/youtubei/v1/search") {
             contentType(ContentType.Application.Json)
             setBody(searchRequest)
@@ -59,34 +66,34 @@ class ApiClient : IApiClient {
             headers {
                 append(
                     HttpHeaders.UserAgent,
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0"
+                    userAgentSearch
                 )
             }
         }
-        var nextToken : String?=null
+        var nextToken: String? = null
         var videoList = ArrayList<VideoItem>()
-        var searchResponseContinuation=rsp.body<SearchResponseContinuation>()
-        searchResponseContinuation.onResponseReceivedCommands.firstOrNull()?.
-        appendContinuationItemsAction?.continuationItems?.forEach {
-            if(it.continuationItemRenderer?.continuationEndpoint?.continuationCommand?.token!=null) {
+        var searchResponseContinuation = rsp.body<SearchResponseContinuation>()
+        searchResponseContinuation.onResponseReceivedCommands.firstOrNull()?.appendContinuationItemsAction?.continuationItems?.forEach {
+            if (it.continuationItemRenderer?.continuationEndpoint?.continuationCommand?.token != null) {
                 nextToken =
                     it.continuationItemRenderer.continuationEndpoint.continuationCommand.token
             }
-            it.itemSectionRenderer?.contents?.forEach { x->
+            it.itemSectionRenderer?.contents?.forEach { x ->
 
-                if(x.videoRenderer!=null) {
+                if (x.videoRenderer != null) {
                     toVideo(x.videoRenderer, videoList)
                 }
             }
 
         }
-        val foo=SearchResponseFoo(videoList,nextToken)
+        val foo = SearchResponseFoo(videoList, nextToken)
         return foo
     }
 
-    override suspend fun Search(searchQuery: String): SearchResponseFoo{
-       val searchContext= SearchContext()
-        var nextToken : String? =null
+    override suspend fun Search(searchQuery: String): SearchResponseFoo {
+        val searchContext = SearchContext()
+        searchContext.client.visitorData = getVisitorData()
+        var nextToken: String? = null
         var searchRequest = SearchRequest(query = searchQuery, context = searchContext)
         var rsp = httpClient.post("https://www.youtube.com/youtubei/v1/search") {
             contentType(ContentType.Application.Json)
@@ -95,7 +102,7 @@ class ApiClient : IApiClient {
             headers {
                 append(
                     HttpHeaders.UserAgent,
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0"
+                    userAgentSearch
                 )
             }
         }
@@ -106,7 +113,7 @@ class ApiClient : IApiClient {
         for (content in searchResponse.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents) {
             val itemSectionR = content.itemSectionRenderer
 
-            if(content.continuationItemRenderer?.continuationEndpoint?.continuationCommand?.token!=null) {
+            if (content.continuationItemRenderer?.continuationEndpoint?.continuationCommand?.token != null) {
                 nextToken =
                     content.continuationItemRenderer.continuationEndpoint.continuationCommand.token
             }
@@ -118,7 +125,7 @@ class ApiClient : IApiClient {
                 }
             }
         }
-        val foo=SearchResponseFoo(videoList,nextToken)
+        val foo = SearchResponseFoo(videoList, nextToken)
         return foo
     }
 
@@ -167,15 +174,53 @@ class ApiClient : IApiClient {
         }
     }
 
+    suspend fun getVisitorData(): String {
+        val response = httpClient.get("https://www.youtube.com/sw.js_data") {
+            headers {
+                append("Accept", "application/json")
+                append(
+                    "User-Agent",
+                    userAgent
+                )
+            }
+        }
+        var result = response.bodyAsText()
+        if (result.startsWith(")]}'")) {
+            result = result.substring(4)
+        }
+        try {
+            var visitorData=""
+            val json = JSONArray(result)
+            json[0].let {
+                (it as JSONArray)[2].let{
+                    (it as JSONArray)[0].let{
+                        (it as JSONArray)[0].let{
+                            (it as JSONArray)[13].let{
+                                visitorData=it.toString()
+                            }
+                        }
+                    }
+                }
+            }
+
+            Log.d("DescarregarVideos",visitorData)
+            return visitorData
+        } catch (e: Exception) {
+            Log.d("DescarregarVideos", result)
+            throw e
+        }
+    }
+
     override suspend fun GetVideoData(videoId: String): PlayerResponse {
         try {
             val playerRequest = PlayerRequest(videoId = videoId)
+            playerRequest.context.client.visitorData = getVisitorData()
             val response: HttpResponse =
                 httpClient.post("https://www.youtube.com/youtubei/v1/player") {
                     headers {
                         append(
                             HttpHeaders.UserAgent,
-                            "com.google.android.youtube/20.10.38 (Linux; U; ANDROID 11) gzip"
+                            userAgent
                         )
                     }
                     contentType(ContentType.Application.Json)
@@ -192,17 +237,17 @@ class ApiClient : IApiClient {
             throw e
         }
     }
-    override suspend fun DownloadVideoStream(urlString: String) : ByteArray{
+
+    override suspend fun DownloadVideoStream(urlString: String): ByteArray {
         try {
-            var result=byteArrayOf()
-            var httpClientFile= HttpClient(CIO){
-                engine{
-                    requestTimeout=0
+            var result = byteArrayOf()
+            var httpClientFile = HttpClient(CIO) {
+                engine {
+                    requestTimeout = 0
                 }
             }
-            httpClientFile.prepareGet(urlString = urlString).execute {
-                    response ->
-                if(response.status.value!=200){
+            httpClientFile.prepareGet(urlString = urlString).execute { response ->
+                if (response.status.value != 200) {
                     throw Exception("No s'ha pogut descarregar el video")
                 }
                 val length = response.contentLength()?.toFloat() ?: 0F
@@ -212,15 +257,15 @@ class ApiClient : IApiClient {
                     val packet = channel.readRemaining()
                     while (!packet.exhausted()) {
                         val bytes: ByteArray = packet.readByteArray()
-                        result+=bytes;
+                        result += bytes;
                         readBytes += bytes.size
                     }
                 }
-                Log.d("DescarregarVideos","Read Bytes: $readBytes length: $length")
+                Log.d("DescarregarVideos", "Read Bytes: $readBytes length: $length")
             }
             return result
-        }catch (e: Exception){
-            Log.d("DescarregarVideos",e.message.toString())
+        } catch (e: Exception) {
+            Log.d("DescarregarVideos", e.message.toString())
             throw e
         }
     }

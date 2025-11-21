@@ -14,8 +14,6 @@ import javax.inject.Inject
 class CustomFileWriter @Inject constructor(private val appContext: Context) : FileWriter {
     override suspend fun write(fileNme: String, bytes: ByteArray): String {
         try {
-
-            /* Comentar de moment */
             val contentValues = ContentValues()
             contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "$fileNme.mp4")
             contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "audio/mp4")
@@ -33,29 +31,11 @@ class CustomFileWriter @Inject constructor(private val appContext: Context) : Fi
                 }
 
             }
-            /*val fullPath = inserted.toString()
-            val file = File(fullPath)
-            file.outputStream().use {
-                it.write(bytes)
-            }*/
             return inserted.toString()
         } catch (e: Exception) {
             e.message?.let { Log.d("DescarregarVideos", it) }
             throw e;
         }
-        /*val dir=File("${appContext.filesDir}/videos")
-        dir.mkdir()
-        var videoUrl="${dir}/${fileNme}.mp4"
-        var file=File(videoUrl)
-        file.mkdir()
-        if(file.exists()){
-            file.delete()
-        }
-        file.createNewFile()
-        file.outputStream().use {
-            it.write(bytes)
-        }
-        return videoUrl*/
     }
 
 }

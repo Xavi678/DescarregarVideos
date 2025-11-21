@@ -123,7 +123,7 @@ class SearchViewModel @Inject constructor(
             val playerResponse: PlayerResponse =
                 youtubeRepository.GetVideoData(savedVideo.videoId)
             val listFormats = playerResponse.streamingData.adaptiveFormats
-            val lists = listFormats.filter { it.mimeType.contains("audio") }
+            val lists = listFormats.filter { it.mimeType.contains("audio/mp4") }
             if (lists.isNotEmpty()) {
                 callback(lists)
             }
