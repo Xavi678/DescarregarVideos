@@ -24,6 +24,9 @@ interface VideoDao {
     @Query("SELECT * FROM savedvideo")
     fun getAll(): Flow<List<SavedVideo>>
 
+    @Query("SELECT * FROM savedvideo")
+    fun getAllCurrent(): List<SavedVideo>
+
     @Query("SELECT * FROM savedvideo WHERE title LIKE '%' || :filter || '%'")
     fun getAll(filter: String): Flow<List<SavedVideo>>
 

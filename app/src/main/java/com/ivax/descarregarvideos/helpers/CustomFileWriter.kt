@@ -2,6 +2,7 @@ package com.ivax.descarregarvideos.helpers
 
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
@@ -19,13 +20,14 @@ class CustomFileWriter @Inject constructor(private val appContext: Context) : Fi
             contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "audio/mp4")
             contentValues.put(
                 MediaStore.MediaColumns.RELATIVE_PATH,
-                "${Environment.DIRECTORY_MUSIC}/DescarregarVideos"
+                "${Environment.DIRECTORY_MUSIC}/DescarregarVideos/audios"
             )
 
             val inserted = appContext.contentResolver.insert(
                 MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
                 contentValues
             )?.also {
+                //appContext.contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 appContext.contentResolver.openOutputStream(it).use {
                         it?.write(bytes)
                 }

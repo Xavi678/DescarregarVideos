@@ -45,4 +45,6 @@ interface PlaylistSavedVideoCrossRefDao {
 
     @Query("UPDATE playlistsavedvideocrossref SET position=:position WHERE playListId=:playlistId AND videoId=:videoId")
     fun updatePosition(playlistId: Int, videoId: String, position: Int): Int
+    @Query("SELECT * FROM playlistsavedvideocrossref")
+    fun getAllCurrentPlaylistSavedVideoCrossRef(): List<PlaylistSavedVideoCrossRef>
 }

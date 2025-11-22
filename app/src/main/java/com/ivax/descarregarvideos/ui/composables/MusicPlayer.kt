@@ -11,11 +11,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -43,7 +40,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderColors
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -57,21 +53,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.C.TIME_UNSET
 import androidx.media3.common.MediaItem
@@ -90,10 +78,10 @@ import coil3.request.ImageRequest
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.ivax.descarregarvideos.classes.MathExtensions
+import com.ivax.descarregarvideos.general.viewmodels.MediaStateUi
 import com.ivax.descarregarvideos.general.viewmodels.MediaViewModel
 import com.ivax.descarregarvideos.services.PlaybackService
 import kotlinx.coroutines.Runnable
-import java.io.FileInputStream
 
 
 @OptIn(UnstableApi::class)
@@ -200,12 +188,12 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel(), shouldShow: Bo
                             val title = mediaItem.mediaMetadata.title
                             val uri = mediaItem.mediaMetadata.artworkUri
                             val playlistName = mediaItem.mediaMetadata.albumTitle
-                            var bmp: Bitmap
+                            /*var bmp: Bitmap
                             var fileInStream = FileInputStream(uri.toString())
                             fileInStream.use {
                                 bmp = BitmapFactory.decodeStream(it)
                             }
-                            fileInStream.close()
+                            fileInStream.close()*/
 
                             mediaViewModel.setMetaData(
                                 playlistName?.toString(),
@@ -288,54 +276,7 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel(), shouldShow: Bo
                         .padding(top = 8.dp, start = 8.dp, end = 8.dp)
                 ) {
                     if (metaDataUi != null) {
-                        AsyncImage(
-                            model = ImageRequest.Builder(context).data(metaDataUi!!.artwork)
-                                .build(),
-                            contentDescription = "ArtWork Image", modifier = Modifier
-                                .width(86.dp)
-                                .align(alignment = Alignment.CenterVertically)
-                        )
-                        /*Image(
-                            bitmap = metaDataUi!!.artwork.asImageBitmap(),
-                            contentDescription = "Thumbnail Video",
-                            modifier = Modifier
-                                .width(86.dp)
-                                .align(alignment = Alignment.CenterVertically)
-
-                        )*/
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            if (isMediaPlayerMaximized) {
-                                Icon(
-                                    imageVector = Icons.Default.KeyboardArrowDown,
-                                    contentDescription = "Minimize/Maximize Player Button",
-                                    tint = Color.White,
-                                    modifier = Modifier
-                                        .zIndex(101f)
-                                        .align(alignment = Alignment.End)
-                                        .clickable(
-                                            interactionSource =
-                                                remember { MutableInteractionSource() },
-                                            indication = ripple(color = Color.White)
-                                        ) {
-                                            mediaViewModel.minimize()
-                                        }
-                                )
-                            }
-                            Text(
-                                text = metaDataUi!!.title.toString(),
-                                color = Color.White,
-                                modifier = Modifier.basicMarquee(),
-                                fontSize = 18.sp
-                            )
-                            if (metaDataUi!!.playlistName != null && isMediaPlayerMaximized) {
-                                Text(
-                                    text = metaDataUi!!.playlistName.toString(),
-                                    color = Color.White,
-                                    fontSize = 14.sp
-                                )
-                            }
-                        }
+                            MetaDataPlayerComposable(metaDataUi,isMediaPlayerMaximized,mediaViewModel)
                     }
                 }
                 Row(modifier = Modifier.align(alignment = Alignment.Center)) {
@@ -487,4 +428,69 @@ fun MusicPlayer(mediaViewModel: MediaViewModel = hiltViewModel(), shouldShow: Bo
         }
     }
 
+}
+
+@Composable
+fun MetaDataPlayerComposable(
+    metaDataUi: MediaStateUi.MetaDataStateUi?,
+    isMediaPlayerMaximized: Boolean,
+    mediaViewModel: MediaViewModel
+) {
+    val context=LocalContext.current
+    var bmp: Bitmap?=null
+    metaDataUi!!.artwork.let{
+        context.contentResolver.openInputStream(it).use{
+            it?.let{
+                bmp = BitmapFactory.decodeStream(it)
+            }
+        }
+    }
+    AsyncImage(
+        model = ImageRequest.Builder(context).data(bmp)
+            .build(),
+        contentDescription = "ArtWork Image", modifier = Modifier
+            .width(86.dp)
+            //.align(alignment = Alignment.CenterVertically)
+    )
+    /*Image(
+        bitmap = metaDataUi!!.artwork.asImageBitmap(),
+        contentDescription = "Thumbnail Video",
+        modifier = Modifier
+            .width(86.dp)
+            .align(alignment = Alignment.CenterVertically)
+
+    )*/
+    Spacer(modifier = Modifier.width(8.dp))
+    Column(modifier = Modifier.fillMaxWidth()) {
+        if (isMediaPlayerMaximized) {
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowDown,
+                contentDescription = "Minimize/Maximize Player Button",
+                tint = Color.White,
+                modifier = Modifier
+                    .zIndex(101f)
+                    .align(alignment = Alignment.End)
+                    .clickable(
+                        interactionSource =
+                            remember { MutableInteractionSource() },
+                        indication = ripple(color = Color.White)
+                    ) {
+                        mediaViewModel.minimize()
+                    }
+            )
+        }
+        Text(
+            text = metaDataUi!!.title.toString(),
+            color = Color.White,
+            modifier = Modifier.basicMarquee(),
+            fontSize = 18.sp
+        )
+        if (metaDataUi!!.playlistName != null && isMediaPlayerMaximized) {
+            Text(
+                text = metaDataUi!!.playlistName.toString(),
+                color = Color.White,
+                fontSize = 14.sp
+            )
+        }
+    }
 }

@@ -1,11 +1,14 @@
 package com.ivax.descarregarvideos.ui.search
 
+import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -26,7 +29,6 @@ import javax.inject.Inject
 import androidx.core.net.toUri
 import com.ivax.descarregarvideos.classes.DownloadState
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.io.File
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
@@ -154,7 +156,7 @@ class SearchViewModel @Inject constructor(
                     youtubeRepository.DownloadVideoStream("${selectedFormat.url}&range=0-${segmentLength}")
                 val videoUrl = fileRepository.saveFile(savedVideo.videoId, bytes)
                 savedVideo.videoUrl = videoUrl
-                videoRepository.insetVideo(savedVideo)
+                videoRepository.insertVideo(savedVideo)
                 finished(true,null)
             }catch (e: Exception){
                 Log.d("DescarregarVideos","Error al descarregar el video")
@@ -166,24 +168,45 @@ class SearchViewModel @Inject constructor(
     }
 
     fun toSavedVideo(video: VideoItem) : SavedVideo{
+        MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        val imgPath = "${video.videoId}_thumbnail"
 
-        val imgPath = "${video.videoId}_thumbnail.bmp"
-
-        var dir = File("${context.filesDir}/fotos")
+        /*var dir = File("${context.filesDir}/fotos")
         var d = dir.mkdir()
         var f = File("${dir}/${imgPath}")
 
         if (f.exists()) {
             f.delete()
+        }*/
+        val contentValues = ContentValues()
+        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, imgPath)
+        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+        contentValues.put(
+            MediaStore.MediaColumns.RELATIVE_PATH,
+            "${Environment.DIRECTORY_PICTURES}/DescarregarVideos/thumbnails"
+        )
+
+        val inserted=context.contentResolver.insert(
+            MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
+            contentValues
+        )?.also {
+            //context.contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            context.contentResolver.openOutputStream(it).use{ s->
+                s?.let {
+                    video.imgUrl?.compress(Bitmap.CompressFormat.PNG, 100, it)
+                }
+            }
         }
-        f.createNewFile()
+
+
+        /*f.createNewFile()
         f.outputStream().use {
             video.imgUrl?.compress(Bitmap.CompressFormat.PNG, 100, it)
-        }
+        }*/
         return SavedVideo(
             video.videoId,
             video.title,
-            imgUrl = "${dir}/${imgPath}",
+            imgUrl = inserted.toString(),
             video.duration,
             video.viewCount,
             author = video.author

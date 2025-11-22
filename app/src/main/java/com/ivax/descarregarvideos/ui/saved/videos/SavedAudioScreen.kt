@@ -2,6 +2,7 @@ package com.ivax.descarregarvideos.ui.saved.videos
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -53,6 +54,7 @@ import com.ivax.descarregarvideos.ui.composables.AddPlaylistMenu
 import com.ivax.descarregarvideos.ui.composables.ModalSheetBottomMenu
 import com.ivax.descarregarvideos.ui.composables.ShowBottomDialogVideoMenu
 import java.io.FileInputStream
+import androidx.core.net.toUri
 
 @Composable
 fun SearchAudioScreen(savedVideosViewModel: SavedVideosViewModel = viewModel(),
@@ -99,13 +101,21 @@ fun ListItem(
     savedVideosViewModel: SavedVideosViewModel = viewModel()
 ) {
 
-    var bmp: Bitmap
-    var fileInStream = FileInputStream(data.imgUrl)
-    fileInStream.use {
-        bmp = BitmapFactory.decodeStream(it)
+    var bmp: Bitmap?=null
+    data.imgUrl?.let{
+        LocalContext.current.contentResolver.openInputStream(it.toUri()).use{
+            it?.let{
+                bmp = BitmapFactory.decodeStream(it)
+            }
+        }
     }
 
-    fileInStream.close()
+    //var fileInStream = FileInputStream(data.imgUrl)
+    /*fileInStream.use {
+
+    }
+
+    fileInStream.close()*/
 
 
     Row(modifier) {
@@ -115,9 +125,13 @@ fun ListItem(
                 .width(86.dp)
                 .padding(top = 8.dp, start = 8.dp)
         ) {
-            AsyncImage(model = ImageRequest.Builder(LocalContext.current)
-                .data(bmp).build(),
-                contentDescription = null,)
+            if(bmp!=null) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(bmp).build(),
+                    contentDescription = null,
+                )
+            }
             Image(
                 painter = painterResource(id = R.drawable.play_button_rect_mod),
                 contentDescription = null,
