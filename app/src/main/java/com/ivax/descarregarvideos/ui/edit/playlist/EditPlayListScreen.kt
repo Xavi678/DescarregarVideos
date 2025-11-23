@@ -44,11 +44,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ivax.descarregarvideos.R
@@ -355,14 +357,14 @@ fun ListItem(
     modifier: Modifier
 
 ) {
-
-    var bmp: Bitmap
-    var fileInStream = FileInputStream(videosWithPositionFoo.imgUrl)
-    fileInStream.use {
-        bmp = BitmapFactory.decodeStream(it)
+    var bmp: Bitmap?=null
+   val context= LocalContext.current
+    videosWithPositionFoo.imgUrl?.let {
+        imgUri->
+        context.contentResolver.openInputStream(imgUri.toUri()).use {
+            bmp = BitmapFactory.decodeStream(it)
+        }
     }
-
-    fileInStream.close()
     Column(
         modifier = modifier
 
@@ -376,10 +378,12 @@ fun ListItem(
                     .width(86.dp)
                     .padding(top = 8.dp, start = 8.dp)
             ) {
-                Image(
-                    bitmap = bmp.asImageBitmap(),
-                    contentDescription = null,
-                )
+                if(bmp!=null) {
+                    Image(
+                        bitmap = bmp.asImageBitmap(),
+                        contentDescription = null,
+                    )
+                }
 
                 Image(
                     painter = painterResource(id = R.drawable.play_button_rect_mod),

@@ -69,28 +69,11 @@ class MediaPlayerRepository @Inject constructor(
 
     @OptIn(UnstableApi::class)
     fun SavedVideoToMediaItem(video: SavedVideo, playlistName: String? = null): MediaItem {
-        val uri = Uri.Builder().path(video.imgUrl).build()
-        var artworkBytes: ByteArray?=null
-        context.contentResolver.openInputStream(video.imgUrl!!.toUri()).use {
-            it?.let{
-                artworkBytes=it.readBytes()
-            }
-        }
-        val metaData = MediaMetadata.Builder()
 
-            .setArtworkUri(video.imgUrl.toUri())
+        val metaData = MediaMetadata.Builder()
+            .setArtworkUri(video.imgUrl!!.toUri())
             .setTitle(video.title)
             .setAlbumTitle(playlistName).build()
-
-        /*val file=File(context.filesDir.path + "/${video.videoId}.mp4")
-        file.createNewFile()
-        file.outputStream().use{ f->
-            context.contentResolver.openInputStream(video.videoUrl!!.toUri()).use {
-                it?.let{
-                    f.write(it.readBytes())
-                }
-            }
-        }*/
         val mediaItem =
             MediaItem.Builder().setUri(video.videoUrl!!).setMediaMetadata(metaData)
                 .setMediaId(video.videoId).build()
@@ -99,8 +82,8 @@ class MediaPlayerRepository @Inject constructor(
     }
 
     fun SavedVideoToMediaItem(video: OrderedVideos, playlistName: String? = null): MediaItem {
-        val uri = Uri.Builder().path(video.imgUrl).build()
-        val metaData = MediaMetadata.Builder().setArtworkUri(uri).setTitle(video.title)
+        //val uri = Uri.Builder().path(video.imgUrl).build()
+        val metaData = MediaMetadata.Builder().setArtworkUri(video.imgUrl!!.toUri()).setTitle(video.title)
             .setAlbumTitle(playlistName).build()
         val mediaItem = MediaItem.Builder().setUri(video.videoUrl!!).setMediaMetadata(metaData)
             .setMediaId(video.videoId).build()
@@ -111,8 +94,8 @@ class MediaPlayerRepository @Inject constructor(
         video: VideosWithPositionFoo,
         playlistName: String? = null
     ): MediaItem {
-        val uri = Uri.Builder().path(video.imgUrl).build()
-        val metaData = MediaMetadata.Builder().setArtworkUri(uri).setTitle(video.title)
+        //val uri = Uri.Builder().path(video.imgUrl).build()
+        val metaData = MediaMetadata.Builder().setArtworkUri(video.imgUrl!!.toUri()).setTitle(video.title)
             .setAlbumTitle(playlistName).build()
         val mediaItem = MediaItem.Builder().setUri(video.videoUrl!!).setMediaMetadata(metaData)
             .setMediaId(video.videoId).build()
