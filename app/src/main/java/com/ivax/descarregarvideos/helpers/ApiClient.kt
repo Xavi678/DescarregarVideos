@@ -53,7 +53,7 @@ class ApiClient : IApiClient {
         }
     }
 
-    val userAgent="com.google.android.youtube/20.10.38 (Linux; U; ANDROID 11) gzip"
+    val userAgent="com.google.android.apps.youtube.vr.oculus/1.60.19 (Linux; U; Android 12L; Quest 3 Build/SQ3A.220605.009.A1) gzip"
     val userAgentSearch= "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0"
 
     override suspend fun SearchMoreVideos(continuationToken: String): SearchResponseFoo {
